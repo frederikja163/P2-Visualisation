@@ -6,3 +6,19 @@ p:hover{
     cursor: pointer;
     width: fit-content;
 }
+
+.textbox{
+    display: inline-block;
+	font-family: courier; 
+	height: 80%;
+	margin: 1%;
+    border-width: 1px;
+    border-style: solid;
+    flex-grow: 1;
+}
+
+body{
+    display: flex;
+	margin: 0;
+	height: 100vh;
+}
