@@ -1,0 +1,13 @@
+
+textarea{
+	font-family: courier; 
+	resize: none;
+	height: 80%;
+	margin: 1%;
+	width: 47.445%;
+}
+
+body{
+	margin: 0;
+	height: 100vh;
+}
