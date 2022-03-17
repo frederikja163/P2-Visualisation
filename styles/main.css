@@ -2,6 +2,10 @@
     text-decoration: underline;
 }
 
+#selected {
+    text-decoration-color: red;
+}
+
 p:hover{
     cursor: pointer;
     width: fit-content;

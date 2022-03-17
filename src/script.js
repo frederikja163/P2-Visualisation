@@ -6,11 +6,19 @@ function breakpoint(code) {
             document.getSelection().removeAllRanges();
         });
         lines[i].addEventListener("click", function () {
-            if (lines[i].classList.contains(breakpointClass)) {
-                lines[i].classList.remove(breakpointClass);
-            }
-            else {
+            var selected = document.getElementById("selected");
+            if (!(lines[i].classList.contains(breakpointClass))) {
                 lines[i].classList.add(breakpointClass);
+                lines[i].id = "selected";
+                selected.id = "";
+            }
+            else if (lines[i].classList.contains(breakpointClass) && lines[i].id === "") {
+                lines[i].id = "selected";
+                selected.id = "";
+            }
+            else if (lines[i].classList.contains(breakpointClass) && lines[i].id === "selected") {
+                lines[i].classList.remove(breakpointClass);
+                lines[i].id = "";
             }
         });
     };

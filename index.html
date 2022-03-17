@@ -12,10 +12,20 @@
     <script src="src/script.js"></script>
 
     <div class="textbox" id="left">
-        <pre><p>function printFunction(name) {</p><p>    name = "Jesper hansen";</p><p>    var a = 7;</p><p>    var b = 6;</p><p>    console.log(a + b);</p><p>    if (a === b) {</p><p>        a++;</p><p>    }</p><p>    var c = a + b;</p><p>}</p></pre>
+        <pre><p class="breakpoint">function printFunction(name) {</p>
+            <p class="breakpoint"> name = "Jesper hansen";</p>
+            <p class="breakpoint" id="selected"> var a = 7;</p>
+            <p> var b = 6;</p>
+            <p> console.log(a + b);</p>
+            <p> if (a === b) {</p>
+            <p> a++;</p>
+            <p> }</p>
+            <p> var c = a + b;</p>
+            <p>}</p>
+            </pre>
     </div>
 
-    <textarea class="textbox" name="pseudocode" id="right" onclick="this.value=''">Insert pseudocode...</textarea>
+    <textarea class="textbox" name="pseudocode" id="right" placeholder="Pseudocode goes here..."></textarea>
 </body>
 
 </html>
