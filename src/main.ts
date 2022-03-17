@@ -1,17 +1,6 @@
-const lines: NodeListOf<HTMLParagraphElement> = document.querySelectorAll('p');
+window.onload = main;
 
-for (let i: number = 0; i < lines.length; i++)
+function main(): void
 {
-    lines[ i ].addEventListener("click", function ()
-    {
-        // Remove the breakpoint if it already exists, otherwise add a breakpoint.
-        if (lines[ i ].classList.contains('breakpoint'))
-        {
-            lines[ i ].classList.remove('breakpoint');
-        }
-        else
-        {
-            lines[ i ].classList.add('breakpoint');
-        }
-    });
+    breakpoint(document.body);
 }
