@@ -2,5 +2,7 @@ window.onload = main;
 
 function main(): void
 {
-    breakpoint(document.body);
+    const left: Element = document.querySelector("#left");
+    const right: Element = document.querySelector("#right");
+    breakpoint(left);
 }

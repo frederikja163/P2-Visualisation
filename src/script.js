@@ -2,6 +2,9 @@ var breakpointClass = "breakpoint";
 function breakpoint(code) {
     var lines = code.querySelectorAll("p");
     var _loop_1 = function (i) {
+        lines[i].addEventListener("dblclick", function (ev) {
+            document.getSelection().removeAllRanges();
+        });
         lines[i].addEventListener("click", function () {
             if (lines[i].classList.contains(breakpointClass)) {
                 lines[i].classList.remove(breakpointClass);
@@ -17,6 +20,8 @@ function breakpoint(code) {
 }
 window.onload = main;
 function main() {
-    breakpoint(document.body);
+    var left = document.querySelector("#left");
+    var right = document.querySelector("#right");
+    breakpoint(left);
 }
 //# sourceMappingURL=script.js.map
