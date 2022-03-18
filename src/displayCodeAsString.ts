@@ -1,3 +1,4 @@
+// function that should be printed
 function printFunction(name: string){
     name = "Jesper hansen";
     let a : number = 7;
@@ -6,31 +7,30 @@ function printFunction(name: string){
     if (a === b){
         a++;
     } 
-    const c = a+b;
+    const c = a + b;
 }
-
-let left = document.querySelector("#left")
-let functionString = printFunction.toString();
-
+// convert function to string
+let functionString : string = printFunction.toString();
+// split string into array contatining each line as separate string
 let stringArray : Array<string> = functionString.split(/(?<=\{\})|[\r\n]+/);
-console.table(stringArray);
-
+// iterate though each line of code, count size of indent
 let indentArray : Array<number> = [];
 for(let i : number = 0; i < stringArray.length ; i++){ 
     let j : number = 0;
-    let currString = String(stringArray[i]);
-    //let currString : string = stringArray[i];
+    let currString : string = String(stringArray[i]);
     while (currString[j] === " "){
         j++;
     }
     indentArray[i] = j;
+    // delete indentation from each line of code
     currString = currString.substring(indentArray[i]);
-    console.log(currString);
-    stringArray[i] = "&nbsp;".repeat(indentArray[i]) + "<p class= \"codeline\">" + currString + "</p></br>";
+
+    // insert indentation outside of <p> tag
+    stringArray[i] = "&nbsp;".repeat(indentArray[i]) + "<p>" + currString + "</p></br>";
 }
-console.log(indentArray);
+// create single string from array of lines
 let paragraphString = stringArray.join("");
+// display string on website
 
-
+let left = document.querySelector("#left")
 left.innerHTML = "<pre>" + paragraphString + "</pre>";
-//console.log(printFunction.toString());

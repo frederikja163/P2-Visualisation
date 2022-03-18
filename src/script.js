@@ -22,10 +22,8 @@ function printFunction(name) {
     }
     const c = a + b;
 }
-let left = document.querySelector("#left");
 let functionString = printFunction.toString();
 let stringArray = functionString.split(/(?<=\{\})|[\r\n]+/);
-console.table(stringArray);
 let indentArray = [];
 for (let i = 0; i < stringArray.length; i++) {
     let j = 0;
@@ -35,11 +33,10 @@ for (let i = 0; i < stringArray.length; i++) {
     }
     indentArray[i] = j;
     currString = currString.substring(indentArray[i]);
-    console.log(currString);
-    stringArray[i] = "&nbsp;".repeat(indentArray[i]) + "<p class= \"codeline\">" + currString + "</p></br>";
+    stringArray[i] = "&nbsp;".repeat(indentArray[i]) + "<p>" + currString + "</p></br>";
 }
-console.log(indentArray);
 let paragraphString = stringArray.join("");
+let left = document.querySelector("#left");
 left.innerHTML = "<pre>" + paragraphString + "</pre>";
 window.onload = main;
 function main() {
