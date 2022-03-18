@@ -42,6 +42,7 @@ function displayCodeAsString() {
 }
 window.onload = main;
 function main() {
+    displayCodeAsString();
     breakpoint(document.body);
 }
 //# sourceMappingURL=script.js.map
