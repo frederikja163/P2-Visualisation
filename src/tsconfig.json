@@ -6,6 +6,7 @@
         "preserveConstEnums": true,
         "sourceMap": true,
         "outFile": "script.js",
+        "target": "es2015"
     },
     "include": [
         "./*.ts"

@@ -10,21 +10,27 @@ function printFunction(name: string){
 }
 
 let left = document.querySelector("#left")
-let functionString : string = printFunction.toString();
+let functionString = printFunction.toString();
 
-let stringArray : Array<String> = functionString.split(/(?<=\{\})|[\r\n]+/);
-//console.log(stringArray);
+let stringArray : Array<string> = functionString.split(/(?<=\{\})|[\r\n]+/);
+console.table(stringArray);
 
-let indentArray : Array<Number> = [];
-for(let i : number = 0; i<=stringArray.length ; i++){ 
-    let j : number = 1;
-    while (stringArray[i][j] === "a"){
-        j++;  
+let indentArray : Array<number> = [];
+for(let i : number = 0; i < stringArray.length ; i++){ 
+    let j : number = 0;
+    let currString = String(stringArray[i]);
+    //let currString : string = stringArray[i];
+    while (currString[j] === " "){
+        j++;
     }
     indentArray[i] = j;
+    currString = currString.substring(indentArray[i]);
+    console.log(currString);
+    stringArray[i] = "&nbsp;".repeat(indentArray[i]) + "<p class= \"codeline\">" + currString + "</p></br>";
 }
 console.log(indentArray);
-let paragraphString = stringArray.join("</p><p>");
+let paragraphString = stringArray.join("");
 
-left.innerHTML = "<pre><p>" + paragraphString + "</p></pre>";
+
+left.innerHTML = "<pre>" + paragraphString + "</pre>";
 //console.log(printFunction.toString());

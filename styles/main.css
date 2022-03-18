@@ -1,6 +1,9 @@
 .breakpoint {
     text-decoration: underline;
 }
+.codeline{
+    display: inline;
+}
 
 p:hover{
     cursor: pointer;
