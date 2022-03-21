@@ -1,4 +1,4 @@
-function displayCodeAsString(){    
+function displayCodeAsString(textBox : Element){    
     // function that should be printed
     function printFunction(name: string){
         name = "Jesper hansen";
@@ -13,26 +13,33 @@ function displayCodeAsString(){
     // convert function to string
     let functionString : string = printFunction.toString();
     // split string into array contatining each line as separate string
-    let stringArray : Array<string> = functionString.split(/(?<=\{\})|[\r\n]+/);
+    let lines : string[] = functionString.split(/(?<=\{\})|[\r\n]+/);
     // iterate though each line of code, count size of indent
-    let indentArray : Array<number> = [];
-    for(let i : number = 0; i < stringArray.length ; i++){ 
-        let j : number = 0;
-        let currString : string = String(stringArray[i]);
-        while (currString[j] === " "){
-            j++;
+    for(let i : number = 0; i < lines.length ; i++){ 
+        let indents : number = 0;
+        const currString : string = lines[i];
+        while (currString[indents] === " "){
+            indents++;
         }
-        indentArray[i] = j;
         // delete indentation from each line of code
-        currString = currString.substring(indentArray[i]);
+        const trimmedStr = currString.substring(indents);
 
         // insert indentation outside of <p> tag
-        stringArray[i] = "&nbsp;".repeat(indentArray[i]) + "<p>" + currString + "</p></br>";
+        lines[i] = "&nbsp;".repeat(indents) + "<p>" + trimmedStr + "</p></br>";
     }
+
+    //lines[1] = highLight(lines[1]);
+
     // create single string from array of lines
-    let paragraphString = stringArray.join("");
+    const paragraphString = lines.join("");
     // display string on website
 
-    let left = document.querySelector("#left")
-    left.innerHTML = "<pre>" + paragraphString + "</pre>";
+    textBox.innerHTML = "<pre>" + paragraphString + "</pre>";
+}
+
+function highLight(input : string){
+    return input.replace("<p>", "<p class=\"highlighted\">");
+}
+function removeHighLight(input : string){
+    return input.replace("<p class=\"highlighted\">", "<p>");
 }

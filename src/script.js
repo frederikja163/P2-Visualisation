@@ -12,7 +12,7 @@ function breakpoint(code) {
         });
     }
 }
-function displayCodeAsString() {
+function displayCodeAsString(textBox) {
     function printFunction(name) {
         name = "Jesper hansen";
         let a = 7;
@@ -24,25 +24,29 @@ function displayCodeAsString() {
         const c = a + b;
     }
     let functionString = printFunction.toString();
-    let stringArray = functionString.split(/(?<=\{\})|[\r\n]+/);
-    let indentArray = [];
-    for (let i = 0; i < stringArray.length; i++) {
-        let j = 0;
-        let currString = String(stringArray[i]);
-        while (currString[j] === " ") {
-            j++;
+    let lines = functionString.split(/(?<=\{\})|[\r\n]+/);
+    for (let i = 0; i < lines.length; i++) {
+        let indents = 0;
+        const currString = lines[i];
+        while (currString[indents] === " ") {
+            indents++;
         }
-        indentArray[i] = j;
-        currString = currString.substring(indentArray[i]);
-        stringArray[i] = "&nbsp;".repeat(indentArray[i]) + "<p>" + currString + "</p></br>";
+        const trimmedStr = currString.substring(indents);
+        lines[i] = "&nbsp;".repeat(indents) + "<p>" + trimmedStr + "</p></br>";
     }
-    let paragraphString = stringArray.join("");
-    let left = document.querySelector("#left");
-    left.innerHTML = "<pre>" + paragraphString + "</pre>";
+    const paragraphString = lines.join("");
+    textBox.innerHTML = "<pre>" + paragraphString + "</pre>";
+}
+function highLight(input) {
+    return input.replace("<p>", "<p class=\"highlighted\">");
+}
+function removeHighLight(input) {
+    return input.replace("<p class=\"highlighted\">", "<p>");
 }
 window.onload = main;
 function main() {
-    displayCodeAsString();
+    let left = document.querySelector("#left");
+    displayCodeAsString(left);
     breakpoint(document.body);
 }
 //# sourceMappingURL=script.js.map

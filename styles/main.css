@@ -10,6 +10,11 @@ p:hover{
     width: fit-content;
 }
 
+.highlighted{
+    font-weight: bold;
+    font-size: 110%;
+}
+
 .textbox{
     display: inline-block;
 	font-family: courier; 
