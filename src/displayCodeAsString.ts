@@ -1,15 +1,4 @@
-function displayCodeAsString(textBox : Element){    
-    // function that should be printed
-    function printFunction(name: string){
-        name = "Jesper hansen";
-        let a : number = 7;
-        let b : number = 6;
-        console.log(a + b);
-        if (a === b){
-            a++;
-        } 
-        const c = a + b;
-    }
+function displayCodeAsString(textBox : Element, printFunction : Function){    
     // convert function to string
     let functionString : string = printFunction.toString();
     // split string into array contatining each line as separate string
@@ -23,23 +12,12 @@ function displayCodeAsString(textBox : Element){
         }
         // delete indentation from each line of code
         const trimmedStr = currString.substring(indents);
-
         // insert indentation outside of <p> tag
-        lines[i] = "&nbsp;".repeat(indents) + "<p>" + trimmedStr + "</p></br>";
+        lines[i] = "&nbsp;".repeat(indents) + "<p index=\""+ i + "\">" + trimmedStr + "</p></br>";
     }
-
-    //lines[1] = highLight(lines[1]);
-
     // create single string from array of lines
     const paragraphString = lines.join("");
     // display string on website
-
-    textBox.innerHTML = "<pre>" + paragraphString + "</pre>";
+    textBox.innerHTML = "<pre id= \"code\">" + paragraphString + "</pre>";
 }
 
-function highLight(input : string){
-    return input.replace("<p>", "<p class=\"highlighted\">");
-}
-function removeHighLight(input : string){
-    return input.replace("<p class=\"highlighted\">", "<p>");
-}
