@@ -5,11 +5,9 @@ function breakpoint(code) {
         lines[i].addEventListener("click", function () {
             if (lines[i].classList.contains(breakpointClass)) {
                 lines[i].classList.remove(breakpointClass);
-                lines[i].classList.remove("highlighted");
             }
             else {
                 lines[i].classList.add(breakpointClass);
-                lines[i].classList.add("highlighted");
             }
         });
     }
@@ -39,18 +37,18 @@ function removeHighLight(index) {
 }
 window.onload = main;
 function main() {
-    function printFunction(name) {
-        name = "Jesper hansen";
-        let a = 7;
-        let b = 6;
-        console.log(a + b);
-        if (a === b) {
-            a++;
-        }
-        const c = a + b;
-    }
     let left = document.querySelector("#left");
     displayCodeAsString(left, printFunction);
     breakpoint(document.body);
+}
+function printFunction(name) {
+    name = "Jesper hansen";
+    let a = 7;
+    let b = 6;
+    console.log(a + b);
+    if (a === b) {
+        a++;
+    }
+    const c = a + b;
 }
 //# sourceMappingURL=script.js.map
