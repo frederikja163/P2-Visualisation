@@ -1,10 +1,18 @@
 .breakpoint {
     text-decoration: underline;
 }
+.textbox p{
+    display: inline;
+}
 
 p:hover{
     cursor: pointer;
     width: fit-content;
+}
+
+.highlighted{
+    font-weight: bold;
+    font-size: 110%;
 }
 
 .textbox{

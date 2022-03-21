@@ -1,7 +1,7 @@
-var breakpointClass = "breakpoint";
+const breakpointClass = "breakpoint";
 function breakpoint(code) {
-    var lines = code.querySelectorAll("p");
-    var _loop_1 = function (i) {
+    const lines = code.querySelectorAll("p");
+    for (let i = 0; i < lines.length; i++) {
         lines[i].addEventListener("click", function () {
             if (lines[i].classList.contains(breakpointClass)) {
                 lines[i].classList.remove(breakpointClass);
@@ -10,13 +10,45 @@ function breakpoint(code) {
                 lines[i].classList.add(breakpointClass);
             }
         });
-    };
-    for (var i = 0; i < lines.length; i++) {
-        _loop_1(i);
     }
+}
+function displayCodeAsString(textBox, printFunction) {
+    let functionString = printFunction.toString();
+    let lines = functionString.split(/(?<=\{\})|[\r\n]+/);
+    for (let i = 0; i < lines.length; i++) {
+        let indents = 0;
+        const currString = lines[i];
+        while (currString[indents] === " ") {
+            indents++;
+        }
+        const trimmedStr = currString.substring(indents);
+        lines[i] = "&nbsp;".repeat(indents) + "<p index=\"" + i + "\">" + trimmedStr + "</p></br>";
+    }
+    const paragraphString = lines.join("");
+    textBox.innerHTML = "<pre id= \"code\">" + paragraphString + "</pre>";
+}
+function highLight(index) {
+    let currParagraph = document.querySelector("p[index=\"" + index + "\"]");
+    currParagraph.classList.add("highlighted");
+}
+function removeHighLight(index) {
+    let currParagraph = document.querySelector("p[index=\"" + index + "\"]");
+    currParagraph.classList.remove("highlighted");
 }
 window.onload = main;
 function main() {
+    let left = document.querySelector("#left");
+    displayCodeAsString(left, printFunction);
     breakpoint(document.body);
+}
+function printFunction(name) {
+    name = "Jesper hansen";
+    let a = 7;
+    let b = 6;
+    console.log(a + b);
+    if (a === b) {
+        a++;
+    }
+    const c = a + b;
 }
 //# sourceMappingURL=script.js.map
