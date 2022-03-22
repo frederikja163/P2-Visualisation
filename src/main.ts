@@ -4,18 +4,17 @@ function main(): void
 {
     let left = document.querySelector("#left");
 
-    displayCodeAsString(left, printFunction);
+    if(left != null) displayCodeAsString(left, f);
     breakpoint(document.body);
 }
 
-// function that should be printed
-function printFunction(name: string) : void{
-    name = "Jesper hansen";
-    let a : number = 7;
-    let b : number = 6;
-    console.log(a + b);
-    if (a === b){
-        a++;
-    } 
-    const c = a + b;
+function f() {
+    let sum = 0;
+    for(let i = 0; i < 10; i++){
+        if(i % 2 === 0){
+            sum += i;
+            console.log("I: \t" + sum);
+        }
+        console.log("Sum:\t" + sum);
+    }
 }

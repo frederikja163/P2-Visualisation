@@ -12,6 +12,16 @@ let resolveCurrentPromise: Function;
 /** Gets the breakable code and runs the code untill the first breakpoint*/
 function runCode(){
 	
+	//removes all highligt
+	//getting a list of all lines of code
+	const lineCount: number = document.querySelectorAll("p").length;
+
+	//Adding each line of code to the code string
+	for (let i: number = 0; i < lineCount; i++){
+		removeHighLight(i);
+	}
+
+
 	//setting up promises
 	currentPromise = new Promise((resolve:Function, reject:Function) => {
 		resolveCurrentPromise = resolve; 
@@ -49,7 +59,7 @@ function createBreakableCode(): Function{
 
         // Remove the breakpoint if it already exists, otherwise add a breakpoint.
 		if (lines[i].classList.contains(breakpointClass)) 
-			code += "await debug();\n";
+			code += "await debug(" + i + ");\n";
 
     }
 
@@ -59,8 +69,13 @@ function createBreakableCode(): Function{
 }
 
 /** Waiting for a specific promise */
-async function debug(): Promise<void>{
+async function debug(line: number): Promise<void>{
+	
+	highLight(line);
+	
 	await currentPromise;
+
+	removeHighLight(line);
 
 	//creating a promise
 	currentPromise = new Promise((resolve:Function, reject:Function) => {
