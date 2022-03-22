@@ -26,7 +26,7 @@ function wrapStrings(elementTag, functionString) {
             indents++;
         }
         const trimmedStr = currString.substring(indents);
-        lines[i] = "&nbsp;".repeat(indents) + "<" + elementTag + " index=\"" + i + "\">" + trimmedStr + "</" + elementTag + "></br>";
+        lines[i] = `${"&nbsp;".repeat(indents)}<${elementTag} index="${i}"> ${trimmedStr}</${elementTag}></br>`;
     }
     return lines.join("");
 }
