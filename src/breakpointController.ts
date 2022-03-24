@@ -70,7 +70,9 @@ function addAsync(currentLine: string):string{
 function addBreakpoint(currentLine: string, lines: NodeListOf<HTMLParagraphElement>, lineNum: number):string{
 	
 	// If is given the last line, then do nothing with the line.
-	if(lineNum != lines.length - 1) return currentLine;
+	if(lineNum != lines.length - 1) {
+		return currentLine;
+	}
 	
 	// Remove the breakpoint if it already exists, otherwise add a breakpoint.
 	if (lines[lineNum].classList.contains(breakpointClass)){

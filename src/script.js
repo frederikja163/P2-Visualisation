@@ -55,8 +55,9 @@ function addAsync(currentLine) {
     return currentLine;
 }
 function addBreakpoint(currentLine, lines, lineNum) {
-    if (lineNum != lines.length - 1)
+    if (lineNum != lines.length - 1) {
         return currentLine;
+    }
     if (lines[lineNum].classList.contains(breakpointClass)) {
         let indexOfDo = currentLine.indexOf("do");
         let indexOfWhile = currentLine.indexOf("while");
