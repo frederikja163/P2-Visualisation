@@ -42,8 +42,7 @@ function createBreakableCode() {
     for (let i = 0; i < lines.length; i++) {
         let currentLine = lines[i].innerHTML.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
         currentLine = addAsync(currentLine);
-        if (i != lines.length - 1)
-            currentLine = addBreakpoint(currentLine, lines, i);
+        currentLine = addBreakpoint(currentLine, lines, i);
         code += currentLine + "\n";
     }
     return new Function('return ' + code)();
@@ -56,6 +55,8 @@ function addAsync(currentLine) {
     return currentLine;
 }
 function addBreakpoint(currentLine, lines, lineNum) {
+    if (lineNum != lines.length - 1)
+        return currentLine;
     if (lines[lineNum].classList.contains(breakpointClass)) {
         let indexOfDo = currentLine.indexOf("do");
         let indexOfWhile = currentLine.indexOf("while");
