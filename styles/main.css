@@ -16,13 +16,14 @@ p:hover{
 }
 
 .textbox{
-    display: inline-block;
+    display: inline;
 	font-family: courier; 
 	height: 80%;
 	margin: 1%;
     border-width: 1px;
     border-style: solid;
     flex-grow: 1;
+    overflow:auto;
 }
 
 body{
@@ -30,3 +31,53 @@ body{
 	margin: 0;
 	height: 100vh;
 }
+
+.dropbtn {
+	font-family: courier;
+    font-weight: bold; 
+    background-color: #57b3b6;
+    color: white;
+    padding: 16px;
+    font-size: 16px;
+    border: none;
+    min-width: 180px;
+    height: 55px;
+  }
+  
+  /* The container <div> - needed to position the dropdown content */
+  .dropdown {
+    position: relative;
+    display: inline-block;
+    height: 55px;
+    margin: 1%;
+  }
+  
+  /* Dropdown Content (Hidden by Default) */
+  .dropdown-content {
+	font-family: courier; 
+    display: none;
+    position: absolute;
+    background-color: #f1f1f1;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    max-height: 800%;
+    overflow:auto;
+  }
+  
+  /* Links inside the dropdown */
+  .dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+  }
+  
+  /* Change color of dropdown links on hover */
+  .dropdown-content a:hover {background-color: #ddd;}
+  
+  /* Show the dropdown menu on hover */
+  .dropdown:hover .dropdown-content {display: block;}
+  
+  /* Change the background color of the dropdown button when the dropdown content is shown */
+  .dropdown:hover .dropbtn {background-color: #51a5a8;}
