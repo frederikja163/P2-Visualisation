@@ -5,6 +5,8 @@ function displayCodeAsString(textBox : Element, printFunction : Function) : void
     const paragraphString = wrapStrings("span", functionString);
     // display string on website
     textBox.innerHTML = "<pre id= \"code\">" + paragraphString + "</pre>";
+    
+    breakpoint(textBox);
 }
 
 function wrapStrings(elementTag : string, functionString : string) : string {
