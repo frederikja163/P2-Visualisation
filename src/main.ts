@@ -2,7 +2,8 @@ window.onload = main;
 
 function main(): void
 {
-    const left: Element = document.querySelector("#left");
-    const right: Element = document.querySelector("#right");
+    const left: HTMLElement = document.querySelector("#left");
+    const right: HTMLElement = document.querySelector("#right");
     breakpoint(left);
+    pseudocode(right);
 }

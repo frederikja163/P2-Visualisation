@@ -1,16 +1,12 @@
 const breakpointClass: string = "breakpoint";
-
-/*
-<p class="breakpoint" selected="true" index="7" pseudo="4">
-
-<p selected="true" index="4" code="7">
-*/
+const selectedCode: string = "selectedCode";
 
 function breakpoint(code: Element): void
 {
     const lines: NodeListOf<HTMLParagraphElement> = code.querySelectorAll("p");
     for (let i: number = 0; i < lines.length; i++)
     {
+        // Listen for events on every lines of code.
         lines[ i ].addEventListener("dblclick", statementOnDblClick);
         lines[ i ].addEventListener("click", () => statementOnClick(lines[ i ]));
     }
@@ -25,7 +21,7 @@ function statementOnClick(line: HTMLElement): void
 {
     if (line.classList.contains(breakpointClass))
     {
-        if (line.id === "selected") // Breakpoint, selected
+        if (line.id === selectedCode) // Breakpoint, selected
         {
             // Remove breakpoint
             line.classList.remove(breakpointClass);
@@ -49,7 +45,9 @@ function statementOnClick(line: HTMLElement): void
 
 function select(line: HTMLElement): void
 {
-    const selected: HTMLElement = document.getElementById("selected");
-    line.id = "selected";
-    selected.id = "";
+    const selected: HTMLElement | null = document.getElementById(selectedCode);
+    line.id = selectedCode;
+    if (selected != null) {
+        selected.id = "";
+    }
 }

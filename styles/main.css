@@ -2,8 +2,12 @@
     text-decoration: underline;
 }
 
-#selected {
+#selectedCode {
     text-decoration-color: red;
+}
+
+span:focus-visible {
+    outline: none;
 }
 
 p:hover{
