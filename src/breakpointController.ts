@@ -5,7 +5,7 @@ let currentPromise: Promise<void>;
 let resolveCurrentPromise: Function;
 
 /** Gets the breakable code and runs the code untill the first breakpoint.*/
-function runCode(){
+function runCode(): void{
 	
 	// Getting the amount of lines.
 	const lineCount: number = document.querySelectorAll("p").length;
@@ -21,16 +21,17 @@ function runCode(){
 	});
 
 	// Running function.
-	createBreakableCode()();
+	let code:Function = parseCode();
+	code();
 }
 
 /** Runs the code untill the next breakpoint by setting up promises. */
-function next(){
+function next():void{
 	resolveCurrentPromise();
 }
 
-/** This function gets all lines of code, adding breakpoints, and returns this as a function. */
-function createBreakableCode(): Function{
+/** This function gets all lines of code, adds breakpoints, and returns this as a function. */
+function parseCode(): Function{
 
 	let code: string = "";
 
@@ -67,6 +68,7 @@ function addAsync(currentLine: string):string{
 	return currentLine;
 }
 
+/** Adds breakpoint to the current line if a control structure is found.*/
 function addBreakpoint(currentLine: string, lines: NodeListOf<HTMLParagraphElement>, lineNum: number):string{
 	
 	// If is given the last line, then do nothing with the line.
@@ -74,7 +76,7 @@ function addBreakpoint(currentLine: string, lines: NodeListOf<HTMLParagraphEleme
 		return currentLine;
 	}
 	
-	// Remove the breakpoint if it already exists, otherwise add a breakpoint.
+	// Checking if the current line has a breakpoint, if so add it.
 	if (lines[lineNum].classList.contains(breakpointClass)){
 
 		// Getting index of {Do, while, for, if, else (after), switch}
@@ -88,18 +90,18 @@ function addBreakpoint(currentLine: string, lines: NodeListOf<HTMLParagraphEleme
 		if(indexOfDo != -1 || indexOfSwitch != -1){ 
 
 			// Insert breakpoint before line.
-			currentLine = "await debug(" + lineNum + ");\n" + currentLine;
+			currentLine = `await debug(${lineNum});\n` + currentLine;
 
 		}else if(indexOfWhile != -1 || indexOfFor != -1 || indexOfIf != -1){
 			
 			// Insert breakpoint in line.
 			let indexOfExpr = indexOfFor != -1 ? currentLine.indexOf(";") : currentLine.indexOf("(");
-			currentLine = currentLine.substring(0, indexOfExpr + 1) + "await debug(" + lineNum + ") && " + currentLine.substring(indexOfExpr + 1, currentLine.length);
+			currentLine = currentLine.substring(0, indexOfExpr + 1) + `await debug(${lineNum}) && ` + currentLine.substring(indexOfExpr + 1, currentLine.length);
 
 		}else{ 
 			
 			// Insert breakpoint after line.
-			currentLine += "\nawait debug(" + lineNum + ");";
+			currentLine += `\nawait debug(${lineNum});`;
 		}
 
 	} 

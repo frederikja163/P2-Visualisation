@@ -31,12 +31,13 @@ function runCode() {
     currentPromise = new Promise((resolve, reject) => {
         resolveCurrentPromise = resolve;
     });
-    createBreakableCode()();
+    let code = parseCode();
+    code();
 }
 function next() {
     resolveCurrentPromise();
 }
-function createBreakableCode() {
+function parseCode() {
     let code = "";
     const lines = document.querySelectorAll("p");
     for (let i = 0; i < lines.length; i++) {
@@ -65,14 +66,14 @@ function addBreakpoint(currentLine, lines, lineNum) {
         let indexOfIf = currentLine.indexOf("if");
         let indexOfSwitch = currentLine.indexOf("switch");
         if (indexOfDo != -1 || indexOfSwitch != -1) {
-            currentLine = "await debug(" + lineNum + ");\n" + currentLine;
+            currentLine = `await debug(${lineNum});\n` + currentLine;
         }
         else if (indexOfWhile != -1 || indexOfFor != -1 || indexOfIf != -1) {
             let indexOfExpr = indexOfFor != -1 ? currentLine.indexOf(";") : currentLine.indexOf("(");
-            currentLine = currentLine.substring(0, indexOfExpr + 1) + "await debug(" + lineNum + ") && " + currentLine.substring(indexOfExpr + 1, currentLine.length);
+            currentLine = currentLine.substring(0, indexOfExpr + 1) + `await debug(${lineNum}) && ` + currentLine.substring(indexOfExpr + 1, currentLine.length);
         }
         else {
-            currentLine += "\nawait debug(" + lineNum + ");";
+            currentLine += `\nawait debug(${lineNum});`;
         }
     }
     return currentLine;
