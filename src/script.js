@@ -14,6 +14,10 @@ function breakpoint(code) {
 }
 function displayCodeAsString(textBox, printFunction) {
     let functionString = printFunction.toString();
+    const paragraphString = wrapStrings("span", functionString);
+    textBox.innerHTML = "<pre id= \"code\">" + paragraphString + "</pre>";
+}
+function wrapStrings(elementTag, functionString) {
     let lines = functionString.split(/(?<=\{\})|[\r\n]+/);
     for (let i = 0; i < lines.length; i++) {
         let indents = 0;
@@ -22,10 +26,9 @@ function displayCodeAsString(textBox, printFunction) {
             indents++;
         }
         const trimmedStr = currString.substring(indents);
-        lines[i] = "&nbsp;".repeat(indents) + "<p index=\"" + i + "\">" + trimmedStr + "</p></br>";
+        lines[i] = `${"&nbsp;".repeat(indents)}<${elementTag} index="${i}"> ${trimmedStr}</${elementTag}></br>`;
     }
-    const paragraphString = lines.join("");
-    textBox.innerHTML = "<pre id= \"code\">" + paragraphString + "</pre>";
+    return lines.join("");
 }
 function highLight(index) {
     let currParagraph = document.querySelector("p[index=\"" + index + "\"]");
