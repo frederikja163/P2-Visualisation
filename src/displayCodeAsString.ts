@@ -1,6 +1,13 @@
 function displayCodeAsString(textBox : Element, printFunction : Function) : void{    
     // convert function to string
     let functionString : string = printFunction.toString();
+    // wrap lines of function in html elements
+    const paragraphString = wrapStrings("span", functionString);
+    // display string on website
+    textBox.innerHTML = "<pre id= \"code\">" + paragraphString + "</pre>";
+}
+
+function wrapStrings(elementTag : string, functionString : string) : string {
     // split string into array contatining each line as separate string
     let lines : string[] = functionString.split(/(?<=\{\})|[\r\n]+/);
     // iterate though each line of code, count size of indent
@@ -16,13 +23,10 @@ function displayCodeAsString(textBox : Element, printFunction : Function) : void
         // delete indentation from each line of code
         const trimmedStr = currString.substring(indents);
         // insert indentation outside of <p> tag
-        lines[i] = "&nbsp;".repeat(indents) + "<p index=\""+ i + "\">" + trimmedStr + "</p></br>";
+        lines[i] = `${"&nbsp;".repeat(indents)}<${elementTag} index="${i}"> ${trimmedStr}</${elementTag}></br>`;
     }
 
     // create single string from array of lines
-    const paragraphString = lines.join("");
-
-    // display string on website
-    textBox.innerHTML = "<pre id= \"code\">" + paragraphString + "</pre>";
+    return lines.join("");
 }
 
