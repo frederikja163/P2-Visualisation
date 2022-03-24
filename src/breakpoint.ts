@@ -3,7 +3,7 @@ const selectedCode: string = "selectedCode";
 
 function breakpoint(code: Element): void
 {
-    const lines: NodeListOf<HTMLParagraphElement> = code.querySelectorAll("p");
+    const lines: NodeListOf<HTMLSpanElement> = code.querySelectorAll("span");
     for (let i: number = 0; i < lines.length; i++)
     {
         // Listen for events on every lines of code.
