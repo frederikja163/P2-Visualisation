@@ -41,17 +41,39 @@ function createBreakableCode() {
     const lines = document.querySelectorAll("p");
     for (let i = 0; i < lines.length; i++) {
         let currentLine = lines[i].innerHTML.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
-        let indexOfFunction = currentLine.indexOf("function");
-        if (indexOfFunction != -1) {
-            code += currentLine.substring(0, indexOfFunction) + "async " + currentLine.substring(indexOfFunction, currentLine.length) + "\n";
-        }
-        else {
-            code += currentLine + "\n";
-        }
-        if (lines[i].classList.contains(breakpointClass))
-            code += "await debug(" + i + ");\n";
+        currentLine = addAsync(currentLine);
+        if (i != lines.length - 1)
+            currentLine = addBreakpoint(currentLine, lines, i);
+        code += currentLine + "\n";
     }
     return new Function('return ' + code)();
+}
+function addAsync(currentLine) {
+    let indexOfFunction = currentLine.indexOf("function");
+    if (indexOfFunction != -1) {
+        return currentLine.substring(0, indexOfFunction) + "async " + currentLine.substring(indexOfFunction, currentLine.length);
+    }
+    return currentLine;
+}
+function addBreakpoint(currentLine, lines, lineNum) {
+    if (lines[lineNum].classList.contains(breakpointClass)) {
+        let indexOfDo = currentLine.indexOf("do");
+        let indexOfWhile = currentLine.indexOf("while");
+        let indexOfFor = currentLine.indexOf("for");
+        let indexOfIf = currentLine.indexOf("if");
+        let indexOfSwitch = currentLine.indexOf("switch");
+        if (indexOfDo != -1 || indexOfSwitch != -1) {
+            currentLine = "await debug(" + lineNum + ");\n" + currentLine;
+        }
+        else if (indexOfWhile != -1 || indexOfFor != -1 || indexOfIf != -1) {
+            let indexOfExpr = indexOfFor != -1 ? currentLine.indexOf(";") : currentLine.indexOf("(");
+            currentLine = currentLine.substring(0, indexOfExpr + 1) + "await debug(" + lineNum + ") && " + currentLine.substring(indexOfExpr + 1, currentLine.length);
+        }
+        else {
+            currentLine += "\nawait debug(" + lineNum + ");";
+        }
+    }
+    return currentLine;
 }
 function debug(line) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -61,6 +83,7 @@ function debug(line) {
         currentPromise = new Promise((resolve, reject) => {
             resolveCurrentPromise = resolve;
         });
+        return true;
     });
 }
 function displayCodeAsString(textBox, printFunction) {

@@ -49,18 +49,11 @@ function createBreakableCode(): Function{
 		
 		//inserting the current line, but adding async in front of any function
 		let currentLine: string = lines[i].innerHTML.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
-		let indexOfFunction: number = currentLine.indexOf("function");
-		
-		if(indexOfFunction != -1){
-			code += currentLine.substring(0, indexOfFunction) + "async " + currentLine.substring(indexOfFunction, currentLine.length) + "\n";
-		}else{
-			code += currentLine + "\n";
-		}
 
-        // Remove the breakpoint if it already exists, otherwise add a breakpoint.
-		if (lines[i].classList.contains(breakpointClass)) 
-			code += "await debug(" + i + ");\n";
-
+		currentLine = addAsync(currentLine);
+		if(i != lines.length - 1) currentLine = addBreakpoint(currentLine, lines, i);
+        
+		code += currentLine + "\n"
     }
 
 	//creating a function from the string
@@ -68,8 +61,53 @@ function createBreakableCode(): Function{
 
 }
 
+/** Adds async to the current line if a function is found.*/
+function addAsync(currentLine: string):string{
+	let indexOfFunction: number = currentLine.indexOf("function");
+		
+	if(indexOfFunction != -1){
+		return currentLine.substring(0, indexOfFunction) + "async " + currentLine.substring(indexOfFunction, currentLine.length);
+	}
+	
+	return currentLine;
+}
+
+function addBreakpoint(currentLine: string, lines: NodeListOf<HTMLParagraphElement>, lineNum: number):string{
+	// Remove the breakpoint if it already exists, otherwise add a breakpoint.
+	if (lines[lineNum].classList.contains(breakpointClass)){
+
+		//do, while, for, if, else (after), switch
+		let indexOfDo: number = currentLine.indexOf("do"); 			//before
+		let indexOfWhile: number = currentLine.indexOf("while"); 	//in
+		let indexOfFor: number = currentLine.indexOf("for"); 		//in
+		let indexOfIf: number = currentLine.indexOf("if"); 			//in
+		let indexOfSwitch: number = currentLine.indexOf("switch"); 	//before
+		
+		//adding breakpoint
+		if(indexOfDo != -1 || indexOfSwitch != -1){ 
+
+			//insert breakpoint before line
+			currentLine = "await debug(" + lineNum + ");\n" + currentLine;
+
+		}else if(indexOfWhile != -1 || indexOfFor != -1 || indexOfIf != -1){
+			
+			//insert breakpoint in line
+			let indexOfExpr = indexOfFor != -1 ? currentLine.indexOf(";") : currentLine.indexOf("(");
+			currentLine = currentLine.substring(0, indexOfExpr + 1) + "await debug(" + lineNum + ") && " + currentLine.substring(indexOfExpr + 1, currentLine.length);
+
+		}else{ 
+			
+			//insert breakpoint after line
+			currentLine += "\nawait debug(" + lineNum + ");";
+		}
+
+	} 
+		
+	return currentLine;
+}
+
 /** Waiting for a specific promise */
-async function debug(line: number): Promise<void>{
+async function debug(line: number): Promise<boolean>{
 	
 	highLight(line);
 	
@@ -81,4 +119,6 @@ async function debug(line: number): Promise<void>{
 	currentPromise = new Promise((resolve:Function, reject:Function) => {
 		resolveCurrentPromise = resolve; 
 	});
+
+	return true;
 }
