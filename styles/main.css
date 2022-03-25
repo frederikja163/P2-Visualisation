@@ -2,6 +2,12 @@
     text-decoration: underline;
 }
 
+textarea {
+  border: none;
+  outline: none;
+  resize: none;
+}
+
 p:hover{
     cursor: pointer;
     width: fit-content;
@@ -15,7 +21,7 @@ p:hover{
 .textbox{
     display:inline-block;
 	font-family: courier; 
-	height: 80%;
+	height: 95%;
 	margin: 1%;
     border-width: 3px;
     border-color: #57b3b6;
@@ -31,12 +37,22 @@ body{
 	height: 100vh;
 }
 
+.dark-mode {
+  background-color: black;
+  color: white;
+}
+
+.buttons{
+  margin: 1%;
+}
+
 .controlBtn{
     color: white;
     background-color: #57b3b6;
     font-weight: bold;
     height: 25px;
     margin: 1%;
+    border: none;
 }
 
 .dropbtn {
@@ -48,7 +64,7 @@ body{
     font-size: 16px;
     border: none;
     min-width: 180px;
-    height: 75px;
+    height: 55px;
   }
 
   /* The container <div> - needed to position the dropdown content */
@@ -65,7 +81,7 @@ body{
     display: block;
     position: absolute;
     background-color: #f1f1f1;
-    min-width: 160px;
+    min-width: 180px;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     z-index: 1;
     height: 0;

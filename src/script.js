@@ -89,6 +89,19 @@ function debug(line) {
         return true;
     });
 }
+function darkMode() {
+    const bodyElement = document.body;
+    const textBoxElement = document.querySelectorAll(".textbox");
+    const darkModeBtn = document.querySelector("#darkModeBtn");
+    const rightTextBox = document.querySelector("#righttextbox");
+    rightTextBox.classList.toggle("dark-mode");
+    bodyElement.classList.toggle("dark-mode");
+    for (let element of textBoxElement) {
+        element.classList.toggle("dark-mode");
+    }
+    bodyElement.classList.contains("dark-mode") ? darkModeBtn.value = "Light Mode" :
+        darkModeBtn.value = "Dark Mode";
+}
 function displayCodeAsString(textBox, printFunction) {
     let functionString = printFunction.toString();
     const paragraphString = wrapStrings("span", functionString);
