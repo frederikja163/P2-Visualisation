@@ -13,15 +13,16 @@ p:hover{
 }
 
 .textbox{
-    display: inline-block;
+    display:inline-block;
 	font-family: courier; 
 	height: 80%;
 	margin: 1%;
-    border-width: 1px;
+    border-width: 3px;
+    border-color: #57b3b6;
     border-style: solid;
     flex-grow: 1;
     overflow:auto;
-    width: 50vw;
+    width: 50%;
 }
 
 body{
@@ -30,6 +31,13 @@ body{
 	height: 100vh;
 }
 
+.controlBtn{
+    color: white;
+    background-color: #57b3b6;
+    font-weight: bold;
+    height: 25px;
+    margin: 1%;
+}
 
 .dropbtn {
 	font-family: courier;
@@ -54,14 +62,16 @@ body{
   /* Dropdown Content (Hidden by Default) */
   .dropdown-content {
 	font-family: courier; 
-    display: none;
+    display: block;
     position: absolute;
     background-color: #f1f1f1;
     min-width: 160px;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     z-index: 1;
+    height: 0;
     max-height: 400%;
-    overflow:auto;
+    overflow:scroll;
+    transition: all .5s ease;
   }
 
   /* Links inside the dropdown */
@@ -71,12 +81,38 @@ body{
     text-decoration: none;
     display: block;
   }
+  .dropdown-content:hover {cursor: pointer;}
 
   /* Change color of dropdown links on hover */
   .dropdown-content a:hover {background-color: #ddd;}
 
   /* Show the dropdown menu on hover */
-  .dropdown:hover .dropdown-content {display: block;}
+  .dropdown:hover .dropdown-content {
+
+      height:500%;
+      transform: translateY(0);
+    }
 
   /* Change the background color of the dropdown button when the dropdown content is shown */
   .dropdown:hover .dropbtn {background-color: #51a5a8;} 
+
+
+  /* width */
+::-webkit-scrollbar {
+    width: 10px;
+  }
+  
+  /* Track */
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  
+  /* Handle */
+  ::-webkit-scrollbar-thumb {
+    background: #888;
+  }
+  
+  /* Handle on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
