@@ -4,8 +4,10 @@ function main(): void
 {
     let left = document.querySelector("#left");
 
-    if(left != null) displayCodeAsString(left, f);
-    breakpoint(document.body);
+    if(left != null) {
+        displayCodeAsString(left, f);
+        breakpoint(left);
+    }
 }
 
 function f() {
