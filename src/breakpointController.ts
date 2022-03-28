@@ -50,8 +50,6 @@ function parseCode(): Function{
 		code += currentLine + "\n"
     }
 
-	console.log(code);
-
 	// Creating a function from the string.
 	return new Function('return ' + code)();
 

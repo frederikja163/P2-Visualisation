@@ -46,7 +46,6 @@ function parseCode() {
         currentLine = addBreakpoint(currentLine, lines, i);
         code += currentLine + "\n";
     }
-    console.log(code);
     return new Function('return ' + code)();
 }
 function addAsync(currentLine) {
