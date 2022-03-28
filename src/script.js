@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 const breakpointClass = "breakpoint";
 function breakpoint(code) {
-    const lines = code.querySelectorAll("p");
+    const lines = code.querySelectorAll("span");
     for (let i = 0; i < lines.length; i++) {
         lines[i].addEventListener("click", function () {
             if (lines[i].classList.contains(breakpointClass)) {
@@ -39,13 +39,14 @@ function next() {
 }
 function parseCode() {
     let code = "";
-    const lines = document.querySelectorAll("p");
+    const lines = document.querySelectorAll("span");
     for (let i = 0; i < lines.length; i++) {
         let currentLine = lines[i].innerHTML.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
         currentLine = addAsync(currentLine);
         currentLine = addBreakpoint(currentLine, lines, i);
         code += currentLine + "\n";
     }
+    console.log(code);
     return new Function('return ' + code)();
 }
 function addAsync(currentLine) {
@@ -56,25 +57,26 @@ function addAsync(currentLine) {
     return currentLine;
 }
 function addBreakpoint(currentLine, lines, lineNum) {
-    if (lineNum != lines.length - 1) {
+    if (lineNum == lines.length - 1) {
         return currentLine;
     }
-    if (lines[lineNum].classList.contains(breakpointClass)) {
-        let indexOfDo = currentLine.indexOf("do");
-        let indexOfWhile = currentLine.indexOf("while");
-        let indexOfFor = currentLine.indexOf("for");
-        let indexOfIf = currentLine.indexOf("if");
-        let indexOfSwitch = currentLine.indexOf("switch");
-        if (indexOfDo != -1 || indexOfSwitch != -1) {
-            currentLine = `await debug(${lineNum});\n` + currentLine;
-        }
-        else if (indexOfWhile != -1 || indexOfFor != -1 || indexOfIf != -1) {
-            let indexOfExpr = indexOfFor != -1 ? currentLine.indexOf(";") : currentLine.indexOf("(");
-            currentLine = currentLine.substring(0, indexOfExpr + 1) + `await debug(${lineNum}) && ` + currentLine.substring(indexOfExpr + 1, currentLine.length);
-        }
-        else {
-            currentLine += `\nawait debug(${lineNum});`;
-        }
+    if (!lines[lineNum].classList.contains(breakpointClass)) {
+        return currentLine;
+    }
+    let indexOfDo = currentLine.indexOf("do");
+    let indexOfWhile = currentLine.indexOf("while");
+    let indexOfFor = currentLine.indexOf("for");
+    let indexOfIf = currentLine.indexOf("if");
+    let indexOfSwitch = currentLine.indexOf("switch");
+    if (indexOfDo != -1 || indexOfSwitch != -1) {
+        currentLine = `await debug(${lineNum});\n` + currentLine;
+    }
+    else if (indexOfWhile != -1 || indexOfFor != -1 || indexOfIf != -1) {
+        let indexOfExpr = indexOfFor != -1 ? currentLine.indexOf(";") : currentLine.indexOf("(");
+        currentLine = currentLine.substring(0, indexOfExpr + 1) + `await debug(${lineNum}) && ` + currentLine.substring(indexOfExpr + 1, currentLine.length);
+    }
+    else {
+        currentLine += `\nawait debug(${lineNum});`;
     }
     return currentLine;
 }
@@ -108,21 +110,22 @@ function wrapStrings(elementTag, functionString) {
     return lines.join("");
 }
 function highLight(index) {
-    let currParagraph = document.querySelector("p[index=\"" + index + "\"]");
+    let currParagraph = document.querySelector("span[index=\"" + index + "\"]");
     if (currParagraph != null)
         currParagraph.classList.add("highlighted");
 }
 function removeHighLight(index) {
-    let currParagraph = document.querySelector("p[index=\"" + index + "\"]");
+    let currParagraph = document.querySelector("span[index=\"" + index + "\"]");
     if (currParagraph != null)
         currParagraph.classList.remove("highlighted");
 }
 window.onload = main;
 function main() {
     let left = document.querySelector("#left");
-    if (left != null)
+    if (left != null) {
         displayCodeAsString(left, f);
-    breakpoint(document.body);
+        breakpoint(left);
+    }
 }
 function f() {
     let sum = 0;
