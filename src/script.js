@@ -154,6 +154,8 @@ function removeHighLight(index) {
         currParagraph.classList.remove("highlighted");
 }
 window.onload = main;
+function main() {
+}
 function algBinarySearch(sortedArray, key) {
     let start = 0;
     let end = sortedArray.length - 1;
@@ -226,12 +228,10 @@ function algMergeSort() {
                 array.push(rItem);
                 rIndex++;
             }
-          
         }
         console.log(array);
         return array;
     }
     mergeSort([5, 2, 3, 1, 58]);
 }
-function main() {}
 //# sourceMappingURL=script.js.map

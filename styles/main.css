@@ -105,7 +105,7 @@ body{
   /* Show the dropdown menu on hover */
   .dropdown:hover .dropdown-content {
 
-      height:500%;
+      height:250%;
       transform: translateY(0);
     }
 
