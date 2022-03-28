@@ -25,7 +25,7 @@ function wrapStrings(elementTag : string, functionString : string) : string {
         // delete indentation from each line of code
         const trimmedStr = currString.substring(indents);
         // insert indentation outside of <p> tag
-        lines[i] = `${"&nbsp;".repeat(indents)}<${elementTag} index="${i}"> ${trimmedStr}</${elementTag}></br>`;
+        lines[i] = `${"&nbsp;".repeat(indents)}<${elementTag} index="${i}">${trimmedStr}</${elementTag}></br>`;
     }
 
     // create single string from array of lines
