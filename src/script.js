@@ -165,27 +165,41 @@ function pseudocodeOnInput(ev) {
     const pseudocode = ev.target;
     const text = ev.data;
 }
+let oldActiveElement = null;
 function pseudocodeOnClick() {
     let activeElement = document.activeElement;
     if (!(activeElement instanceof HTMLSpanElement)) {
         activeElement = document.querySelector("#right > span:last-child");
     }
+    if (activeElement != oldActiveElement && oldActiveElement != null) {
+        if (oldActiveElement.textContent === "") {
+            oldActiveElement.remove();
+        }
+    }
     const text = activeElement.textContent;
-    const carretPosition = getCarretPosition();
-    const beforeCursor = text.slice(0, carretPosition);
-    const afterCursor = text.slice(carretPosition, text.length);
-    const beforeElement = document.createElement("span");
-    beforeElement.setAttribute("contenteditable", "true");
-    beforeElement.innerText = beforeCursor;
-    activeElement.before(beforeElement);
-    const afterElement = document.createElement("span");
-    afterElement.setAttribute("contenteditable", "true");
-    afterElement.innerText = afterCursor;
-    activeElement.after(afterElement);
-    const newElement = document.createElement("span");
-    newElement.setAttribute("contenteditable", "true");
+    const caretPosition = getCaretPosition();
+    const beforeCursor = text.slice(0, caretPosition);
+    const afterCursor = text.slice(caretPosition, text.length);
+    if (beforeCursor === "") {
+        activeElement.after(createPseudocodeSpan(afterCursor));
+    }
+    else if (afterCursor === "") {
+        activeElement.before(createPseudocodeSpan(beforeCursor));
+    }
+    else {
+        activeElement.before(createPseudocodeSpan(beforeCursor));
+        activeElement.after(createPseudocodeSpan(afterCursor));
+    }
+    const newElement = createPseudocodeSpan("");
     activeElement.replaceWith(newElement);
     setCaretPosition(newElement, 0);
+    oldActiveElement = newElement;
+}
+function createPseudocodeSpan(text) {
+    const element = document.createElement("span");
+    element.setAttribute("contenteditable", "true");
+    element.innerText = text;
+    return element;
 }
 function setCaretPosition(element, caretPos) {
     const selection = window.getSelection();
@@ -198,7 +212,7 @@ function setCaretPosition(element, caretPos) {
     selection.addRange(range);
     element.focus();
 }
-function getCarretPosition() {
+function getCaretPosition() {
     const selection = window.getSelection();
     selection.getRangeAt(0);
     return selection.getRangeAt(0).startOffset;

@@ -1,13 +1,6 @@
 /*
-<p class="breakpoint" id="selectedCode" index="7" pseudo="4">
-
-<p id="selectedPseudo" index="4" code="7">
-
-
-
-
+    
 */
-
 
 function pseudocode(right: HTMLElement): void
 {
@@ -22,33 +15,54 @@ function pseudocodeOnInput(ev: InputEvent): void
     const text: string = ev.data;
 }
 
+let oldActiveElement: Element | null = null;
+
 function pseudocodeOnClick(): void {
+    // Get the currently active span element, or the last span element.
     let activeElement: Element = document.activeElement;
     if (!(activeElement instanceof HTMLSpanElement)) {
         activeElement = document.querySelector("#right > span:last-child");
     }
+
+    // Runs on the first click and on all clicks which change the active element.
+    if (activeElement != oldActiveElement && oldActiveElement != null) {
+        if (oldActiveElement.textContent === ""){
+            oldActiveElement.remove();
+        }
+    }
+
     const text: string = activeElement.textContent;
-    const carretPosition: number = getCarretPosition();
+    const caretPosition: number = getCaretPosition();
     
-
-    const beforeCursor: string = text.slice(0, carretPosition);
-    const afterCursor: string = text.slice(carretPosition, text.length);
+    // Get the text before and after the carret (cusor).
+    const beforeCursor: string = text.slice(0, caretPosition);
+    const afterCursor: string = text.slice(caretPosition, text.length);
     
-    const beforeElement: HTMLElement = document.createElement("span");
-    beforeElement.setAttribute("contenteditable", "true");
-    beforeElement.innerText = beforeCursor;
-    activeElement.before(beforeElement);
-
-    const afterElement: HTMLElement = document.createElement("span");
-    afterElement.setAttribute("contenteditable", "true");
-    afterElement.innerText = afterCursor;
-    activeElement.after(afterElement);
-
-    const newElement: HTMLElement = document.createElement("span");
-    newElement.setAttribute("contenteditable", "true");
+    // Create before and after elements with the correct text.
+    if (beforeCursor === ""){
+        activeElement.after(createPseudocodeSpan(afterCursor));
+    }
+    else if (afterCursor === ""){
+        activeElement.before(createPseudocodeSpan(beforeCursor));
+    }
+    else {
+        activeElement.before(createPseudocodeSpan(beforeCursor));
+        activeElement.after(createPseudocodeSpan(afterCursor));
+    }
+    
+    // Create the new element with the cursor.
+    const newElement: HTMLElement = createPseudocodeSpan("");
     activeElement.replaceWith(newElement);
-
     setCaretPosition(newElement, 0);
+
+    oldActiveElement = newElement;
+}
+
+function createPseudocodeSpan(text: string): HTMLElement {
+    const element: HTMLElement = document.createElement("span");
+    element.setAttribute("contenteditable", "true");
+    element.innerText = text;
+    return element;
 }
 
 function setCaretPosition(element: HTMLElement, caretPos: number): void {
@@ -63,25 +77,9 @@ function setCaretPosition(element: HTMLElement, caretPos: number): void {
     element.focus();
 }
 
-function getCarretPosition(): number {
+function getCaretPosition(): number {
     const selection: Selection = window.getSelection();
     selection.getRangeAt(0);
 
     return selection.getRangeAt(0).startOffset;
 }
-
-/*
-#Code
-    <span  id="1">heji</span>
-    <span id="2">heji</span>
-    <span selected id="3">heji</span>
-    <span id="4">heji</span>
-    <span id="5">heji</span>
-
-#Pseudocode
-    <span id="1">heji</span>
-    <span id="3">heji</span>
-    <span id="4">heji</span>
-    <span id="5">heji</span>
-    <span id="1">heji</span>
-*/
