@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 const breakpointClass = "breakpoint";
 function breakpoint(code) {
-    const lines = code.querySelectorAll("p");
+    const lines = code.querySelectorAll("span");
     for (let i = 0; i < lines.length; i++) {
         lines[i].addEventListener("click", function () {
             if (lines[i].classList.contains(breakpointClass)) {
@@ -104,6 +104,14 @@ function wrapStrings(elementTag, functionString) {
         }
         const trimmedStr = currString.substring(indents);
         lines[i] = `${"&nbsp;".repeat(indents)}<${elementTag} index="${i}"> ${trimmedStr}</${elementTag}></br>`;
+    }
+    let word = ['for', 'let', 'if', 'console.log', 'function', 'switch', 'while', 'do'];
+    let color = ['red', 'green', 'blue', 'magenta', 'gray', 'red', 'red', 'red',];
+    for (let i = 0; i < lines.length; i++) {
+        for (let k = 0; k < word.length; k++)
+            if (lines[i].includes(word[k])) {
+                lines[i] = lines[i].replace(word[k], `<span style="color: ${color[k]};">${word[k]}</span>`);
+            }
     }
     return lines.join("");
 }
