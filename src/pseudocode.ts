@@ -1,5 +1,8 @@
 /*
-    
+    Cannot enter an existing span
+    Highlight pseudocode
+    Make arrows work
+    Make tabs work
 */
 
 function pseudocode(right: HTMLElement): void
@@ -37,30 +40,44 @@ function pseudocodeOnClick(): void {
     // Get the text before and after the carret (cusor).
     const beforeCursor: string = text.slice(0, caretPosition);
     const afterCursor: string = text.slice(caretPosition, text.length);
-    
+    const activeElementCodeIndex: string = activeElement.getAttribute("codeIndex");
+
     // Create before and after elements with the correct text.
     if (beforeCursor === ""){
-        activeElement.after(createPseudocodeSpan(afterCursor));
+        const afterElement: HTMLElement = createPseudocodeSpan(afterCursor, activeElementCodeIndex);
+        activeElement.after(afterElement);
     }
     else if (afterCursor === ""){
-        activeElement.before(createPseudocodeSpan(beforeCursor));
+        const beforeElement: HTMLElement = createPseudocodeSpan(beforeCursor, activeElementCodeIndex);
+        activeElement.before(beforeElement);
     }
     else {
-        activeElement.before(createPseudocodeSpan(beforeCursor));
-        activeElement.after(createPseudocodeSpan(afterCursor));
+        const beforeElement: HTMLElement = createPseudocodeSpan(beforeCursor, activeElementCodeIndex);
+        activeElement.before(beforeElement);
+        
+        const afterElement: HTMLElement = createPseudocodeSpan(afterCursor, activeElementCodeIndex);
+        activeElement.after(afterElement);
+    }
+
+    const selectedBreakpoint: HTMLElement | null = document.querySelector("#selectedCode");
+    let breakpointIndex: string = "-1";
+    if (selectedBreakpoint != null) {
+        breakpointIndex = selectedBreakpoint.getAttribute("index");  
     }
     
     // Create the new element with the cursor.
-    const newElement: HTMLElement = createPseudocodeSpan("");
+    const newElement: HTMLElement = createPseudocodeSpan("", breakpointIndex);
     activeElement.replaceWith(newElement);
     setCaretPosition(newElement, 0);
 
     oldActiveElement = newElement;
+
 }
 
-function createPseudocodeSpan(text: string): HTMLElement {
+function createPseudocodeSpan(text: string, codeIndex: string): HTMLElement {
     const element: HTMLElement = document.createElement("span");
     element.setAttribute("contenteditable", "true");
+    element.setAttribute("codeIndex", codeIndex);
     element.innerText = text;
     return element;
 }
@@ -68,7 +85,7 @@ function createPseudocodeSpan(text: string): HTMLElement {
 function setCaretPosition(element: HTMLElement, caretPos: number): void {
     const selection: Selection = window.getSelection();
     const range: Range = document.createRange();  
-    selection.removeAllRanges();  
+    selection.removeAllRanges();
     range.selectNodeContents(element); 
     range.collapse(false);
     range.setStart(element, caretPos);

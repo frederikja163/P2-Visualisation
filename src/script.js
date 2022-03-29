@@ -180,24 +180,35 @@ function pseudocodeOnClick() {
     const caretPosition = getCaretPosition();
     const beforeCursor = text.slice(0, caretPosition);
     const afterCursor = text.slice(caretPosition, text.length);
+    const activeElementCodeIndex = activeElement.getAttribute("codeIndex");
     if (beforeCursor === "") {
-        activeElement.after(createPseudocodeSpan(afterCursor));
+        const afterElement = createPseudocodeSpan(afterCursor, activeElementCodeIndex);
+        activeElement.after(afterElement);
     }
     else if (afterCursor === "") {
-        activeElement.before(createPseudocodeSpan(beforeCursor));
+        const beforeElement = createPseudocodeSpan(beforeCursor, activeElementCodeIndex);
+        activeElement.before(beforeElement);
     }
     else {
-        activeElement.before(createPseudocodeSpan(beforeCursor));
-        activeElement.after(createPseudocodeSpan(afterCursor));
+        const beforeElement = createPseudocodeSpan(beforeCursor, activeElementCodeIndex);
+        activeElement.before(beforeElement);
+        const afterElement = createPseudocodeSpan(afterCursor, activeElementCodeIndex);
+        activeElement.after(afterElement);
     }
-    const newElement = createPseudocodeSpan("");
+    const selectedBreakpoint = document.querySelector("#selectedCode");
+    let breakpointIndex = "-1";
+    if (selectedBreakpoint != null) {
+        breakpointIndex = selectedBreakpoint.getAttribute("index");
+    }
+    const newElement = createPseudocodeSpan("", breakpointIndex);
     activeElement.replaceWith(newElement);
     setCaretPosition(newElement, 0);
     oldActiveElement = newElement;
 }
-function createPseudocodeSpan(text) {
+function createPseudocodeSpan(text, codeIndex) {
     const element = document.createElement("span");
     element.setAttribute("contenteditable", "true");
+    element.setAttribute("codeIndex", codeIndex);
     element.innerText = text;
     return element;
 }
