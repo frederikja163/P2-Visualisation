@@ -12,7 +12,7 @@ function displayCodeAsString(textBox : Element, printFunction : Function) : void
 function wrapStrings(elementTag : string, functionString : string) : string {
     // split string into array contatining each line as separate string
     let lines : string[] = functionString.split(/(?<=\{\})|[\r\n]+/);
-    // iterate though each line of code, count size of indent
+    // iterate through each line of code, count size of indent
 
     for(let i : number = 0; i < lines.length ; i++){ 
         let indents : number = 0;
