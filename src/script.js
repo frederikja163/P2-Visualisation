@@ -164,14 +164,16 @@ for (let option of options) {
     });
 }
 function highLight(index) {
-    let currParagraph = document.querySelector("span[index=\"" + index + "\"]");
-    if (currParagraph != null)
-        currParagraph.classList.add("highlighted");
+    const codeSpans = document.querySelectorAll(`span[index=\"${index}\"]`);
+    for (let i = 0; i < codeSpans.length; i++) {
+        codeSpans[i].classList.add("highlighted");
+    }
 }
 function removeHighLight(index) {
-    let currParagraph = document.querySelector("span[index=\"" + index + "\"]");
-    if (currParagraph != null)
-        currParagraph.classList.remove("highlighted");
+    const codeSpans = document.querySelectorAll(`span[index=\"${index}\"]`);
+    for (let i = 0; i < codeSpans.length; i++) {
+        codeSpans[i].classList.remove("highlighted");
+    }
 }
 window.onload = main;
 function main() {
@@ -182,58 +184,79 @@ function main() {
         displayCodeAsString(left, algMergeSort);
 }
 function pseudocode(right) {
-    setCaretPosition(document.querySelector("span"), 0);
     right.addEventListener("input", pseudocodeOnInput);
     right.addEventListener("click", pseudocodeOnClick);
 }
 function pseudocodeOnInput(ev) {
     const pseudocode = ev.target;
     const text = ev.data;
+    const caretPosition = getCaretPosition();
 }
 let oldActiveElement = null;
 function pseudocodeOnClick() {
     let activeElement = document.activeElement;
     if (!(activeElement instanceof HTMLSpanElement)) {
         activeElement = document.querySelector("#right > span:last-child");
+        setCaretPosition(activeElement, activeElement.textContent.length - 1);
     }
-    if (activeElement != oldActiveElement && oldActiveElement != null) {
-        if (oldActiveElement.textContent === "") {
+    if (activeElement != oldActiveElement && oldActiveElement != null && oldActiveElement.innerHTML === "") {
+        const prevElement = oldActiveElement.previousElementSibling;
+        const nextElement = oldActiveElement.nextElementSibling;
+        const prevIndex = prevElement === null || prevElement === void 0 ? void 0 : prevElement.getAttribute("index");
+        const nextIndex = nextElement === null || nextElement === void 0 ? void 0 : nextElement.getAttribute("index");
+        if (prevElement != null && nextElement != null && prevIndex === nextIndex) {
+            const prevText = prevElement.textContent;
+            const nextText = nextElement.textContent;
+            const mergedElement = createPseudocodeSpan(prevText + nextText, prevIndex);
+            oldActiveElement.previousElementSibling.remove();
+            oldActiveElement.nextElementSibling.remove();
+            oldActiveElement.replaceWith(mergedElement);
+        }
+        else {
             oldActiveElement.remove();
         }
     }
-    const text = activeElement.textContent;
     const caretPosition = getCaretPosition();
-    const beforeCursor = text.slice(0, caretPosition);
-    const afterCursor = text.slice(caretPosition, text.length);
-    const activeElementCodeIndex = activeElement.getAttribute("codeIndex");
-    if (beforeCursor === "") {
-        const afterElement = createPseudocodeSpan(afterCursor, activeElementCodeIndex);
-        activeElement.after(afterElement);
-    }
-    else if (afterCursor === "") {
-        const beforeElement = createPseudocodeSpan(beforeCursor, activeElementCodeIndex);
-        activeElement.before(beforeElement);
-    }
-    else {
-        const beforeElement = createPseudocodeSpan(beforeCursor, activeElementCodeIndex);
-        activeElement.before(beforeElement);
-        const afterElement = createPseudocodeSpan(afterCursor, activeElementCodeIndex);
-        activeElement.after(afterElement);
-    }
     const selectedBreakpoint = document.querySelector("#selectedCode");
     let breakpointIndex = "-1";
     if (selectedBreakpoint != null) {
         breakpointIndex = selectedBreakpoint.getAttribute("index");
     }
-    const newElement = createPseudocodeSpan("", breakpointIndex);
-    activeElement.replaceWith(newElement);
-    setCaretPosition(newElement, 0);
-    oldActiveElement = newElement;
+    if (activeElement.getAttribute("index") === breakpointIndex) {
+        oldActiveElement = activeElement;
+    }
+    else {
+        splitHtmlElement(activeElement, caretPosition);
+        const newElement = createPseudocodeSpan("", breakpointIndex);
+        activeElement.replaceWith(newElement);
+        setCaretPosition(newElement, 0);
+        oldActiveElement = newElement;
+    }
+}
+function splitHtmlElement(element, index) {
+    const text = element.innerText;
+    const beforeText = text.slice(0, index);
+    const afterText = text.slice(index, text.length);
+    const activeElementCodeIndex = element.getAttribute("index");
+    if (beforeText === "") {
+        const afterElement = createPseudocodeSpan(afterText, activeElementCodeIndex);
+        element.after(afterElement);
+    }
+    else if (afterText === "") {
+        const beforeElement = createPseudocodeSpan(beforeText, activeElementCodeIndex);
+        element.before(beforeElement);
+    }
+    else {
+        const beforeElement = createPseudocodeSpan(beforeText, activeElementCodeIndex);
+        element.before(beforeElement);
+        const afterElement = createPseudocodeSpan(afterText, activeElementCodeIndex);
+        element.after(afterElement);
+    }
 }
 function createPseudocodeSpan(text, codeIndex) {
     const element = document.createElement("span");
     element.setAttribute("contenteditable", "true");
-    element.setAttribute("codeIndex", codeIndex);
+    element.setAttribute("index", codeIndex);
     element.innerText = text;
     return element;
 }
