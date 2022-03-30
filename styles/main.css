@@ -29,12 +29,20 @@ p:hover{
     flex-grow: 1;
     overflow:auto;
     width: 50%;
+    transition: background-color 1s
 }
 
 body{
     display: flex;
 	margin: 0;
 	height: 100vh;
+  transition-property: background-color, color;
+  transition-duration: 1s;
+}
+
+#righttextbox{
+  transition-property: background-color, color;
+  transition-duration: 1s;
 }
 
 .dark-mode {
