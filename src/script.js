@@ -184,20 +184,14 @@ function main() {
         displayCodeAsString(left, algMergeSort);
 }
 function pseudocode(right) {
-    right.addEventListener("input", pseudocodeOnInput);
     right.addEventListener("click", pseudocodeOnClick);
-}
-function pseudocodeOnInput(ev) {
-    const pseudocode = ev.target;
-    const text = ev.data;
-    const caretPosition = getCaretPosition();
 }
 let oldActiveElement = null;
 function pseudocodeOnClick() {
     let activeElement = document.activeElement;
     if (!(activeElement instanceof HTMLSpanElement)) {
         activeElement = document.querySelector("#right > span:last-child");
-        setCaretPosition(activeElement, activeElement.textContent.length - 1);
+        setCaretPosition(activeElement, activeElement.textContent.length);
     }
     if (activeElement != oldActiveElement && oldActiveElement != null && oldActiveElement.innerHTML === "") {
         const prevElement = oldActiveElement.previousElementSibling;

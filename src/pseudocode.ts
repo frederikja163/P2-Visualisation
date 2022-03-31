@@ -1,32 +1,25 @@
 /*
-    Make enter work - sometimes it makes a double click
-    Make arrows work
-    Make tabs work
-    Make delete work
+    TODO: Make enter work - sometimes it makes a double <br tag>
+    TODO: Make arrows work
+    TODO: Make tabs work
+    TODO: Make delete work        
 */
 
+/** Initialize pseudocode and subscribe to the correct events. */
 function pseudocode(right: HTMLElement): void
 {
-    // setCaretPosition(document.querySelector("span"), 0);
-    right.addEventListener("input", pseudocodeOnInput);
     right.addEventListener("click", pseudocodeOnClick);
-}
-
-function pseudocodeOnInput(ev: InputEvent): void
-{
-    const pseudocode: HTMLElement = ev.target as HTMLElement;
-    const text: string = ev.data;
-    const caretPosition: number = getCaretPosition();
 }
 
 let oldActiveElement: HTMLElement | null = null;
 
+/** Event for when there has been clicked on a pseudocode span. */
 function pseudocodeOnClick(): void {
     // Get the currently active span element, or the last span element.
     let activeElement: HTMLElement = document.activeElement as HTMLElement;
     if (!(activeElement instanceof HTMLSpanElement)) {
         activeElement = document.querySelector("#right > span:last-child");
-        setCaretPosition(activeElement, activeElement.textContent.length - 1);
+        setCaretPosition(activeElement, activeElement.textContent.length);
     }
 
     // Runs on the first click and on all clicks which change the active element.
@@ -35,6 +28,8 @@ function pseudocodeOnClick(): void {
         const nextElement: Element | null = oldActiveElement.nextElementSibling;
         const prevIndex: string = prevElement?.getAttribute("index");
         const nextIndex: string = nextElement?.getAttribute("index");
+       
+        // Merge the siblings of the old last element if they had the same index.
         if (prevElement != null && nextElement != null && prevIndex === nextIndex){
             const prevText: string = prevElement.textContent;
             const nextText: string = nextElement.textContent;
@@ -45,12 +40,14 @@ function pseudocodeOnClick(): void {
             oldActiveElement.replaceWith(mergedElement);
         }
         else {
+            // Remove old active element if it was empty.
             oldActiveElement.remove();
         }
     }
 
     const caretPosition: number = getCaretPosition();
     
+    // Get selected breakpoint index.
     const selectedBreakpoint: HTMLElement | null = document.querySelector("#selectedCode");
     let breakpointIndex: string = "-1";
     if (selectedBreakpoint != null) {
@@ -72,10 +69,11 @@ function pseudocodeOnClick(): void {
     }
 }
 
+/** Splits 'element' into two different html elements, the text is split at 'index'. */
 function splitHtmlElement(element: HTMLElement, index: number) {
     const text: string = element.innerText;
 
-    // Get the text before and after the carret (cusor).
+    // Get the text before and after the index.
     const beforeText: string = text.slice(0, index);
     const afterText: string = text.slice(index, text.length);
     const activeElementCodeIndex: string = element.getAttribute("index");
@@ -98,6 +96,7 @@ function splitHtmlElement(element: HTMLElement, index: number) {
     }
 }
 
+/** Create a span for pseudocode with 'text' and index='codeIndex'. */
 function createPseudocodeSpan(text: string, codeIndex: string): HTMLElement {
     const element: HTMLElement = document.createElement("span");
     element.setAttribute("contenteditable", "true");
@@ -106,6 +105,7 @@ function createPseudocodeSpan(text: string, codeIndex: string): HTMLElement {
     return element;
 }
 
+/** Sets the caret position on 'element' to 'caretPos'. */
 function setCaretPosition(element: HTMLElement, caretPos: number): void {
     const selection: Selection = window.getSelection();
     const range: Range = document.createRange();  
@@ -118,6 +118,7 @@ function setCaretPosition(element: HTMLElement, caretPos: number): void {
     element.focus();
 }
 
+/** Gets the current caret position as a number. */
 function getCaretPosition(): number {
     const selection: Selection = window.getSelection();
     selection.getRangeAt(0);
