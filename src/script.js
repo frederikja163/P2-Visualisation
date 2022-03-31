@@ -1,12 +1,3 @@
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 const breakpointClass = "breakpoint";
 function breakpoint(code) {
     const lines = code.querySelectorAll("span");
@@ -79,16 +70,14 @@ function addBreakpoint(currentLine, lines, lineNum) {
     }
     return currentLine;
 }
-function debug(line) {
-    return __awaiter(this, void 0, void 0, function* () {
-        highLight(line);
-        yield currentPromise;
-        removeHighLight(line);
-        currentPromise = new Promise((resolve, reject) => {
-            resolveCurrentPromise = resolve;
-        });
-        return true;
+async function debug(line) {
+    highLight(line);
+    await currentPromise;
+    removeHighLight(line);
+    currentPromise = new Promise((resolve, reject) => {
+        resolveCurrentPromise = resolve;
     });
+    return true;
 }
 function darkMode() {
     const bodyElement = document.body;
@@ -153,6 +142,52 @@ function removeHighLight(index) {
 }
 window.onload = main;
 function main() {
+    addEventListener("beforeunload", saveCodeToCookie);
+    addCodeFromCookie();
+}
+const colonIndicator = "<$SEMICOLON$>";
+const newlineIndicator = "<$NEWLINE$>";
+const codeVarName = "codeString";
+const pseuVarName = "pseudocodeString";
+function saveCodeToCookie() {
+    const codeElement = document.getElementById('left');
+    if (codeElement == null)
+        return;
+    const codeString = codeElement.innerHTML;
+    const pseudocodeElement = document.getElementById('righttextbox');
+    if (pseudocodeElement == null)
+        return;
+    const pseudocodeString = pseudocodeElement.value;
+    setCookieVariable(codeVarName, codeString);
+    setCookieVariable(pseuVarName, pseudocodeString);
+}
+function addCodeFromCookie() {
+    const codeString = getCookieVariable(codeVarName);
+    const pseudocodeString = getCookieVariable(pseuVarName);
+    if (codeString === "" || pseudocodeString === "")
+        return;
+    const codeElement = document.getElementById('left');
+    if (codeElement == null)
+        return;
+    codeElement.innerHTML = codeString;
+    const pseudocodeElement = document.getElementById('righttextbox');
+    if (pseudocodeElement == null)
+        return;
+    pseudocodeElement.value = pseudocodeString;
+}
+function setCookieVariable(variableName, value) {
+    document.cookie = variableName + `=` + value.replaceAll(";", colonIndicator).replaceAll("\n", newlineIndicator) + `;`;
+}
+function getCookieVariable(variableName) {
+    const cookieInfo = document.cookie;
+    const variableIndex = cookieInfo.indexOf(variableName);
+    if (variableIndex == -1)
+        return "";
+    const valueIndex = variableIndex + variableName.length + 1;
+    let valueEndIndex = cookieInfo.substring(valueIndex, cookieInfo.length).indexOf(";") + valueIndex;
+    if (valueEndIndex == valueIndex - 1)
+        valueEndIndex = cookieInfo.length;
+    return cookieInfo.substring(valueIndex, valueEndIndex).replaceAll(colonIndicator, ";").replaceAll(newlineIndicator, "\n");
 }
 function algBinarySearch(sortedArray, key) {
     let start = 0;
