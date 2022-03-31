@@ -112,14 +112,8 @@ function debug(line) {
 }
 function darkMode() {
     const bodyElement = document.body;
-    const textBoxElement = document.querySelectorAll(".textbox");
     const darkModeBtn = document.querySelector("#darkModeBtn");
-    const rightTextBox = document.querySelector("#right");
-    rightTextBox.classList.toggle("dark-mode");
     bodyElement.classList.toggle("dark-mode");
-    for (let element of textBoxElement) {
-        element.classList.toggle("dark-mode");
-    }
     bodyElement.classList.contains("dark-mode") ? darkModeBtn.value = "Light Mode" :
         darkModeBtn.value = "Dark Mode";
 }

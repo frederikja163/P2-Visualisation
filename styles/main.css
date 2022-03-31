@@ -1,3 +1,7 @@
+:root{
+  --trans: 0.15s
+}
+
 .breakpoint {
     text-decoration: underline;
 }
@@ -44,11 +48,22 @@ body{
     display: flex;
 	margin: 0;
 	height: 100vh;
+  transition-property: background-color, color;
+  transition-duration: var(--trans);
 }
 
-.dark-mode {
+#right{
+  transition-property: background-color, color;
+  transition-duration: var(--trans);
+}
+
+.dark-mode{
   background-color: rgb(36, 36, 36);
   color: white;
+}
+
+#darkModeBtn {
+  width: 6em;
 }
 
 .buttons{
@@ -62,6 +77,7 @@ body{
     height: 25px;
     margin: 1%;
     border: none;
+    font-variant-numeric: lining-nums;
 }
 
 .dropbtn {
