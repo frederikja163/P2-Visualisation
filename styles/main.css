@@ -1,3 +1,7 @@
+:root{
+  --trans: 0.25s
+}
+
 .breakpoint {
     text-decoration: underline;
 }
@@ -29,7 +33,6 @@ p:hover{
     flex-grow: 1;
     overflow:auto;
     width: 50%;
-    transition: background-color 1s
 }
 
 body{
@@ -37,12 +40,12 @@ body{
 	margin: 0;
 	height: 100vh;
   transition-property: background-color, color;
-  transition-duration: 1s;
+  transition-duration: var(--trans);
 }
 
 #righttextbox{
   transition-property: background-color, color;
-  transition-duration: 1s;
+  transition-duration: var(--trans);
 }
 
 .dark-mode {
