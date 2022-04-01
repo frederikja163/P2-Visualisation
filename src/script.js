@@ -8,17 +8,37 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 const breakpointClass = "breakpoint";
+const selectedCode = "selectedCode";
 function breakpoint(code) {
     const lines = code.querySelectorAll("span");
     for (let i = 0; i < lines.length; i++) {
-        lines[i].addEventListener("click", function () {
-            if (lines[i].classList.contains(breakpointClass)) {
-                lines[i].classList.remove(breakpointClass);
-            }
-            else {
-                lines[i].classList.add(breakpointClass);
-            }
-        });
+        lines[i].addEventListener("dblclick", statementOnDblClick);
+        lines[i].addEventListener("click", () => statementOnClick(lines[i]));
+    }
+}
+function statementOnDblClick() {
+    document.getSelection().removeAllRanges();
+}
+function statementOnClick(line) {
+    if (line.classList.contains(breakpointClass)) {
+        if (line.id === selectedCode) {
+            line.classList.remove(breakpointClass);
+            line.id = "";
+        }
+        else {
+            select(line);
+        }
+    }
+    else {
+        line.classList.add(breakpointClass);
+        select(line);
+    }
+}
+function select(line) {
+    const selected = document.getElementById(selectedCode);
+    line.id = selectedCode;
+    if (selected != null) {
+        selected.id = "";
     }
 }
 let currentPromise;
@@ -93,13 +113,9 @@ function debug(line) {
 function darkMode() {
     const bodyElement = document.body;
     const darkModeBtn = document.querySelector("#darkModeBtn");
-    const rightTextBox = document.querySelector("#righttextbox");
-    const dropdownContent = document.querySelector(".dropdown-content");
-    rightTextBox.classList.toggle("dark-mode");
     bodyElement.classList.toggle("dark-mode");
-    dropdownContent.classList.toggle("dark-mode");
     bodyElement.classList.contains("dark-mode") ? darkModeBtn.value = "Light Mode" :
-        darkModeBtn.value = "Dark Mode ";
+        darkModeBtn.value = "Dark Mode";
 }
 function displayCodeAsString(textBox, printFunction) {
     let functionString = printFunction.toString();
@@ -142,17 +158,111 @@ for (let option of options) {
     });
 }
 function highLight(index) {
-    let currParagraph = document.querySelector("span[index=\"" + index + "\"]");
-    if (currParagraph != null)
-        currParagraph.classList.add("highlighted");
+    const codeSpans = document.querySelectorAll(`span[index=\"${index}\"]`);
+    for (let i = 0; i < codeSpans.length; i++) {
+        codeSpans[i].classList.add("highlighted");
+    }
 }
 function removeHighLight(index) {
-    let currParagraph = document.querySelector("span[index=\"" + index + "\"]");
-    if (currParagraph != null)
-        currParagraph.classList.remove("highlighted");
+    const codeSpans = document.querySelectorAll(`span[index=\"${index}\"]`);
+    for (let i = 0; i < codeSpans.length; i++) {
+        codeSpans[i].classList.remove("highlighted");
+    }
 }
 window.onload = main;
 function main() {
+    const left = document.querySelector("#left");
+    const right = document.querySelector("#right");
+    pseudocode(right);
+    if (left != null)
+        displayCodeAsString(left, algMergeSort);
+}
+function pseudocode(right) {
+    right.addEventListener("click", pseudocodeOnClick);
+}
+let oldActiveElement = null;
+function pseudocodeOnClick() {
+    let activeElement = document.activeElement;
+    if (!(activeElement instanceof HTMLSpanElement)) {
+        activeElement = document.querySelector("#right > span:last-child");
+        setCaretPosition(activeElement, activeElement.textContent.length);
+    }
+    if (activeElement != oldActiveElement && oldActiveElement != null && oldActiveElement.innerHTML === "") {
+        const prevElement = oldActiveElement.previousElementSibling;
+        const nextElement = oldActiveElement.nextElementSibling;
+        const prevIndex = prevElement === null || prevElement === void 0 ? void 0 : prevElement.getAttribute("index");
+        const nextIndex = nextElement === null || nextElement === void 0 ? void 0 : nextElement.getAttribute("index");
+        if (prevElement != null && nextElement != null && prevIndex === nextIndex) {
+            const prevText = prevElement.textContent;
+            const nextText = nextElement.textContent;
+            const mergedElement = createPseudocodeSpan(prevText + nextText, prevIndex);
+            oldActiveElement.previousElementSibling.remove();
+            oldActiveElement.nextElementSibling.remove();
+            oldActiveElement.replaceWith(mergedElement);
+        }
+        else {
+            oldActiveElement.remove();
+        }
+    }
+    const caretPosition = getCaretPosition();
+    const selectedBreakpoint = document.querySelector("#selectedCode");
+    let breakpointIndex = "-1";
+    if (selectedBreakpoint != null) {
+        breakpointIndex = selectedBreakpoint.getAttribute("index");
+    }
+    if (activeElement.getAttribute("index") === breakpointIndex) {
+        oldActiveElement = activeElement;
+    }
+    else {
+        splitHtmlElement(activeElement, caretPosition);
+        const newElement = createPseudocodeSpan("", breakpointIndex);
+        activeElement.replaceWith(newElement);
+        setCaretPosition(newElement, 0);
+        oldActiveElement = newElement;
+    }
+}
+function splitHtmlElement(element, index) {
+    const text = element.innerText;
+    const beforeText = text.slice(0, index);
+    const afterText = text.slice(index, text.length);
+    const activeElementCodeIndex = element.getAttribute("index");
+    if (beforeText === "") {
+        const afterElement = createPseudocodeSpan(afterText, activeElementCodeIndex);
+        element.after(afterElement);
+    }
+    else if (afterText === "") {
+        const beforeElement = createPseudocodeSpan(beforeText, activeElementCodeIndex);
+        element.before(beforeElement);
+    }
+    else {
+        const beforeElement = createPseudocodeSpan(beforeText, activeElementCodeIndex);
+        element.before(beforeElement);
+        const afterElement = createPseudocodeSpan(afterText, activeElementCodeIndex);
+        element.after(afterElement);
+    }
+}
+function createPseudocodeSpan(text, codeIndex) {
+    const element = document.createElement("span");
+    element.setAttribute("contenteditable", "true");
+    element.setAttribute("index", codeIndex);
+    element.innerText = text;
+    return element;
+}
+function setCaretPosition(element, caretPos) {
+    const selection = window.getSelection();
+    const range = document.createRange();
+    selection.removeAllRanges();
+    range.selectNodeContents(element);
+    range.collapse(false);
+    range.setStart(element, caretPos);
+    range.setEnd(element, caretPos);
+    selection.addRange(range);
+    element.focus();
+}
+function getCaretPosition() {
+    const selection = window.getSelection();
+    selection.getRangeAt(0);
+    return selection.getRangeAt(0).startOffset;
 }
 function algBinarySearch(sortedArray, key) {
     let start = 0;

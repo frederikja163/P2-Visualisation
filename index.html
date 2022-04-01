@@ -10,8 +10,8 @@
 
 <body>
     <div class="buttons">
-      <input class="controlBtn" type="submit" value="run" onclick="runCode();">
-      <input class="controlBtn" type="submit" value="next" onclick="next();">
+      <input class="controlBtn" type="submit" value="Run" onclick="runCode();">
+      <input class="controlBtn" type="submit" value="Next" onclick="next();">
       <input id="darkModeBtn"class="controlBtn" type="button" value="Dark Mode" onclick="darkMode();">
       <div class="dropdown">
       <button class="dropbtn">Choose algorithm</button> 
@@ -27,7 +27,9 @@
 
     <div class="textbox" id="left"></div>
 
-    <div class="textbox" id="right"><textarea id="righttextbox" style="width: 98%; height: 98%;" name="pseudocode" onclick="">Insert pseudocode...</textarea></div>
+    <div class="textbox" id="right">
+        <span contenteditable=""></span>
+    </div>
     <script src="src/script.js"></script>
 </body>
 
