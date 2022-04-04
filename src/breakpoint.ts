@@ -15,6 +15,10 @@ function breakpoint(code: Element): void
             {
                 lines[ i ].classList.add(breakpointClass);
             }
+
+            //reconstructs the code
+            parseCode(); 
+
         });
     }
 }

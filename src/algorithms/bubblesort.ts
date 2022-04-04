@@ -1,6 +1,7 @@
 // Optimized implementation of bubble sort Algorithm
 
-function algBubbleSort(arr : number[]){
+function algBubbleSort(){
+  function bubbleSort(arr : number[]){
 
     var i, j;
     var len = arr.length;
@@ -31,5 +32,7 @@ function algBubbleSort(arr : number[]){
     console.log(arr)
   }
   
+  bubbleSort([243, 45, 23, 356, 3, 5346, 35, 5]); 
+} 
   
-  var arr = [243, 45, 23, 356, 3, 5346, 35, 5]; 
+ 
