@@ -4,9 +4,9 @@ function darkMode() : void{
     const rightTextBox = document.querySelector("#righttextbox");
     const dropdownContent = document.querySelector(".dropdown-content");
 
-    rightTextBox.classList.toggle("dark-mode");
-    bodyElement.classList.toggle("dark-mode");
-    dropdownContent.classList.toggle("dark-mode");
+    rightTextBox?.classList.toggle("dark-mode");
+    bodyElement?.classList.toggle("dark-mode");
+    dropdownContent?.classList.toggle("dark-mode");
 
     bodyElement.classList.contains("dark-mode") ?   darkModeBtn.value="Light Mode" : 
                                                     darkModeBtn.value="Dark Mode ";

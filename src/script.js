@@ -24,7 +24,8 @@ function breakpoint(code) {
 let currentPromise;
 let resolveCurrentPromise;
 function runCode() {
-    const lineCount = document.querySelectorAll("p").length;
+    console.log("RUNNINNG CODE!");
+    const lineCount = document.querySelectorAll("span").length;
     for (let i = 0; i < lineCount; i++) {
         removeHighLight(i);
     }
@@ -59,23 +60,24 @@ function addBreakpoint(currentLine, lines, lineNum) {
     if (lineNum == lines.length - 1) {
         return currentLine;
     }
-    if (!lines[lineNum].classList.contains(breakpointClass)) {
+    if (!(lines[lineNum].classList.contains(breakpointClass))) {
         return currentLine;
     }
-    let indexOfDo = currentLine.indexOf("do");
-    let indexOfWhile = currentLine.indexOf("while");
-    let indexOfFor = currentLine.indexOf("for");
-    let indexOfIf = currentLine.indexOf("if");
-    let indexOfSwitch = currentLine.indexOf("switch");
-    if (indexOfDo != -1 || indexOfSwitch != -1) {
-        currentLine = `await debug(${lineNum});\n` + currentLine;
-    }
-    else if (indexOfWhile != -1 || indexOfFor != -1 || indexOfIf != -1) {
-        let indexOfExpr = indexOfFor != -1 ? currentLine.indexOf(";") : currentLine.indexOf("(");
+    console.log(lines[lineNum].classList.contains(breakpointClass));
+    let hasWhile = currentLine.includes("while");
+    let hasFor = currentLine.includes("for");
+    let hasIf = currentLine.includes("if");
+    let hasElse = currentLine.includes("else");
+    let hasFunction = currentLine.includes("function");
+    if (hasWhile || hasFor || hasIf) {
+        let indexOfExpr = hasFor ? currentLine.indexOf(";") : currentLine.indexOf("(");
         currentLine = currentLine.substring(0, indexOfExpr + 1) + `await debug(${lineNum}) && ` + currentLine.substring(indexOfExpr + 1, currentLine.length);
     }
-    else {
+    else if (hasElse || hasFunction) {
         currentLine += `\nawait debug(${lineNum});`;
+    }
+    else {
+        currentLine = `await debug(${lineNum});\n` + currentLine;
     }
     return currentLine;
 }
@@ -95,9 +97,9 @@ function darkMode() {
     const darkModeBtn = document.querySelector("#darkModeBtn");
     const rightTextBox = document.querySelector("#righttextbox");
     const dropdownContent = document.querySelector(".dropdown-content");
-    rightTextBox.classList.toggle("dark-mode");
-    bodyElement.classList.toggle("dark-mode");
-    dropdownContent.classList.toggle("dark-mode");
+    rightTextBox === null || rightTextBox === void 0 ? void 0 : rightTextBox.classList.toggle("dark-mode");
+    bodyElement === null || bodyElement === void 0 ? void 0 : bodyElement.classList.toggle("dark-mode");
+    dropdownContent === null || dropdownContent === void 0 ? void 0 : dropdownContent.classList.toggle("dark-mode");
     bodyElement.classList.contains("dark-mode") ? darkModeBtn.value = "Light Mode" :
         darkModeBtn.value = "Dark Mode ";
 }
@@ -122,21 +124,27 @@ function wrapStrings(elementTag, functionString) {
 }
 let options = document.querySelectorAll(".dropdown-content > a");
 let left = document.querySelector("#left");
-for (let option of options) {
-    option.addEventListener("click", function dropDownSelector(event) {
+for (let i = 0; i < options.length; i++) {
+    options[i].addEventListener("click", function dropDownSelector(event) {
         let dropdownBtn = document.querySelector(".dropdown > button");
         switch (event.target.id) {
             case "mergesort":
-                displayCodeAsString(left, algMergeSort);
-                dropdownBtn.innerHTML = "MergeSort";
+                if (left != null)
+                    displayCodeAsString(left, algMergeSort);
+                if (dropdownBtn != null)
+                    dropdownBtn.innerHTML = "MergeSort";
                 break;
             case "binarysearch":
-                displayCodeAsString(left, algBinarySearch);
-                dropdownBtn.innerHTML = "Binary Search";
+                if (left != null)
+                    displayCodeAsString(left, algBinarySearch);
+                if (dropdownBtn != null)
+                    dropdownBtn.innerHTML = "Binary Search";
                 break;
             case "bubblesort":
-                displayCodeAsString(left, algBubbleSort);
-                dropdownBtn.innerHTML = "Bubble Sort";
+                if (left != null)
+                    displayCodeAsString(left, algBubbleSort);
+                if (dropdownBtn != null)
+                    dropdownBtn.innerHTML = "Bubble Sort";
                 break;
         }
     });
@@ -154,44 +162,48 @@ function removeHighLight(index) {
 window.onload = main;
 function main() {
 }
-function algBinarySearch(sortedArray, key) {
-    let start = 0;
-    let end = sortedArray.length - 1;
-    while (start <= end) {
-        let middle = Math.floor((start + end) / 2);
-        if (sortedArray[middle] === key) {
-            return middle;
-        }
-        else if (sortedArray[middle] < key) {
-            start = middle + 1;
-        }
-        else {
-            end = middle - 1;
-        }
-    }
-    return -1;
-}
-function algBubbleSort(arr) {
-    var i, j;
-    var len = arr.length;
-    var isSwapped = false;
-    for (i = 0; i < len; i++) {
-        isSwapped = false;
-        for (j = 0; j < len; j++) {
-            if (arr[j] > arr[j + 1]) {
-                var temp = arr[j];
-                arr[j] = arr[j + 1];
-                arr[j + 1] = temp;
-                isSwapped = true;
+function algBinarySearch() {
+    function binarySearch(sortedArray, key) {
+        let start = 0;
+        let end = sortedArray.length - 1;
+        while (start <= end) {
+            let middle = Math.floor((start + end) / 2);
+            if (sortedArray[middle] === key) {
+                return middle;
+            }
+            else if (sortedArray[middle] < key) {
+                start = middle + 1;
+            }
+            else {
+                end = middle - 1;
             }
         }
-        if (!isSwapped) {
-            break;
+        return -1;
+    }
+    binarySearch([167, 124, 91, 63, 42, 22, 14, 7, 3], 14);
+}
+function algBubbleSort() {
+    function bubbleSort(arr) {
+        var i, j;
+        var len = arr.length;
+        var isSwapped = false;
+        for (i = 0; i < len; i++) {
+            isSwapped = false;
+            for (j = 0; j < len; j++) {
+                if (arr[j] > arr[j + 1]) {
+                    var temp = arr[j];
+                    arr[j] = arr[j + 1];
+                    arr[j + 1] = temp;
+                    isSwapped = true;
+                }
+            }
+            if (!isSwapped) {
+                break;
+            }
         }
     }
-    console.log(arr);
+    bubbleSort([5, 45, 23, 243, 35]);
 }
-var arr = [243, 45, 23, 356, 3, 5346, 35, 5];
 function algMergeSort() {
     function mergeSort(array) {
         if (array.length <= 1) {
