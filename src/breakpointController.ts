@@ -8,7 +8,7 @@ let resolveCurrentPromise: Function;
 function runCode(): void{
 	
 	// Getting the amount of lines.
-	const lineCount: number = document.querySelectorAll("p").length;
+	const lineCount: number = <number> document.getElementById("code")?.querySelectorAll("span")?.length;
 
 	// Removes all highligts.
 	for (let i: number = 0; i < lineCount; i++){
@@ -16,7 +16,7 @@ function runCode(): void{
 	}
 
 	// Setting up promises.
-	currentPromise = new Promise((resolve:Function, reject:Function) => {
+	currentPromise = new Promise((resolve:Function, reject:Function) => { 
 		resolveCurrentPromise = resolve; 
 	});
 
@@ -35,8 +35,8 @@ function parseCode(): Function{
 
 	let code: string = "";
 
-	// Getting a list of all lines of code.
-    const lines: NodeListOf<HTMLSpanElement> = document.querySelectorAll("span");
+	// Getting a list of all lines of code. 
+    const lines: NodeListOf<HTMLSpanElement> = <NodeListOf<HTMLSpanElement>>document.getElementById("code")?.querySelectorAll("span");
 
 	// Adding each line of code to the code string.
 	for (let i: number = 0; i < lines.length; i++){
@@ -44,11 +44,14 @@ function parseCode(): Function{
 		// Inserting the current line, but adding async in front of any function.
 		let currentLine: string = lines[i].innerHTML.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
 
+
 		currentLine = addAsync(currentLine);
 		currentLine = addBreakpoint(currentLine, lines, i);
 
 		code += currentLine + "\n"
     }
+
+	console.log(code);
 
 	// Creating a function from the string.
 	return new Function('return ' + code)();
@@ -75,35 +78,36 @@ function addBreakpoint(currentLine: string, lines: NodeListOf<HTMLSpanElement>, 
 	if(lineNum == lines.length - 1) {
 		return currentLine;
 	}
-	
+
 	// Checking if the current line has a breakpoint, if so add it.
-	if (!lines[lineNum].classList.contains(breakpointClass)){
+	if (!(lines[lineNum].classList.contains(breakpointClass))){
 		return currentLine;
 	} 
 
-	// Getting index of {Do, while, for, if, else (after), switch}
-	let indexOfDo: number = currentLine.indexOf("do"); 			//before
-	let indexOfWhile: number = currentLine.indexOf("while"); 	//in
-	let indexOfFor: number = currentLine.indexOf("for"); 		//in
-	let indexOfIf: number = currentLine.indexOf("if"); 			//in
-	let indexOfSwitch: number = currentLine.indexOf("switch"); 	//before
+	// Checks if line has While, for, if, else, switch or function
+	let hasWhile: boolean = currentLine.includes("while"); 		//in
+	let hasFor: boolean = currentLine.includes("for"); 			//in
+	let hasIf: boolean = currentLine.includes("if"); 			//in
+	let hasElse: boolean = currentLine.includes("else"); 		//after
+	let hasFunction: boolean = currentLine.includes("function");//after
 	
 	// Adding breakpoint.
-	if(indexOfDo != -1 || indexOfSwitch != -1){ 
+	if(hasWhile || hasFor || hasIf){
+		
+		// Insert breakpoint in line.
+		let indexOfExpr = hasFor ? currentLine.indexOf(";") : currentLine.indexOf("(");
+		currentLine = currentLine.substring(0, indexOfExpr + 1) + `await debug(${lineNum}) && ` + currentLine.substring(indexOfExpr + 1, currentLine.length);
 
+	}else if(hasElse || hasFunction){ 
+
+		// Insert breakpoint after line.
+		currentLine += `\nawait debug(${lineNum});`;
+		
+	}else{ 
+		
 		// Insert breakpoint before line.
 		currentLine = `await debug(${lineNum});\n` + currentLine;
 
-	}else if(indexOfWhile != -1 || indexOfFor != -1 || indexOfIf != -1){
-		
-		// Insert breakpoint in line.
-		let indexOfExpr = indexOfFor != -1 ? currentLine.indexOf(";") : currentLine.indexOf("(");
-		currentLine = currentLine.substring(0, indexOfExpr + 1) + `await debug(${lineNum}) && ` + currentLine.substring(indexOfExpr + 1, currentLine.length);
-
-	}else{ 
-		
-		// Insert breakpoint after line.
-		currentLine += `\nawait debug(${lineNum});`;
 	}
 	
 	return currentLine;

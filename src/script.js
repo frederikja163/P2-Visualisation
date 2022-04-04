@@ -17,7 +17,8 @@ function breakpoint(code) {
     }
 }
 function statementOnDblClick() {
-    document.getSelection().removeAllRanges();
+    var _a;
+    (_a = document.getSelection()) === null || _a === void 0 ? void 0 : _a.removeAllRanges();
 }
 function statementOnClick(line) {
     if (line.classList.contains(breakpointClass)) {
@@ -44,7 +45,8 @@ function select(line) {
 let currentPromise;
 let resolveCurrentPromise;
 function runCode() {
-    const lineCount = document.querySelectorAll("p").length;
+    var _a, _b;
+    const lineCount = (_b = (_a = document.getElementById("code")) === null || _a === void 0 ? void 0 : _a.querySelectorAll("span")) === null || _b === void 0 ? void 0 : _b.length;
     for (let i = 0; i < lineCount; i++) {
         removeHighLight(i);
     }
@@ -58,14 +60,16 @@ function next() {
     resolveCurrentPromise();
 }
 function parseCode() {
+    var _a;
     let code = "";
-    const lines = document.querySelectorAll("span");
+    const lines = (_a = document.getElementById("code")) === null || _a === void 0 ? void 0 : _a.querySelectorAll("span");
     for (let i = 0; i < lines.length; i++) {
         let currentLine = lines[i].innerHTML.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
         currentLine = addAsync(currentLine);
         currentLine = addBreakpoint(currentLine, lines, i);
         code += currentLine + "\n";
     }
+    console.log(code);
     return new Function('return ' + code)();
 }
 function addAsync(currentLine) {
@@ -79,23 +83,23 @@ function addBreakpoint(currentLine, lines, lineNum) {
     if (lineNum == lines.length - 1) {
         return currentLine;
     }
-    if (!lines[lineNum].classList.contains(breakpointClass)) {
+    if (!(lines[lineNum].classList.contains(breakpointClass))) {
         return currentLine;
     }
-    let indexOfDo = currentLine.indexOf("do");
-    let indexOfWhile = currentLine.indexOf("while");
-    let indexOfFor = currentLine.indexOf("for");
-    let indexOfIf = currentLine.indexOf("if");
-    let indexOfSwitch = currentLine.indexOf("switch");
-    if (indexOfDo != -1 || indexOfSwitch != -1) {
-        currentLine = `await debug(${lineNum});\n` + currentLine;
-    }
-    else if (indexOfWhile != -1 || indexOfFor != -1 || indexOfIf != -1) {
-        let indexOfExpr = indexOfFor != -1 ? currentLine.indexOf(";") : currentLine.indexOf("(");
+    let hasWhile = currentLine.includes("while");
+    let hasFor = currentLine.includes("for");
+    let hasIf = currentLine.includes("if");
+    let hasElse = currentLine.includes("else");
+    let hasFunction = currentLine.includes("function");
+    if (hasWhile || hasFor || hasIf) {
+        let indexOfExpr = hasFor ? currentLine.indexOf(";") : currentLine.indexOf("(");
         currentLine = currentLine.substring(0, indexOfExpr + 1) + `await debug(${lineNum}) && ` + currentLine.substring(indexOfExpr + 1, currentLine.length);
     }
-    else {
+    else if (hasElse || hasFunction) {
         currentLine += `\nawait debug(${lineNum});`;
+    }
+    else {
+        currentLine = `await debug(${lineNum});\n` + currentLine;
     }
     return currentLine;
 }
@@ -138,21 +142,27 @@ function wrapStrings(elementTag, functionString) {
 }
 let options = document.querySelectorAll(".dropdown-content > a");
 let left = document.querySelector("#left");
-for (let option of options) {
-    option.addEventListener("click", function dropDownSelector(event) {
+for (let i = 0; i < options.length; i++) {
+    options[i].addEventListener("click", function dropDownSelector(event) {
         let dropdownBtn = document.querySelector(".dropdown > button");
         switch (event.target.id) {
             case "mergesort":
-                displayCodeAsString(left, algMergeSort);
-                dropdownBtn.innerHTML = "MergeSort";
+                if (left != null)
+                    displayCodeAsString(left, algMergeSort);
+                if (dropdownBtn != null)
+                    dropdownBtn.innerHTML = "MergeSort";
                 break;
             case "binarysearch":
-                displayCodeAsString(left, algBinarySearch);
-                dropdownBtn.innerHTML = "Binary Search";
+                if (left != null)
+                    displayCodeAsString(left, algBinarySearch);
+                if (dropdownBtn != null)
+                    dropdownBtn.innerHTML = "Binary Search";
                 break;
             case "bubblesort":
-                displayCodeAsString(left, algBubbleSort);
-                dropdownBtn.innerHTML = "Bubble Sort";
+                if (left != null)
+                    displayCodeAsString(left, algBubbleSort);
+                if (dropdownBtn != null)
+                    dropdownBtn.innerHTML = "Bubble Sort";
                 break;
         }
     });
@@ -173,7 +183,8 @@ window.onload = main;
 function main() {
     const left = document.querySelector("#left");
     const right = document.querySelector("#right");
-    pseudocode(right);
+    if (right != null)
+        pseudocode(right);
     if (left != null)
         displayCodeAsString(left, algMergeSort);
 }
@@ -185,7 +196,12 @@ function pseudocodeOnClick() {
     let activeElement = document.activeElement;
     if (!(activeElement instanceof HTMLSpanElement)) {
         activeElement = document.querySelector("#right > span:last-child");
-        setCaretPosition(activeElement, activeElement.textContent.length);
+        if (activeElement != null) {
+            const textContent = activeElement.textContent;
+            if (textContent) {
+                setCaretPosition(activeElement, textContent.length);
+            }
+        }
     }
     if (activeElement != oldActiveElement && oldActiveElement != null && oldActiveElement.innerHTML === "") {
         const prevElement = oldActiveElement.previousElementSibling;
@@ -195,10 +211,16 @@ function pseudocodeOnClick() {
         if (prevElement != null && nextElement != null && prevIndex === nextIndex) {
             const prevText = prevElement.textContent;
             const nextText = nextElement.textContent;
-            const mergedElement = createPseudocodeSpan(prevText + nextText, prevIndex);
-            oldActiveElement.previousElementSibling.remove();
-            oldActiveElement.nextElementSibling.remove();
-            oldActiveElement.replaceWith(mergedElement);
+            if (prevText != null && nextText != null && prevIndex != null) {
+                const mergedElement = createPseudocodeSpan(prevText + nextText, prevIndex);
+                const previous = oldActiveElement.previousElementSibling;
+                const next = oldActiveElement.nextElementSibling;
+                if (previous != null && next != null) {
+                    previous.remove();
+                    next.remove();
+                    oldActiveElement.replaceWith(mergedElement);
+                }
+            }
         }
         else {
             oldActiveElement.remove();
@@ -210,10 +232,10 @@ function pseudocodeOnClick() {
     if (selectedBreakpoint != null) {
         breakpointIndex = selectedBreakpoint.getAttribute("index");
     }
-    if (activeElement.getAttribute("index") === breakpointIndex) {
+    if (activeElement != null && activeElement.getAttribute("index") === breakpointIndex) {
         oldActiveElement = activeElement;
     }
-    else {
+    else if (activeElement != null && breakpointIndex != null) {
         splitHtmlElement(activeElement, caretPosition);
         const newElement = createPseudocodeSpan("", breakpointIndex);
         activeElement.replaceWith(newElement);
@@ -226,19 +248,21 @@ function splitHtmlElement(element, index) {
     const beforeText = text.slice(0, index);
     const afterText = text.slice(index, text.length);
     const activeElementCodeIndex = element.getAttribute("index");
-    if (beforeText === "") {
-        const afterElement = createPseudocodeSpan(afterText, activeElementCodeIndex);
-        element.after(afterElement);
-    }
-    else if (afterText === "") {
-        const beforeElement = createPseudocodeSpan(beforeText, activeElementCodeIndex);
-        element.before(beforeElement);
-    }
-    else {
-        const beforeElement = createPseudocodeSpan(beforeText, activeElementCodeIndex);
-        element.before(beforeElement);
-        const afterElement = createPseudocodeSpan(afterText, activeElementCodeIndex);
-        element.after(afterElement);
+    if (activeElementCodeIndex != null) {
+        if (beforeText === "") {
+            const afterElement = createPseudocodeSpan(afterText, activeElementCodeIndex);
+            element.after(afterElement);
+        }
+        else if (afterText === "") {
+            const beforeElement = createPseudocodeSpan(beforeText, activeElementCodeIndex);
+            element.before(beforeElement);
+        }
+        else {
+            const beforeElement = createPseudocodeSpan(beforeText, activeElementCodeIndex);
+            element.before(beforeElement);
+            const afterElement = createPseudocodeSpan(afterText, activeElementCodeIndex);
+            element.after(afterElement);
+        }
     }
 }
 function createPseudocodeSpan(text, codeIndex) {
@@ -250,6 +274,8 @@ function createPseudocodeSpan(text, codeIndex) {
 }
 function setCaretPosition(element, caretPos) {
     const selection = window.getSelection();
+    if (selection == null)
+        return;
     const range = document.createRange();
     selection.removeAllRanges();
     range.selectNodeContents(element);
@@ -261,47 +287,53 @@ function setCaretPosition(element, caretPos) {
 }
 function getCaretPosition() {
     const selection = window.getSelection();
+    if (selection == null)
+        return -1;
     selection.getRangeAt(0);
     return selection.getRangeAt(0).startOffset;
 }
-function algBinarySearch(sortedArray, key) {
-    let start = 0;
-    let end = sortedArray.length - 1;
-    while (start <= end) {
-        let middle = Math.floor((start + end) / 2);
-        if (sortedArray[middle] === key) {
-            return middle;
-        }
-        else if (sortedArray[middle] < key) {
-            start = middle + 1;
-        }
-        else {
-            end = middle - 1;
-        }
-    }
-    return -1;
-}
-function algBubbleSort(arr) {
-    var i, j;
-    var len = arr.length;
-    var isSwapped = false;
-    for (i = 0; i < len; i++) {
-        isSwapped = false;
-        for (j = 0; j < len; j++) {
-            if (arr[j] > arr[j + 1]) {
-                var temp = arr[j];
-                arr[j] = arr[j + 1];
-                arr[j + 1] = temp;
-                isSwapped = true;
+function algBinarySearch() {
+    function binarySearch(sortedArray, key) {
+        let start = 0;
+        let end = sortedArray.length - 1;
+        while (start <= end) {
+            let middle = Math.floor((start + end) / 2);
+            if (sortedArray[middle] === key) {
+                return middle;
+            }
+            else if (sortedArray[middle] < key) {
+                start = middle + 1;
+            }
+            else {
+                end = middle - 1;
             }
         }
-        if (!isSwapped) {
-            break;
+        return -1;
+    }
+    binarySearch([167, 124, 91, 63, 42, 22, 14, 7, 3], 14);
+}
+function algBubbleSort() {
+    function bubbleSort(arr) {
+        var i, j;
+        var len = arr.length;
+        var isSwapped = false;
+        for (i = 0; i < len; i++) {
+            isSwapped = false;
+            for (j = 0; j < len; j++) {
+                if (arr[j] > arr[j + 1]) {
+                    var temp = arr[j];
+                    arr[j] = arr[j + 1];
+                    arr[j + 1] = temp;
+                    isSwapped = true;
+                }
+            }
+            if (!isSwapped) {
+                break;
+            }
         }
     }
-    console.log(arr);
+    bubbleSort([5, 45, 23, 243, 35]);
 }
-var arr = [243, 45, 23, 356, 3, 5346, 35, 5];
 function algMergeSort() {
     function mergeSort(array) {
         if (array.length <= 1) {

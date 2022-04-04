@@ -14,7 +14,7 @@ function breakpoint(code: Element): void
 
 function statementOnDblClick(): void
 {
-    document.getSelection().removeAllRanges();
+    document.getSelection()?.removeAllRanges();
 }
 
 function statementOnClick(line: HTMLElement): void
