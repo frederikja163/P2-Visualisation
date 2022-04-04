@@ -17,7 +17,8 @@ function breakpoint(code) {
     }
 }
 function statementOnDblClick() {
-    document.getSelection().removeAllRanges();
+    var _a;
+    (_a = document.getSelection()) === null || _a === void 0 ? void 0 : _a.removeAllRanges();
 }
 function statementOnClick(line) {
     if (line.classList.contains(breakpointClass)) {
@@ -44,8 +45,8 @@ function select(line) {
 let currentPromise;
 let resolveCurrentPromise;
 function runCode() {
-    console.log("RUNNINNG CODE!");
-    const lineCount = document.querySelectorAll("span").length;
+    var _a, _b;
+    const lineCount = (_b = (_a = document.getElementById("code")) === null || _a === void 0 ? void 0 : _a.querySelectorAll("span")) === null || _b === void 0 ? void 0 : _b.length;
     for (let i = 0; i < lineCount; i++) {
         removeHighLight(i);
     }
@@ -59,14 +60,16 @@ function next() {
     resolveCurrentPromise();
 }
 function parseCode() {
+    var _a;
     let code = "";
-    const lines = document.querySelectorAll("span");
+    const lines = (_a = document.getElementById("code")) === null || _a === void 0 ? void 0 : _a.querySelectorAll("span");
     for (let i = 0; i < lines.length; i++) {
         let currentLine = lines[i].innerHTML.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
         currentLine = addAsync(currentLine);
         currentLine = addBreakpoint(currentLine, lines, i);
         code += currentLine + "\n";
     }
+    console.log(code);
     return new Function('return ' + code)();
 }
 function addAsync(currentLine) {
@@ -83,7 +86,6 @@ function addBreakpoint(currentLine, lines, lineNum) {
     if (!(lines[lineNum].classList.contains(breakpointClass))) {
         return currentLine;
     }
-    console.log(lines[lineNum].classList.contains(breakpointClass));
     let hasWhile = currentLine.includes("while");
     let hasFor = currentLine.includes("for");
     let hasIf = currentLine.includes("if");
@@ -115,7 +117,6 @@ function debug(line) {
 function darkMode() {
     const bodyElement = document.body;
     const darkModeBtn = document.querySelector("#darkModeBtn");
-
     bodyElement.classList.toggle("dark-mode");
     bodyElement.classList.contains("dark-mode") ? darkModeBtn.value = "Light Mode" :
         darkModeBtn.value = "Dark Mode";
@@ -182,7 +183,8 @@ window.onload = main;
 function main() {
     const left = document.querySelector("#left");
     const right = document.querySelector("#right");
-    pseudocode(right);
+    if (right != null)
+        pseudocode(right);
     if (left != null)
         displayCodeAsString(left, algMergeSort);
 }
@@ -194,7 +196,12 @@ function pseudocodeOnClick() {
     let activeElement = document.activeElement;
     if (!(activeElement instanceof HTMLSpanElement)) {
         activeElement = document.querySelector("#right > span:last-child");
-        setCaretPosition(activeElement, activeElement.textContent.length);
+        if (activeElement != null) {
+            const textContent = activeElement.textContent;
+            if (textContent) {
+                setCaretPosition(activeElement, textContent.length);
+            }
+        }
     }
     if (activeElement != oldActiveElement && oldActiveElement != null && oldActiveElement.innerHTML === "") {
         const prevElement = oldActiveElement.previousElementSibling;
@@ -204,10 +211,16 @@ function pseudocodeOnClick() {
         if (prevElement != null && nextElement != null && prevIndex === nextIndex) {
             const prevText = prevElement.textContent;
             const nextText = nextElement.textContent;
-            const mergedElement = createPseudocodeSpan(prevText + nextText, prevIndex);
-            oldActiveElement.previousElementSibling.remove();
-            oldActiveElement.nextElementSibling.remove();
-            oldActiveElement.replaceWith(mergedElement);
+            if (prevText != null && nextText != null && prevIndex != null) {
+                const mergedElement = createPseudocodeSpan(prevText + nextText, prevIndex);
+                const previous = oldActiveElement.previousElementSibling;
+                const next = oldActiveElement.nextElementSibling;
+                if (previous != null && next != null) {
+                    previous.remove();
+                    next.remove();
+                    oldActiveElement.replaceWith(mergedElement);
+                }
+            }
         }
         else {
             oldActiveElement.remove();
@@ -219,10 +232,10 @@ function pseudocodeOnClick() {
     if (selectedBreakpoint != null) {
         breakpointIndex = selectedBreakpoint.getAttribute("index");
     }
-    if (activeElement.getAttribute("index") === breakpointIndex) {
+    if (activeElement != null && activeElement.getAttribute("index") === breakpointIndex) {
         oldActiveElement = activeElement;
     }
-    else {
+    else if (activeElement != null && breakpointIndex != null) {
         splitHtmlElement(activeElement, caretPosition);
         const newElement = createPseudocodeSpan("", breakpointIndex);
         activeElement.replaceWith(newElement);
@@ -235,19 +248,21 @@ function splitHtmlElement(element, index) {
     const beforeText = text.slice(0, index);
     const afterText = text.slice(index, text.length);
     const activeElementCodeIndex = element.getAttribute("index");
-    if (beforeText === "") {
-        const afterElement = createPseudocodeSpan(afterText, activeElementCodeIndex);
-        element.after(afterElement);
-    }
-    else if (afterText === "") {
-        const beforeElement = createPseudocodeSpan(beforeText, activeElementCodeIndex);
-        element.before(beforeElement);
-    }
-    else {
-        const beforeElement = createPseudocodeSpan(beforeText, activeElementCodeIndex);
-        element.before(beforeElement);
-        const afterElement = createPseudocodeSpan(afterText, activeElementCodeIndex);
-        element.after(afterElement);
+    if (activeElementCodeIndex != null) {
+        if (beforeText === "") {
+            const afterElement = createPseudocodeSpan(afterText, activeElementCodeIndex);
+            element.after(afterElement);
+        }
+        else if (afterText === "") {
+            const beforeElement = createPseudocodeSpan(beforeText, activeElementCodeIndex);
+            element.before(beforeElement);
+        }
+        else {
+            const beforeElement = createPseudocodeSpan(beforeText, activeElementCodeIndex);
+            element.before(beforeElement);
+            const afterElement = createPseudocodeSpan(afterText, activeElementCodeIndex);
+            element.after(afterElement);
+        }
     }
 }
 function createPseudocodeSpan(text, codeIndex) {
@@ -259,6 +274,8 @@ function createPseudocodeSpan(text, codeIndex) {
 }
 function setCaretPosition(element, caretPos) {
     const selection = window.getSelection();
+    if (selection == null)
+        return;
     const range = document.createRange();
     selection.removeAllRanges();
     range.selectNodeContents(element);
@@ -270,6 +287,8 @@ function setCaretPosition(element, caretPos) {
 }
 function getCaretPosition() {
     const selection = window.getSelection();
+    if (selection == null)
+        return -1;
     selection.getRangeAt(0);
     return selection.getRangeAt(0).startOffset;
 }
