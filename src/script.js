@@ -21,20 +21,22 @@ function statementOnDblClick() {
     (_a = document.getSelection()) === null || _a === void 0 ? void 0 : _a.removeAllRanges();
 }
 function statementOnClick(line) {
-    if (line.classList.contains(breakpointClass)) {
-        if (line.id === selectedCode) {
-            line.classList.remove(breakpointClass);
-            line.id = "";
+    return __awaiter(this, void 0, void 0, function* () {
+        if (line.classList.contains(breakpointClass)) {
+            if (line.id === selectedCode) {
+                line.classList.remove(breakpointClass);
+                line.id = "";
+            }
+            else {
+                select(line);
+            }
         }
         else {
+            line.classList.add(breakpointClass);
             select(line);
         }
-    }
-    else {
-        line.classList.add(breakpointClass);
-        select(line);
-    }
-    parseCode();
+        yield parseCode();
+    });
 }
 function select(line) {
     const selected = document.getElementById(selectedCode);
@@ -46,49 +48,85 @@ function select(line) {
 let currentPromise;
 let resolveCurrentPromise;
 let codeFunction = null;
-let stopRunning = false;
+let isStopping = false;
 let awaitingPromise = false;
+let isRunning = false;
 function stopCode() {
-    if (codeFunction != null) {
-        stopRunning = true;
-        if (awaitingPromise) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (codeFunction != null && isRunning && awaitingPromise) {
+            isStopping = true;
             resolveCurrentPromise();
+            yield codeFunction();
         }
-    }
+        removeAllHighlighting();
+        setButtonToRun();
+    });
 }
 function runCode() {
     return __awaiter(this, void 0, void 0, function* () {
+        yield parseCode();
         currentPromise = new Promise((resolve, reject) => {
             resolveCurrentPromise = resolve;
         });
         if (codeFunction != null) {
-            stopRunning = false;
+            isStopping = false;
+            isRunning = true;
+            setButtonToStop();
             yield codeFunction();
-            stopRunning = false;
+            setButtonToRun();
+            isRunning = false;
+            isStopping = false;
         }
+        removeAllHighlighting();
     });
+}
+function setButtonToStop() {
+    const runButton = document.getElementById("runStopButton");
+    if (runButton != null) {
+        runButton.value = "Stop";
+        runButton.onclick = stopCode;
+    }
+}
+function setButtonToRun() {
+    const runButton = document.getElementById("runStopButton");
+    if (runButton != null) {
+        runButton.value = "Run";
+        runButton.onclick = runCode;
+    }
 }
 function next() {
     resolveCurrentPromise();
 }
 function parseCode() {
     var _a;
-    removeAllHighligting();
-    stopCode();
-    let code = "";
-    const lines = (_a = document.getElementById("code")) === null || _a === void 0 ? void 0 : _a.querySelectorAll("span");
-    for (let i = 0; i < lines.length; i++) {
-        let currentLine = lines[i].innerHTML.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
-        currentLine = addAsync(currentLine);
-        currentLine = addBreakpoint(currentLine, lines, i);
-        code += currentLine + "\n";
-    }
-    codeFunction = new Function('return ' + code)();
+    return __awaiter(this, void 0, void 0, function* () {
+        yield stopCode();
+        let code = "";
+        const lines = (_a = document.getElementById("code")) === null || _a === void 0 ? void 0 : _a.querySelectorAll("span");
+        for (let i = 0; i < lines.length; i++) {
+            let currentLine = lines[i].innerHTML.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+            currentLine = addAwait(currentLine, lines.length, i);
+            currentLine = addAsync(currentLine);
+            currentLine = addBreakpoint(currentLine, lines, i);
+            code += currentLine + "\n";
+        }
+        codeFunction = new Function('return ' + code)();
+    });
 }
 function addAsync(currentLine) {
     let indexOfFunction = currentLine.indexOf("function");
     if (indexOfFunction != -1) {
         return currentLine.substring(0, indexOfFunction) + "async " + currentLine.substring(indexOfFunction, currentLine.length);
+    }
+    return currentLine;
+}
+function addAwait(currentLine, lineCount, lineNum) {
+    const hasStartBracket = currentLine.includes("(");
+    const hasEndBracket = currentLine.includes(")");
+    const hasStartCurleyBracket = currentLine.includes("{");
+    const hasBeginCurleyBracket = currentLine.includes("}");
+    if (hasStartBracket && hasEndBracket && !hasStartCurleyBracket && !hasBeginCurleyBracket) {
+        return "await " + currentLine;
     }
     return currentLine;
 }
@@ -118,13 +156,13 @@ function addBreakpoint(currentLine, lines, lineNum) {
 }
 function debug(line) {
     return __awaiter(this, void 0, void 0, function* () {
-        highLight(line);
-        if (!stopRunning) {
+        if (!isStopping) {
             awaitingPromise = true;
+            highLight(line);
             yield currentPromise;
+            removeHighLight(line);
             awaitingPromise = false;
         }
-        removeHighLight(line);
         currentPromise = new Promise((resolve, reject) => {
             resolveCurrentPromise = resolve;
         });
@@ -191,11 +229,12 @@ function highLight(index) {
     }
 }
 function removeHighLight(index) {
-    let currParagraph = document.querySelector("span[index=\"" + index + "\"]");
-    if (currParagraph != null)
-        currParagraph.classList.remove("highlighted");
+    const codeSpans = document.querySelectorAll(`span[index=\"${index}\"]`);
+    for (let i = 0; i < codeSpans.length; i++) {
+        codeSpans[i].classList.remove("highlighted");
+    }
 }
-function removeAllHighligting() {
+function removeAllHighlighting() {
     var _a, _b;
     const lineCount = (_b = (_a = document.getElementById("code")) === null || _a === void 0 ? void 0 : _a.querySelectorAll("span")) === null || _b === void 0 ? void 0 : _b.length;
     for (let i = 0; i < lineCount; i++) {
@@ -204,6 +243,7 @@ function removeAllHighligting() {
 }
 window.onload = main;
 function main() {
+    setButtonToRun();
     const left = document.querySelector("#left");
     const right = document.querySelector("#right");
     if (right != null)
@@ -366,7 +406,6 @@ function algMergeSort() {
         const middle = Math.floor(array.length);
         const left = array.slice(0, middle);
         const right = array.slice(middle);
-        console.log(array);
         return merge(mergeSort(left), mergeSort(right));
     }
     function merge(left, right) {

@@ -9,7 +9,6 @@ function algMergeSort(){
       const left = array.slice(0, middle);
       const right = array.slice(middle);
   
-      console.log(array);
       return merge(mergeSort(left),mergeSort(right));
     }
   

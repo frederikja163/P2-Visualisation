@@ -6,11 +6,13 @@ function highLight(index : number) : void {
 }
 
 function removeHighLight(index : number) : void{
-    let currParagraph = document.querySelector("span[index=\""+index+"\"]");
-    if(currParagraph != null) currParagraph.classList.remove("highlighted");
+    const codeSpans: NodeListOf<Element> = document.querySelectorAll(`span[index=\"${index}\"]`);
+    for (let i: number = 0; i < codeSpans.length; i++) {
+        codeSpans[i].classList.remove("highlighted");
+    }
 }
 
-function removeAllHighligting(){
+function removeAllHighlighting(){
     
 	// Removes all highligts.
 	const lineCount: number = <number> document.getElementById("code")?.querySelectorAll("span")?.length;

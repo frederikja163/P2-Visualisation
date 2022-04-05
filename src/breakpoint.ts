@@ -17,7 +17,7 @@ function statementOnDblClick(): void
     document.getSelection()?.removeAllRanges();
 }
 
-function statementOnClick(line: HTMLElement): void
+async function statementOnClick(line: HTMLElement): Promise<void>
 {
     if (line.classList.contains(breakpointClass))
     {
@@ -42,7 +42,7 @@ function statementOnClick(line: HTMLElement): void
     }
     
     //reconstructs the code
-    parseCode(); 
+    await parseCode(); 
     
 }
 

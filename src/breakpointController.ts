@@ -7,20 +7,29 @@ let resolveCurrentPromise: Function;
 let codeFunction:Function | null = null;
 let isStopping: boolean = false;
 let awaitingPromise: boolean = false;
+let isRunning: boolean = false;
 
 /** Stopping the current running of code by resolving all promises*/
-function stopCode(): void{
-	if(codeFunction != null) {
-		isStopping = true
-		if(awaitingPromise){
-			resolveCurrentPromise();
-		}
+async function stopCode(): Promise<void>{
+	
+	if(codeFunction != null && isRunning && awaitingPromise) {
+		isStopping = true;
+		
+		resolveCurrentPromise();
+		await codeFunction();
+		
 	}
+
+	removeAllHighlighting();
+
+	setButtonToRun();
 }
 
 /** Gets the breakable code and runs the code until the first breakpoint.*/
 async function runCode(): Promise<void>{
 	
+	await parseCode();
+
 	// Setting up promises.
 	currentPromise = new Promise((resolve:Function, reject:Function) => { 
 		resolveCurrentPromise = resolve; 
@@ -29,8 +38,35 @@ async function runCode(): Promise<void>{
 	// Running function.
 	if(codeFunction != null) {
 		isStopping = false;
+		isRunning = true;
+		setButtonToStop();
 		await codeFunction();
+		setButtonToRun();
+		isRunning = false;
 		isStopping = false;
+	}
+
+	removeAllHighlighting();
+}
+
+/** Setting the run button to be a stop button.*/
+function setButtonToStop():void{
+	const runButton: HTMLInputElement | null = <HTMLInputElement | null> document.getElementById("runStopButton");
+
+	if(runButton != null){
+		runButton.value = "Stop";
+		runButton.onclick = stopCode;
+	}
+}
+
+/** Setting the stop button to be a run button.*/
+function setButtonToRun():void{
+	const runButton: HTMLInputElement | null = <HTMLInputElement | null> document.getElementById("runStopButton");
+
+	if(runButton != null){
+		runButton.value = "Run";
+		runButton.onclick = runCode;
+	
 	}
 }
 
@@ -40,10 +76,9 @@ function next():void{
 }
 
 /** This function gets all lines of code, adds breakpoints, and returns this as a function. */
-function parseCode(): void{
+async function parseCode(): Promise<void>{
 
-	removeAllHighligting();
-	stopCode();
+	await stopCode();
 
 	let code: string = "";
 
@@ -56,6 +91,7 @@ function parseCode(): void{
 		// Inserting the current line, but adding async in front of any function.
 		let currentLine: string = lines[i].innerHTML.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
 
+		currentLine = addAwait(currentLine, lines.length, i);
 		currentLine = addAsync(currentLine);
 		currentLine = addBreakpoint(currentLine, lines, i); 
 
@@ -67,7 +103,6 @@ function parseCode(): void{
 
 }
 
-
 /** Adds async to the current line if a function is found.*/
 function addAsync(currentLine: string):string{
 	
@@ -78,6 +113,22 @@ function addAsync(currentLine: string):string{
 		return currentLine.substring(0, indexOfFunction) + "async " + currentLine.substring(indexOfFunction, currentLine.length);
 	}
 	
+	return currentLine;
+}
+
+/** Adding await to the current line if the call of a function is found*/
+function addAwait(currentLine: string, lineCount: number, lineNum: number):string{
+
+	//if it is the second to last line and it contains "(" and ")"
+	const hasStartBracket: boolean = currentLine.includes("(");
+	const hasEndBracket: boolean = currentLine.includes(")");
+	const hasStartCurleyBracket: boolean = currentLine.includes("{");
+	const hasBeginCurleyBracket: boolean = currentLine.includes("}");
+
+	if(hasStartBracket && hasEndBracket && !hasStartCurleyBracket && !hasBeginCurleyBracket){
+		return "await " + currentLine;
+	}
+
 	return currentLine;
 }
 
@@ -126,16 +177,14 @@ function addBreakpoint(currentLine: string, lines: NodeListOf<HTMLSpanElement>, 
 /** Waiting for a specific promise.*/
 async function debug(line: number): Promise<boolean>{
 	
-	// Adding/removing highligting and waiting by using a promise.
-	highLight(line);
-	
+	// Adding/removing highlighting and waiting by using a promise.
 	if(!isStopping){
 		awaitingPromise = true;
+		highLight(line);
 		await currentPromise;
+		removeHighLight(line)
 		awaitingPromise = false;
 	}
-
-	removeHighLight(line);
 
 	// Creating a new promise.
 	currentPromise = new Promise((resolve:Function, reject:Function) => {
