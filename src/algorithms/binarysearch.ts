@@ -20,6 +20,7 @@ function algBinarySearch(){
         // key wasn't found
         return -1;
     } 
-    
-    binarySearch([201, 176, 90, 63, 12], 90);
+  
+    binarySearch([201, 176, 90, 63, 12, 1], 12);
+
 }

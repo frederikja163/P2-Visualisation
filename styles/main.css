@@ -12,6 +12,14 @@ textarea {
   resize: none;
 }
 
+#selectedCode {
+    text-decoration-color: red;
+}
+
+span:focus-visible {
+    outline: none;
+}
+
 p:hover{
     cursor: pointer;
     width: fit-content;
@@ -23,16 +31,17 @@ p:hover{
 }
 
 .textbox{
-    display:inline-block;
-	font-family: courier; 
-	height: 95%;
-	margin: 1%;
-    border-width: 3px;
-    border-color: #57b3b6;
-    border-style: solid;
-    flex-grow: 1;
-    overflow:auto;
-    width: 50%;
+  display:inline-block;
+  font-family: courier; 
+  height: 95%;
+  margin: 1%;
+  border-width: 3px;
+  border-color: #57b3b6;
+  border-style: solid;
+  flex-grow: 1;
+  overflow:auto;
+  width: 50%;
+  padding-left: 1em;
 }
 
 body{
@@ -43,14 +52,18 @@ body{
   transition-duration: var(--trans);
 }
 
-#righttextbox{
+#right{
   transition-property: background-color, color;
   transition-duration: var(--trans);
 }
 
-.dark-mode {
+.dark-mode{
   background-color: rgb(36, 36, 36);
   color: white;
+}
+
+#darkModeBtn {
+  width: 6em;
 }
 
 .buttons{
@@ -64,6 +77,7 @@ body{
     height: 25px;
     margin: 1%;
     border: none;
+    font-variant-numeric: lining-nums;
 }
 
 .dropbtn {

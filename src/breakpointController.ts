@@ -41,11 +41,14 @@ function parseCode(): void{
 		// Inserting the current line, but adding async in front of any function.
 		let currentLine: string = lines[i].innerHTML.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
 
+
 		currentLine = addAsync(currentLine);
 		currentLine = addBreakpoint(currentLine, lines, i); 
 
 		code += currentLine + "\n"
     }
+
+	console.log(code);
 
 	// Creating a function from the string.
 	codeFunction = new Function('return ' + code)();
