@@ -1,12 +1,3 @@
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 const breakpointClass = "breakpoint";
 const selectedCode = "selectedCode";
 function breakpoint(code) {
@@ -103,16 +94,14 @@ function addBreakpoint(currentLine, lines, lineNum) {
     }
     return currentLine;
 }
-function debug(line) {
-    return __awaiter(this, void 0, void 0, function* () {
-        highLight(line);
-        yield currentPromise;
-        removeHighLight(line);
-        currentPromise = new Promise((resolve, reject) => {
-            resolveCurrentPromise = resolve;
-        });
-        return true;
+async function debug(line) {
+    highLight(line);
+    await currentPromise;
+    removeHighLight(line);
+    currentPromise = new Promise((resolve, reject) => {
+        resolveCurrentPromise = resolve;
     });
+    return true;
 }
 function darkMode() {
     const bodyElement = document.body;
@@ -181,15 +170,7 @@ function removeHighLight(index) {
 }
 window.onload = main;
 function main() {
-    const left = document.querySelector("#left");
-    const right = document.querySelector("#right");
-    if (right != null)
-        pseudocode(right);
-    if (left != null)
-        displayCodeAsString(left, algMergeSort);
-}
-function pseudocode(right) {
-    right.addEventListener("click", pseudocodeOnClick);
+
 }
 let oldActiveElement = null;
 function pseudocodeOnClick() {
