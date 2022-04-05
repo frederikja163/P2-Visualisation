@@ -38,7 +38,8 @@ function wrapStrings(elementTag : string, functionString : string) : string {
     {word : "function", color : "gray"}, 
     {word : "switch", color : "red"}, 
     {word : "while", color : "red"}, 
-    {word : "do", color : "red"}];  
+    {word : "do", color : "red"}];
+      
     for(let i : number = 0; i < lines.length; i++){
         for(let k : number = 0; k < highlight.length; k++){
             if(lines[i].includes(highlight[k].word)){   
