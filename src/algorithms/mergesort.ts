@@ -1,5 +1,5 @@
 function algMergeSort(){
-  
+
   function mergeSort(array:number[]):number[]{
       if(array.length <=1){
         return array;
@@ -39,7 +39,6 @@ function algMergeSort(){
         rIndex++;
       }
     }
-    console.log(array);
     return array;
   }
   

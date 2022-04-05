@@ -5,9 +5,21 @@ let currentPromise: Promise<void>;
 let resolveCurrentPromise: Function;
 
 let codeFunction:Function | null = null;
+let stopRunning: boolean = false;
+let awaitingPromise: boolean = false;
 
-/** Gets the breakable code and runs the code untill the first breakpoint.*/
-function runCode(): void{
+/** stoping the current running of code by resolving all promises*/
+function stopCode(): void{
+	if(codeFunction != null) {
+		stopRunning = true
+		if(awaitingPromise){
+			resolveCurrentPromise();
+		}
+	}
+}
+
+/** Gets the breakable code and runs the code until the first breakpoint.*/
+async function runCode(): Promise<void>{
 	
 	// Setting up promises.
 	currentPromise = new Promise((resolve:Function, reject:Function) => { 
@@ -16,7 +28,9 @@ function runCode(): void{
 
 	// Running function.
 	if(codeFunction != null) {
-		codeFunction();
+		stopRunning = false;
+		await codeFunction();
+		stopRunning = false;
 	}
 }
 
@@ -29,6 +43,7 @@ function next():void{
 function parseCode(): void{
 
 	removeAllHighligting();
+	stopCode();
 
 	let code: string = "";
 
@@ -41,14 +56,11 @@ function parseCode(): void{
 		// Inserting the current line, but adding async in front of any function.
 		let currentLine: string = lines[i].innerHTML.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
 
-
 		currentLine = addAsync(currentLine);
 		currentLine = addBreakpoint(currentLine, lines, i); 
 
 		code += currentLine + "\n"
     }
-
-	console.log(code);
 
 	// Creating a function from the string.
 	codeFunction = new Function('return ' + code)();
@@ -117,7 +129,11 @@ async function debug(line: number): Promise<boolean>{
 	// Adding/removing highligting and waiting by using a promise.
 	highLight(line);
 	
-	await currentPromise;
+	if(!stopRunning){
+		awaitingPromise = true;
+		await currentPromise;
+		awaitingPromise = false;
+	}
 
 	removeHighLight(line);
 

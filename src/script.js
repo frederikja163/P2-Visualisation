@@ -15,7 +15,6 @@ function breakpoint(code) {
         lines[i].addEventListener("dblclick", statementOnDblClick);
         lines[i].addEventListener("click", () => statementOnClick(lines[i]));
     }
-    parseCode();
 }
 function statementOnDblClick() {
     var _a;
@@ -35,6 +34,7 @@ function statementOnClick(line) {
         line.classList.add(breakpointClass);
         select(line);
     }
+    parseCode();
 }
 function select(line) {
     const selected = document.getElementById(selectedCode);
@@ -46,18 +46,27 @@ function select(line) {
 let currentPromise;
 let resolveCurrentPromise;
 let codeFunction = null;
-function runCode() {
-    var _a, _b;
-    const lineCount = (_b = (_a = document.getElementById("code")) === null || _a === void 0 ? void 0 : _a.querySelectorAll("span")) === null || _b === void 0 ? void 0 : _b.length;
-    for (let i = 0; i < lineCount; i++) {
-        removeHighLight(i);
-    }
-    currentPromise = new Promise((resolve, reject) => {
-        resolveCurrentPromise = resolve;
-    });
+let stopRunning = false;
+let awaitingPromise = false;
+function stopCode() {
     if (codeFunction != null) {
-        codeFunction();
+        stopRunning = true;
+        if (awaitingPromise) {
+            resolveCurrentPromise();
+        }
     }
+}
+function runCode() {
+    return __awaiter(this, void 0, void 0, function* () {
+        currentPromise = new Promise((resolve, reject) => {
+            resolveCurrentPromise = resolve;
+        });
+        if (codeFunction != null) {
+            stopRunning = false;
+            yield codeFunction();
+            stopRunning = false;
+        }
+    });
 }
 function next() {
     resolveCurrentPromise();
@@ -65,7 +74,7 @@ function next() {
 function parseCode() {
     var _a;
     removeAllHighligting();
-  
+    stopCode();
     let code = "";
     const lines = (_a = document.getElementById("code")) === null || _a === void 0 ? void 0 : _a.querySelectorAll("span");
     for (let i = 0; i < lines.length; i++) {
@@ -74,7 +83,6 @@ function parseCode() {
         currentLine = addBreakpoint(currentLine, lines, i);
         code += currentLine + "\n";
     }
-  
     codeFunction = new Function('return ' + code)();
 }
 function addAsync(currentLine) {
@@ -111,7 +119,11 @@ function addBreakpoint(currentLine, lines, lineNum) {
 function debug(line) {
     return __awaiter(this, void 0, void 0, function* () {
         highLight(line);
-        yield currentPromise;
+        if (!stopRunning) {
+            awaitingPromise = true;
+            yield currentPromise;
+            awaitingPromise = false;
+        }
         removeHighLight(line);
         currentPromise = new Promise((resolve, reject) => {
             resolveCurrentPromise = resolve;
@@ -179,10 +191,9 @@ function highLight(index) {
     }
 }
 function removeHighLight(index) {
-    const codeSpans = document.querySelectorAll(`span[index=\"${index}\"]`);
-    for (let i = 0; i < codeSpans.length; i++) {
-        codeSpans[i].classList.remove("highlighted");
-    }
+    let currParagraph = document.querySelector("span[index=\"" + index + "\"]");
+    if (currParagraph != null)
+        currParagraph.classList.remove("highlighted");
 }
 function removeAllHighligting() {
     var _a, _b;
@@ -203,22 +214,6 @@ function main() {
 function pseudocode(right) {
     right.addEventListener("click", pseudocodeOnClick);
 }
-
-function algBinarySearch() {
-    function binarySearch(sortedArray, key) {
-        let start = 0;
-        let end = sortedArray.length - 1;
-        while (start <= end) {
-            let middle = Math.floor((start + end) / 2);
-            if (sortedArray[middle] === key) {
-                return middle;
-            }
-            else if (sortedArray[middle] < key) {
-                start = middle + 1;
-            }
-            else {
-                end = middle - 1;
-            }
 let oldActiveElement = null;
 function pseudocodeOnClick() {
     let activeElement = document.activeElement;
@@ -291,34 +286,7 @@ function splitHtmlElement(element, index) {
             const afterElement = createPseudocodeSpan(afterText, activeElementCodeIndex);
             element.after(afterElement);
         }
-        return -1;
     }
-  
-    binarySearch([201, 176, 90, 63, 12], 90);
-}
-function algBubbleSort() {
-    function bubbleSort(arr) {
-        var i, j;
-        var len = arr.length;
-        var isSwapped = false;
-        for (i = 0; i < len; i++) {
-            isSwapped = false;
-            for (j = 0; j < len; j++) {
-                if (arr[j] > arr[j + 1]) {
-                    var temp = arr[j];
-                    arr[j] = arr[j + 1];
-                    arr[j + 1] = temp;
-                    isSwapped = true;
-                }
-            }
-            if (!isSwapped) {
-                break;
-            }
-        }
-        console.log(arr);
-    }
-    bubbleSort([243, 45, 23, 356, 3, 5346, 35, 5]);
-
 }
 function createPseudocodeSpan(text, codeIndex) {
     const element = document.createElement("span");
@@ -365,20 +333,20 @@ function algBinarySearch() {
         }
         return -1;
     }
-    binarySearch([167, 124, 91, 63, 42, 22, 14, 7, 3], 14);
+    binarySearch([201, 176, 90, 63, 12, 1], 12);
 }
 function algBubbleSort() {
-    function bubbleSort(arr) {
+    function bubbleSort(arrary) {
         var i, j;
-        var len = arr.length;
+        var len = arrary.length;
         var isSwapped = false;
         for (i = 0; i < len; i++) {
             isSwapped = false;
             for (j = 0; j < len; j++) {
-                if (arr[j] > arr[j + 1]) {
-                    var temp = arr[j];
-                    arr[j] = arr[j + 1];
-                    arr[j + 1] = temp;
+                if (arrary[j] > arrary[j + 1]) {
+                    var temp = arrary[j];
+                    arrary[j] = arrary[j + 1];
+                    arrary[j + 1] = temp;
                     isSwapped = true;
                 }
             }
@@ -386,8 +354,9 @@ function algBubbleSort() {
                 break;
             }
         }
+        return arrary;
     }
-    bubbleSort([5, 45, 23, 243, 35]);
+    bubbleSort([243, 45, 23, 356, 3, 5346, 35, 5]);
 }
 function algMergeSort() {
     function mergeSort(array) {
@@ -424,7 +393,6 @@ function algMergeSort() {
                 rIndex++;
             }
         }
-        console.log(array);
         return array;
     }
     mergeSort([5, 2, 3, 1, 58]);
