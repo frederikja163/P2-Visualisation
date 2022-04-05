@@ -5,13 +5,13 @@ let currentPromise: Promise<void>;
 let resolveCurrentPromise: Function;
 
 let codeFunction:Function | null = null;
-let stopRunning: boolean = false;
+let isStopping: boolean = false;
 let awaitingPromise: boolean = false;
 
-/** stoping the current running of code by resolving all promises*/
+/** Stopping the current running of code by resolving all promises*/
 function stopCode(): void{
 	if(codeFunction != null) {
-		stopRunning = true
+		isStopping = true
 		if(awaitingPromise){
 			resolveCurrentPromise();
 		}
@@ -28,9 +28,9 @@ async function runCode(): Promise<void>{
 
 	// Running function.
 	if(codeFunction != null) {
-		stopRunning = false;
+		isStopping = false;
 		await codeFunction();
-		stopRunning = false;
+		isStopping = false;
 	}
 }
 
@@ -129,7 +129,7 @@ async function debug(line: number): Promise<boolean>{
 	// Adding/removing highligting and waiting by using a promise.
 	highLight(line);
 	
-	if(!stopRunning){
+	if(!isStopping){
 		awaitingPromise = true;
 		await currentPromise;
 		awaitingPromise = false;

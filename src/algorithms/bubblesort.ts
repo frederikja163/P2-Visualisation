@@ -21,7 +21,7 @@ function algBubbleSort(){
           }
       }
   
-      // IF no two elements were swapped by inner loop, then break 
+      // If no two elements were swapped by inner loop, then break 
   
       if(!isSwapped){
         break;
