@@ -27,21 +27,25 @@ function wrapStrings(elementTag : string, functionString : string) : string {
         // insert indentation outside of <p> tag
         lines[i] = `${"&nbsp;".repeat(indents)}<${elementTag} index="${i}">${trimmedStr}</${elementTag}></br>`;
     }
-    
 
-    //Each word correlates to a color. 
-    //To change color, find the index of the word below, 
-    //and change index position in color.
-    // i.e. word[3] is console.log, corresponding color is color[3] which is magenta.
-    let word : string[] = ['for', 'let', 'if', 'console.log', 'function', 'switch', 'while', 'do'];
-    let color : string[] = ['red', 'green', 'blue', 'magenta', 'gray', 'red', 'red', 'red',];
+    //Syntax highlight. To add another word/color, simply add another element to highlight.
+    type Highlight = {word: string, color : string};
+    const highlight: Highlight[] = [
+    {word : "for", color : "red"}, 
+    {word : "let", color : "green"}, 
+    {word : "if", color : "blue"}, 
+    {word : "console.log", color : "magenta"}, 
+    {word : "function", color : "gray"}, 
+    {word : "switch", color : "red"}, 
+    {word : "while", color : "red"}, 
+    {word : "do", color : "red"}];  
     for(let i : number = 0; i < lines.length; i++){
-        for(let k : number = 0; k < word.length; k++)
-            if(lines[i].includes(word[k])){
-                lines[i] = lines[i].replace(word[k],`<span style="color: ${color[k]};">${word[k]}</span>`);
+        for(let k : number = 0; k < highlight.length; k++){
+            if(lines[i].includes(highlight[k].word)){   
+                lines[i] = lines[i].replace(highlight[k].word,`<span style="color: ${highlight[k].color};">${highlight[k].word}</span>`);
             }
+        }
     }
-
     // create single string from array of lines
     return lines.join("");
 }
