@@ -1,21 +1,43 @@
 const breakpointClass = "breakpoint";
+const selectedCode = "selectedCode";
 function breakpoint(code) {
     const lines = code.querySelectorAll("span");
     for (let i = 0; i < lines.length; i++) {
-        lines[i].addEventListener("click", function () {
-            if (lines[i].classList.contains(breakpointClass)) {
-                lines[i].classList.remove(breakpointClass);
-            }
-            else {
-                lines[i].classList.add(breakpointClass);
-            }
-        });
+        lines[i].addEventListener("dblclick", statementOnDblClick);
+        lines[i].addEventListener("click", () => statementOnClick(lines[i]));
+    }
+}
+function statementOnDblClick() {
+    var _a;
+    (_a = document.getSelection()) === null || _a === void 0 ? void 0 : _a.removeAllRanges();
+}
+function statementOnClick(line) {
+    if (line.classList.contains(breakpointClass)) {
+        if (line.id === selectedCode) {
+            line.classList.remove(breakpointClass);
+            line.id = "";
+        }
+        else {
+            select(line);
+        }
+    }
+    else {
+        line.classList.add(breakpointClass);
+        select(line);
+    }
+}
+function select(line) {
+    const selected = document.getElementById(selectedCode);
+    line.id = selectedCode;
+    if (selected != null) {
+        selected.id = "";
     }
 }
 let currentPromise;
 let resolveCurrentPromise;
 function runCode() {
-    const lineCount = document.querySelectorAll("p").length;
+    var _a, _b;
+    const lineCount = (_b = (_a = document.getElementById("code")) === null || _a === void 0 ? void 0 : _a.querySelectorAll("span")) === null || _b === void 0 ? void 0 : _b.length;
     for (let i = 0; i < lineCount; i++) {
         removeHighLight(i);
     }
@@ -29,14 +51,16 @@ function next() {
     resolveCurrentPromise();
 }
 function parseCode() {
+    var _a;
     let code = "";
-    const lines = document.querySelectorAll("span");
+    const lines = (_a = document.getElementById("code")) === null || _a === void 0 ? void 0 : _a.querySelectorAll("span");
     for (let i = 0; i < lines.length; i++) {
         let currentLine = lines[i].innerHTML.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
         currentLine = addAsync(currentLine);
         currentLine = addBreakpoint(currentLine, lines, i);
         code += currentLine + "\n";
     }
+    console.log(code);
     return new Function('return ' + code)();
 }
 function addAsync(currentLine) {
@@ -50,23 +74,23 @@ function addBreakpoint(currentLine, lines, lineNum) {
     if (lineNum == lines.length - 1) {
         return currentLine;
     }
-    if (!lines[lineNum].classList.contains(breakpointClass)) {
+    if (!(lines[lineNum].classList.contains(breakpointClass))) {
         return currentLine;
     }
-    let indexOfDo = currentLine.indexOf("do");
-    let indexOfWhile = currentLine.indexOf("while");
-    let indexOfFor = currentLine.indexOf("for");
-    let indexOfIf = currentLine.indexOf("if");
-    let indexOfSwitch = currentLine.indexOf("switch");
-    if (indexOfDo != -1 || indexOfSwitch != -1) {
-        currentLine = `await debug(${lineNum});\n` + currentLine;
-    }
-    else if (indexOfWhile != -1 || indexOfFor != -1 || indexOfIf != -1) {
-        let indexOfExpr = indexOfFor != -1 ? currentLine.indexOf(";") : currentLine.indexOf("(");
+    let hasWhile = currentLine.includes("while");
+    let hasFor = currentLine.includes("for");
+    let hasIf = currentLine.includes("if");
+    let hasElse = currentLine.includes("else");
+    let hasFunction = currentLine.includes("function");
+    if (hasWhile || hasFor || hasIf) {
+        let indexOfExpr = hasFor ? currentLine.indexOf(";") : currentLine.indexOf("(");
         currentLine = currentLine.substring(0, indexOfExpr + 1) + `await debug(${lineNum}) && ` + currentLine.substring(indexOfExpr + 1, currentLine.length);
     }
-    else {
+    else if (hasElse || hasFunction) {
         currentLine += `\nawait debug(${lineNum});`;
+    }
+    else {
+        currentLine = `await debug(${lineNum});\n` + currentLine;
     }
     return currentLine;
 }
@@ -82,13 +106,9 @@ async function debug(line) {
 function darkMode() {
     const bodyElement = document.body;
     const darkModeBtn = document.querySelector("#darkModeBtn");
-    const rightTextBox = document.querySelector("#righttextbox");
-    const dropdownContent = document.querySelector(".dropdown-content");
-    rightTextBox.classList.toggle("dark-mode");
     bodyElement.classList.toggle("dark-mode");
-    dropdownContent.classList.toggle("dark-mode");
     bodyElement.classList.contains("dark-mode") ? darkModeBtn.value = "Light Mode" :
-        darkModeBtn.value = "Dark Mode ";
+        darkModeBtn.value = "Dark Mode";
 }
 function displayCodeAsString(textBox, printFunction) {
     let functionString = printFunction.toString();
@@ -111,122 +131,190 @@ function wrapStrings(elementTag, functionString) {
 }
 let options = document.querySelectorAll(".dropdown-content > a");
 let left = document.querySelector("#left");
-for (let option of options) {
-    option.addEventListener("click", function dropDownSelector(event) {
+for (let i = 0; i < options.length; i++) {
+    options[i].addEventListener("click", function dropDownSelector(event) {
         let dropdownBtn = document.querySelector(".dropdown > button");
         switch (event.target.id) {
             case "mergesort":
-                displayCodeAsString(left, algMergeSort);
-                dropdownBtn.innerHTML = "MergeSort";
+                if (left != null)
+                    displayCodeAsString(left, algMergeSort);
+                if (dropdownBtn != null)
+                    dropdownBtn.innerHTML = "MergeSort";
                 break;
             case "binarysearch":
-                displayCodeAsString(left, algBinarySearch);
-                dropdownBtn.innerHTML = "Binary Search";
+                if (left != null)
+                    displayCodeAsString(left, algBinarySearch);
+                if (dropdownBtn != null)
+                    dropdownBtn.innerHTML = "Binary Search";
                 break;
             case "bubblesort":
-                displayCodeAsString(left, algBubbleSort);
-                dropdownBtn.innerHTML = "Bubble Sort";
+                if (left != null)
+                    displayCodeAsString(left, algBubbleSort);
+                if (dropdownBtn != null)
+                    dropdownBtn.innerHTML = "Bubble Sort";
                 break;
         }
     });
 }
 function highLight(index) {
-    let currParagraph = document.querySelector("span[index=\"" + index + "\"]");
-    if (currParagraph != null)
-        currParagraph.classList.add("highlighted");
+    const codeSpans = document.querySelectorAll(`span[index=\"${index}\"]`);
+    for (let i = 0; i < codeSpans.length; i++) {
+        codeSpans[i].classList.add("highlighted");
+    }
 }
 function removeHighLight(index) {
-    let currParagraph = document.querySelector("span[index=\"" + index + "\"]");
-    if (currParagraph != null)
-        currParagraph.classList.remove("highlighted");
+    const codeSpans = document.querySelectorAll(`span[index=\"${index}\"]`);
+    for (let i = 0; i < codeSpans.length; i++) {
+        codeSpans[i].classList.remove("highlighted");
+    }
 }
 window.onload = main;
 function main() {
-    addEventListener("beforeunload", saveCodeToCookie);
-    addCodeFromCookie();
+
 }
-const colonIndicator = "<$SEMICOLON$>";
-const newlineIndicator = "<$NEWLINE$>";
-const codeVarName = "codeString";
-const pseuVarName = "pseudocodeString";
-function saveCodeToCookie() {
-    const codeElement = document.getElementById('left');
-    if (codeElement == null)
-        return;
-    const codeString = codeElement.innerHTML;
-    const pseudocodeElement = document.getElementById('righttextbox');
-    if (pseudocodeElement == null)
-        return;
-    const pseudocodeString = pseudocodeElement.value;
-    setCookieVariable(codeVarName, codeString);
-    setCookieVariable(pseuVarName, pseudocodeString);
-}
-function addCodeFromCookie() {
-    const codeString = getCookieVariable(codeVarName);
-    const pseudocodeString = getCookieVariable(pseuVarName);
-    if (codeString === "" || pseudocodeString === "")
-        return;
-    const codeElement = document.getElementById('left');
-    if (codeElement == null)
-        return;
-    codeElement.innerHTML = codeString;
-    const pseudocodeElement = document.getElementById('righttextbox');
-    if (pseudocodeElement == null)
-        return;
-    pseudocodeElement.value = pseudocodeString;
-}
-function setCookieVariable(variableName, value) {
-    document.cookie = variableName + `=` + value.replaceAll(";", colonIndicator).replaceAll("\n", newlineIndicator) + `;`;
-}
-function getCookieVariable(variableName) {
-    const cookieInfo = document.cookie;
-    const variableIndex = cookieInfo.indexOf(variableName);
-    if (variableIndex == -1)
-        return "";
-    const valueIndex = variableIndex + variableName.length + 1;
-    let valueEndIndex = cookieInfo.substring(valueIndex, cookieInfo.length).indexOf(";") + valueIndex;
-    if (valueEndIndex == valueIndex - 1)
-        valueEndIndex = cookieInfo.length;
-    return cookieInfo.substring(valueIndex, valueEndIndex).replaceAll(colonIndicator, ";").replaceAll(newlineIndicator, "\n");
-}
-function algBinarySearch(sortedArray, key) {
-    let start = 0;
-    let end = sortedArray.length - 1;
-    while (start <= end) {
-        let middle = Math.floor((start + end) / 2);
-        if (sortedArray[middle] === key) {
-            return middle;
-        }
-        else if (sortedArray[middle] < key) {
-            start = middle + 1;
-        }
-        else {
-            end = middle - 1;
-        }
-    }
-    return -1;
-}
-function algBubbleSort(arr) {
-    var i, j;
-    var len = arr.length;
-    var isSwapped = false;
-    for (i = 0; i < len; i++) {
-        isSwapped = false;
-        for (j = 0; j < len; j++) {
-            if (arr[j] > arr[j + 1]) {
-                var temp = arr[j];
-                arr[j] = arr[j + 1];
-                arr[j + 1] = temp;
-                isSwapped = true;
+let oldActiveElement = null;
+function pseudocodeOnClick() {
+    let activeElement = document.activeElement;
+    if (!(activeElement instanceof HTMLSpanElement)) {
+        activeElement = document.querySelector("#right > span:last-child");
+        if (activeElement != null) {
+            const textContent = activeElement.textContent;
+            if (textContent) {
+                setCaretPosition(activeElement, textContent.length);
             }
         }
-        if (!isSwapped) {
-            break;
+    }
+    if (activeElement != oldActiveElement && oldActiveElement != null && oldActiveElement.innerHTML === "") {
+        const prevElement = oldActiveElement.previousElementSibling;
+        const nextElement = oldActiveElement.nextElementSibling;
+        const prevIndex = prevElement === null || prevElement === void 0 ? void 0 : prevElement.getAttribute("index");
+        const nextIndex = nextElement === null || nextElement === void 0 ? void 0 : nextElement.getAttribute("index");
+        if (prevElement != null && nextElement != null && prevIndex === nextIndex) {
+            const prevText = prevElement.textContent;
+            const nextText = nextElement.textContent;
+            if (prevText != null && nextText != null && prevIndex != null) {
+                const mergedElement = createPseudocodeSpan(prevText + nextText, prevIndex);
+                const previous = oldActiveElement.previousElementSibling;
+                const next = oldActiveElement.nextElementSibling;
+                if (previous != null && next != null) {
+                    previous.remove();
+                    next.remove();
+                    oldActiveElement.replaceWith(mergedElement);
+                }
+            }
+        }
+        else {
+            oldActiveElement.remove();
         }
     }
-    console.log(arr);
+    const caretPosition = getCaretPosition();
+    const selectedBreakpoint = document.querySelector("#selectedCode");
+    let breakpointIndex = "-1";
+    if (selectedBreakpoint != null) {
+        breakpointIndex = selectedBreakpoint.getAttribute("index");
+    }
+    if (activeElement != null && activeElement.getAttribute("index") === breakpointIndex) {
+        oldActiveElement = activeElement;
+    }
+    else if (activeElement != null && breakpointIndex != null) {
+        splitHtmlElement(activeElement, caretPosition);
+        const newElement = createPseudocodeSpan("", breakpointIndex);
+        activeElement.replaceWith(newElement);
+        setCaretPosition(newElement, 0);
+        oldActiveElement = newElement;
+    }
 }
-var arr = [243, 45, 23, 356, 3, 5346, 35, 5];
+function splitHtmlElement(element, index) {
+    const text = element.innerText;
+    const beforeText = text.slice(0, index);
+    const afterText = text.slice(index, text.length);
+    const activeElementCodeIndex = element.getAttribute("index");
+    if (activeElementCodeIndex != null) {
+        if (beforeText === "") {
+            const afterElement = createPseudocodeSpan(afterText, activeElementCodeIndex);
+            element.after(afterElement);
+        }
+        else if (afterText === "") {
+            const beforeElement = createPseudocodeSpan(beforeText, activeElementCodeIndex);
+            element.before(beforeElement);
+        }
+        else {
+            const beforeElement = createPseudocodeSpan(beforeText, activeElementCodeIndex);
+            element.before(beforeElement);
+            const afterElement = createPseudocodeSpan(afterText, activeElementCodeIndex);
+            element.after(afterElement);
+        }
+    }
+}
+function createPseudocodeSpan(text, codeIndex) {
+    const element = document.createElement("span");
+    element.setAttribute("contenteditable", "true");
+    element.setAttribute("index", codeIndex);
+    element.innerText = text;
+    return element;
+}
+function setCaretPosition(element, caretPos) {
+    const selection = window.getSelection();
+    if (selection == null)
+        return;
+    const range = document.createRange();
+    selection.removeAllRanges();
+    range.selectNodeContents(element);
+    range.collapse(false);
+    range.setStart(element, caretPos);
+    range.setEnd(element, caretPos);
+    selection.addRange(range);
+    element.focus();
+}
+function getCaretPosition() {
+    const selection = window.getSelection();
+    if (selection == null)
+        return -1;
+    selection.getRangeAt(0);
+    return selection.getRangeAt(0).startOffset;
+}
+function algBinarySearch() {
+    function binarySearch(sortedArray, key) {
+        let start = 0;
+        let end = sortedArray.length - 1;
+        while (start <= end) {
+            let middle = Math.floor((start + end) / 2);
+            if (sortedArray[middle] === key) {
+                return middle;
+            }
+            else if (sortedArray[middle] < key) {
+                start = middle + 1;
+            }
+            else {
+                end = middle - 1;
+            }
+        }
+        return -1;
+    }
+    binarySearch([167, 124, 91, 63, 42, 22, 14, 7, 3], 14);
+}
+function algBubbleSort() {
+    function bubbleSort(arr) {
+        var i, j;
+        var len = arr.length;
+        var isSwapped = false;
+        for (i = 0; i < len; i++) {
+            isSwapped = false;
+            for (j = 0; j < len; j++) {
+                if (arr[j] > arr[j + 1]) {
+                    var temp = arr[j];
+                    arr[j] = arr[j + 1];
+                    arr[j + 1] = temp;
+                    isSwapped = true;
+                }
+            }
+            if (!isSwapped) {
+                break;
+            }
+        }
+    }
+    bubbleSort([5, 45, 23, 243, 35]);
+}
 function algMergeSort() {
     function mergeSort(array) {
         if (array.length <= 1) {
