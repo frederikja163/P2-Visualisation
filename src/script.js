@@ -34,6 +34,7 @@ function statementOnClick(line) {
         line.classList.add(breakpointClass);
         select(line);
     }
+    parseCode();
 }
 function select(line) {
     const selected = document.getElementById(selectedCode);
@@ -44,38 +45,83 @@ function select(line) {
 }
 let currentPromise;
 let resolveCurrentPromise;
-function runCode() {
-    var _a, _b;
-    const lineCount = (_b = (_a = document.getElementById("code")) === null || _a === void 0 ? void 0 : _a.querySelectorAll("span")) === null || _b === void 0 ? void 0 : _b.length;
-    for (let i = 0; i < lineCount; i++) {
-        removeHighLight(i);
+let codeFunction = null;
+let isStopping = false;
+let awaitingPromise = false;
+let isRunning = false;
+function stopCode() {
+    if (codeFunction != null && isRunning && awaitingPromise) {
+        isStopping = true;
+        resolveCurrentPromise();
     }
+    removeAllHighlighting();
+    setButtonToRun();
+}
+function runCode() {
+    parseCode();
     currentPromise = new Promise((resolve, reject) => {
         resolveCurrentPromise = resolve;
     });
-    let code = parseCode();
-    code();
+    if (codeFunction != null) {
+        isStopping = false;
+        isRunning = true;
+        setButtonToStop();
+        codeFunction().then((resolve, reject) => {
+            setButtonToRun();
+            isRunning = false;
+            isStopping = false;
+            removeAllHighlighting();
+        });
+    }
+    else {
+        removeAllHighlighting();
+    }
+}
+function setButtonToStop() {
+    const runButton = document.getElementById("runStopButton");
+    if (runButton != null) {
+        runButton.value = "Stop";
+        runButton.onclick = stopCode;
+    }
+}
+function setButtonToRun() {
+    const runButton = document.getElementById("runStopButton");
+    if (runButton != null) {
+        runButton.value = "Run";
+        runButton.onclick = runCode;
+    }
 }
 function next() {
     resolveCurrentPromise();
 }
 function parseCode() {
     var _a;
+    stopCode();
     let code = "";
     const lines = (_a = document.getElementById("code")) === null || _a === void 0 ? void 0 : _a.querySelectorAll("span");
     for (let i = 0; i < lines.length; i++) {
         let currentLine = lines[i].innerHTML.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+        currentLine = addAwait(currentLine, lines.length, i);
         currentLine = addAsync(currentLine);
         currentLine = addBreakpoint(currentLine, lines, i);
         code += currentLine + "\n";
     }
-    console.log(code);
-    return new Function('return ' + code)();
+    codeFunction = new Function('return ' + code)();
 }
 function addAsync(currentLine) {
     let indexOfFunction = currentLine.indexOf("function");
     if (indexOfFunction != -1) {
         return currentLine.substring(0, indexOfFunction) + "async " + currentLine.substring(indexOfFunction, currentLine.length);
+    }
+    return currentLine;
+}
+function addAwait(currentLine, lineCount, lineNum) {
+    const hasStartBracket = currentLine.includes("(");
+    const hasEndBracket = currentLine.includes(")");
+    const hasStartCurleyBracket = currentLine.includes("{");
+    const hasBeginCurleyBracket = currentLine.includes("}");
+    if (hasStartBracket && hasEndBracket && !hasStartCurleyBracket && !hasBeginCurleyBracket) {
+        return "await " + currentLine;
     }
     return currentLine;
 }
@@ -105,9 +151,13 @@ function addBreakpoint(currentLine, lines, lineNum) {
 }
 function debug(line) {
     return __awaiter(this, void 0, void 0, function* () {
-        highLight(line);
-        yield currentPromise;
-        removeHighLight(line);
+        if (!isStopping) {
+            awaitingPromise = true;
+            highLight(line);
+            yield currentPromise;
+            removeHighLight(line);
+            awaitingPromise = false;
+        }
         currentPromise = new Promise((resolve, reject) => {
             resolveCurrentPromise = resolve;
         });
@@ -179,8 +229,16 @@ function removeHighLight(index) {
         codeSpans[i].classList.remove("highlighted");
     }
 }
+function removeAllHighlighting() {
+    var _a, _b;
+    const lineCount = (_b = (_a = document.getElementById("code")) === null || _a === void 0 ? void 0 : _a.querySelectorAll("span")) === null || _b === void 0 ? void 0 : _b.length;
+    for (let i = 0; i < lineCount; i++) {
+        removeHighLight(i);
+    }
+}
 window.onload = main;
 function main() {
+    setButtonToRun();
     const left = document.querySelector("#left");
     const right = document.querySelector("#right");
     if (right != null)
@@ -310,20 +368,20 @@ function algBinarySearch() {
         }
         return -1;
     }
-    binarySearch([167, 124, 91, 63, 42, 22, 14, 7, 3], 14);
+    binarySearch([201, 176, 90, 63, 12, 1], 12);
 }
 function algBubbleSort() {
-    function bubbleSort(arr) {
+    function bubbleSort(arrary) {
         var i, j;
-        var len = arr.length;
+        var len = arrary.length;
         var isSwapped = false;
         for (i = 0; i < len; i++) {
             isSwapped = false;
             for (j = 0; j < len; j++) {
-                if (arr[j] > arr[j + 1]) {
-                    var temp = arr[j];
-                    arr[j] = arr[j + 1];
-                    arr[j + 1] = temp;
+                if (arrary[j] > arrary[j + 1]) {
+                    var temp = arrary[j];
+                    arrary[j] = arrary[j + 1];
+                    arrary[j + 1] = temp;
                     isSwapped = true;
                 }
             }
@@ -331,8 +389,9 @@ function algBubbleSort() {
                 break;
             }
         }
+        return arrary;
     }
-    bubbleSort([5, 45, 23, 243, 35]);
+    bubbleSort([243, 45, 23, 356, 3, 5346, 35, 5]);
 }
 function algMergeSort() {
     function mergeSort(array) {
@@ -342,7 +401,6 @@ function algMergeSort() {
         const middle = Math.floor(array.length);
         const left = array.slice(0, middle);
         const right = array.slice(middle);
-        console.log(array);
         return merge(mergeSort(left), mergeSort(right));
     }
     function merge(left, right) {
@@ -369,7 +427,6 @@ function algMergeSort() {
                 rIndex++;
             }
         }
-        console.log(array);
         return array;
     }
     mergeSort([5, 2, 3, 1, 58]);

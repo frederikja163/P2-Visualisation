@@ -1,15 +1,14 @@
 function algMergeSort(){
-  
+
   function mergeSort(array:number[]):number[]{
       if(array.length <=1){
         return array;
       }
-  
+      
       const middle = Math.floor(array.length);
       const left = array.slice(0, middle);
       const right = array.slice(middle);
   
-      console.log(array);
       return merge(mergeSort(left),mergeSort(right));
     }
   
@@ -39,9 +38,8 @@ function algMergeSort(){
         rIndex++;
       }
     }
-    console.log(array);
     return array;
   }
   
-  mergeSort([5,2,3,1,58]);
-}
+  mergeSort([5,2,3,1,58]); 
+} 

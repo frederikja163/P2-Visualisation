@@ -17,8 +17,7 @@ function statementOnDblClick(): void
     document.getSelection()?.removeAllRanges();
 }
 
-function statementOnClick(line: HTMLElement): void
-{
+function statementOnClick(line: HTMLElement): void{
     if (line.classList.contains(breakpointClass))
     {
         if (line.id === selectedCode) // Breakpoint, selected
@@ -40,6 +39,10 @@ function statementOnClick(line: HTMLElement): void
         // Select
         select(line);
     }
+    
+    //reconstructs the code
+    parseCode(); 
+    
 }
 
 
