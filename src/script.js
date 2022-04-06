@@ -21,22 +21,20 @@ function statementOnDblClick() {
     (_a = document.getSelection()) === null || _a === void 0 ? void 0 : _a.removeAllRanges();
 }
 function statementOnClick(line) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (line.classList.contains(breakpointClass)) {
-            if (line.id === selectedCode) {
-                line.classList.remove(breakpointClass);
-                line.id = "";
-            }
-            else {
-                select(line);
-            }
+    if (line.classList.contains(breakpointClass)) {
+        if (line.id === selectedCode) {
+            line.classList.remove(breakpointClass);
+            line.id = "";
         }
         else {
-            line.classList.add(breakpointClass);
             select(line);
         }
-        yield parseCode();
-    });
+    }
+    else {
+        line.classList.add(breakpointClass);
+        select(line);
+    }
+    parseCode();
 }
 function select(line) {
     const selected = document.getElementById(selectedCode);
@@ -52,33 +50,32 @@ let isStopping = false;
 let awaitingPromise = false;
 let isRunning = false;
 function stopCode() {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (codeFunction != null && isRunning && awaitingPromise) {
-            isStopping = true;
-            resolveCurrentPromise();
-            yield codeFunction();
-        }
-        removeAllHighlighting();
-        setButtonToRun();
-    });
+    if (codeFunction != null && isRunning && awaitingPromise) {
+        isStopping = true;
+        resolveCurrentPromise();
+    }
+    removeAllHighlighting();
+    setButtonToRun();
 }
 function runCode() {
-    return __awaiter(this, void 0, void 0, function* () {
-        yield parseCode();
-        currentPromise = new Promise((resolve, reject) => {
-            resolveCurrentPromise = resolve;
-        });
-        if (codeFunction != null) {
-            isStopping = false;
-            isRunning = true;
-            setButtonToStop();
-            yield codeFunction();
+    parseCode();
+    currentPromise = new Promise((resolve, reject) => {
+        resolveCurrentPromise = resolve;
+    });
+    if (codeFunction != null) {
+        isStopping = false;
+        isRunning = true;
+        setButtonToStop();
+        codeFunction().then((resolve, reject) => {
             setButtonToRun();
             isRunning = false;
             isStopping = false;
-        }
+            removeAllHighlighting();
+        });
+    }
+    else {
         removeAllHighlighting();
-    });
+    }
 }
 function setButtonToStop() {
     const runButton = document.getElementById("runStopButton");
@@ -99,19 +96,17 @@ function next() {
 }
 function parseCode() {
     var _a;
-    return __awaiter(this, void 0, void 0, function* () {
-        yield stopCode();
-        let code = "";
-        const lines = (_a = document.getElementById("code")) === null || _a === void 0 ? void 0 : _a.querySelectorAll("span");
-        for (let i = 0; i < lines.length; i++) {
-            let currentLine = lines[i].innerHTML.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
-            currentLine = addAwait(currentLine, lines.length, i);
-            currentLine = addAsync(currentLine);
-            currentLine = addBreakpoint(currentLine, lines, i);
-            code += currentLine + "\n";
-        }
-        codeFunction = new Function('return ' + code)();
-    });
+    stopCode();
+    let code = "";
+    const lines = (_a = document.getElementById("code")) === null || _a === void 0 ? void 0 : _a.querySelectorAll("span");
+    for (let i = 0; i < lines.length; i++) {
+        let currentLine = lines[i].innerHTML.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+        currentLine = addAwait(currentLine, lines.length, i);
+        currentLine = addAsync(currentLine);
+        currentLine = addBreakpoint(currentLine, lines, i);
+        code += currentLine + "\n";
+    }
+    codeFunction = new Function('return ' + code)();
 }
 function addAsync(currentLine) {
     let indexOfFunction = currentLine.indexOf("function");

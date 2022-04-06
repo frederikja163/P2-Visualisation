@@ -10,26 +10,22 @@ let awaitingPromise: boolean = false;
 let isRunning: boolean = false;
 
 /** Stopping the current running of code by resolving all promises*/
-async function stopCode(): Promise<void>{
+function stopCode(): void{
 	
 	if(codeFunction != null && isRunning && awaitingPromise) {
 		isStopping = true;
-		
 		resolveCurrentPromise();
-		await codeFunction();
-		
 	}
 
 	removeAllHighlighting();
-
 	setButtonToRun();
 }
 
 /** Gets the breakable code and runs the code until the first breakpoint.*/
-async function runCode(): Promise<void>{
+function runCode(): void{
 	
-	await parseCode();
-
+	parseCode();
+	
 	// Setting up promises.
 	currentPromise = new Promise((resolve:Function, reject:Function) => { 
 		resolveCurrentPromise = resolve; 
@@ -40,13 +36,17 @@ async function runCode(): Promise<void>{
 		isStopping = false;
 		isRunning = true;
 		setButtonToStop();
-		await codeFunction();
-		setButtonToRun();
-		isRunning = false;
-		isStopping = false;
+		codeFunction().then((resolve:Function, reject: Function) => {
+			setButtonToRun();
+			isRunning = false;
+			isStopping = false;
+
+			removeAllHighlighting();
+		});
+	}else{
+		removeAllHighlighting();
 	}
 
-	removeAllHighlighting();
 }
 
 /** Setting the run button to be a stop button.*/
@@ -76,9 +76,9 @@ function next():void{
 }
 
 /** This function gets all lines of code, adds breakpoints, and returns this as a function. */
-async function parseCode(): Promise<void>{
+function parseCode(): void{
 
-	await stopCode();
+	stopCode();
 
 	let code: string = "";
 

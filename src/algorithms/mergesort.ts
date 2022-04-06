@@ -4,7 +4,7 @@ function algMergeSort(){
       if(array.length <=1){
         return array;
       }
-  
+      
       const middle = Math.floor(array.length);
       const left = array.slice(0, middle);
       const right = array.slice(middle);
