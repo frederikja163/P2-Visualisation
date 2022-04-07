@@ -50,9 +50,8 @@ let isStopping = false;
 let awaitingPromise = false;
 let isRunning = false;
 function stopCode() {
-    if (codeFunction != null && isRunning && awaitingPromise) {
+    if (isRunning) {
         isStopping = true;
-        resolveCurrentPromise();
     }
     removeAllHighlighting();
     setButtonToRun();
@@ -99,29 +98,38 @@ function parseCode() {
     stopCode();
     let code = "";
     const lines = (_a = document.getElementById("code")) === null || _a === void 0 ? void 0 : _a.querySelectorAll("span");
+    let functionNames = getFunctionNames(lines);
     for (let i = 0; i < lines.length; i++) {
         let currentLine = lines[i].innerHTML.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
-        currentLine = addAwait(currentLine, lines.length, i);
-        currentLine = addAsync(currentLine);
+        currentLine = addAsyncAwait(currentLine, functionNames);
         currentLine = addBreakpoint(currentLine, lines, i);
         code += currentLine + "\n";
     }
     codeFunction = new Function('return ' + code)();
 }
-function addAsync(currentLine) {
+function getFunctionNames(lines) {
+    let functionNames = [];
+    for (let i = 0; i < lines.length; i++) {
+        let currentLine = lines[i].innerHTML.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+        let indexOfFunction = currentLine.indexOf("function");
+        if (indexOfFunction != -1) {
+            functionNames.push(currentLine.substring(indexOfFunction + "function".length + 1, currentLine.indexOf("(")));
+        }
+    }
+    return functionNames;
+}
+function addAsyncAwait(currentLine, functionNames) {
     let indexOfFunction = currentLine.indexOf("function");
     if (indexOfFunction != -1) {
         return currentLine.substring(0, indexOfFunction) + "async " + currentLine.substring(indexOfFunction, currentLine.length);
     }
-    return currentLine;
-}
-function addAwait(currentLine, lineCount, lineNum) {
-    const hasStartBracket = currentLine.includes("(");
-    const hasEndBracket = currentLine.includes(")");
-    const hasStartCurleyBracket = currentLine.includes("{");
-    const hasBeginCurleyBracket = currentLine.includes("}");
-    if (hasStartBracket && hasEndBracket && !hasStartCurleyBracket && !hasBeginCurleyBracket) {
-        return "await " + currentLine;
+    else {
+        for (let i = 0; i < functionNames.length; i++) {
+            let indexOfFunction = currentLine.indexOf(functionNames[i]);
+            if (indexOfFunction != -1) {
+                return currentLine.substring(0, indexOfFunction) + "await " + currentLine.substring(indexOfFunction, currentLine.length);
+            }
+        }
     }
     return currentLine;
 }
@@ -190,32 +198,34 @@ function wrapStrings(elementTag, functionString) {
     }
     return lines.join("");
 }
-let options = document.querySelectorAll(".dropdown-content > a");
-let left = document.querySelector("#left");
-for (let i = 0; i < options.length; i++) {
-    options[i].addEventListener("click", function dropDownSelector(event) {
-        let dropdownBtn = document.querySelector(".dropdown > button");
-        switch (event.target.id) {
-            case "mergesort":
-                if (left != null)
-                    displayCodeAsString(left, algMergeSort);
-                if (dropdownBtn != null)
-                    dropdownBtn.innerHTML = "MergeSort";
-                break;
-            case "binarysearch":
-                if (left != null)
-                    displayCodeAsString(left, algBinarySearch);
-                if (dropdownBtn != null)
-                    dropdownBtn.innerHTML = "Binary Search";
-                break;
-            case "bubblesort":
-                if (left != null)
-                    displayCodeAsString(left, algBubbleSort);
-                if (dropdownBtn != null)
-                    dropdownBtn.innerHTML = "Bubble Sort";
-                break;
-        }
-    });
+function initDropDown() {
+    let options = document.querySelectorAll(".dropdown-content > a");
+    let left = document.querySelector("#left");
+    for (let i = 0; i < options.length; i++) {
+        options[i].addEventListener("click", function dropDownSelector(event) {
+            let dropdownBtn = document.querySelector(".dropdown > button");
+            switch (event.target.id) {
+                case "mergesort":
+                    if (left != null)
+                        displayCodeAsString(left, algMergeSort);
+                    if (dropdownBtn != null)
+                        dropdownBtn.innerHTML = "MergeSort";
+                    break;
+                case "binarysearch":
+                    if (left != null)
+                        displayCodeAsString(left, algBinarySearch);
+                    if (dropdownBtn != null)
+                        dropdownBtn.innerHTML = "Binary Search";
+                    break;
+                case "bubblesort":
+                    if (left != null)
+                        displayCodeAsString(left, algBubbleSort);
+                    if (dropdownBtn != null)
+                        dropdownBtn.innerHTML = "Bubble Sort";
+                    break;
+            }
+        });
+    }
 }
 function highLight(index) {
     const codeSpans = document.querySelectorAll(`span[index=\"${index}\"]`);
@@ -239,6 +249,7 @@ function removeAllHighlighting() {
 window.onload = main;
 function main() {
     setButtonToRun();
+    initDropDown();
     const left = document.querySelector("#left");
     const right = document.querySelector("#right");
     if (right != null)
@@ -371,17 +382,17 @@ function algBinarySearch() {
     binarySearch([201, 176, 90, 63, 12, 1], 12);
 }
 function algBubbleSort() {
-    function bubbleSort(arrary) {
+    function bubbleSort(array) {
         var i, j;
-        var len = arrary.length;
+        var len = array.length;
         var isSwapped = false;
         for (i = 0; i < len; i++) {
             isSwapped = false;
             for (j = 0; j < len; j++) {
-                if (arrary[j] > arrary[j + 1]) {
-                    var temp = arrary[j];
-                    arrary[j] = arrary[j + 1];
-                    arrary[j + 1] = temp;
+                if (array[j] > array[j + 1]) {
+                    var temp = array[j];
+                    array[j] = array[j + 1];
+                    array[j + 1] = temp;
                     isSwapped = true;
                 }
             }
@@ -389,7 +400,7 @@ function algBubbleSort() {
                 break;
             }
         }
-        return arrary;
+        return array;
     }
     bubbleSort([243, 45, 23, 356, 3, 5346, 35, 5]);
 }
@@ -398,10 +409,12 @@ function algMergeSort() {
         if (array.length <= 1) {
             return array;
         }
-        const middle = Math.floor(array.length);
+        const middle = Math.floor(array.length / 2);
         const left = array.slice(0, middle);
         const right = array.slice(middle);
-        return merge(mergeSort(left), mergeSort(right));
+        const sortedLeft = mergeSort(left);
+        const sortedRight = mergeSort(right);
+        return merge(sortedLeft, sortedRight);
     }
     function merge(left, right) {
         const array = [];
