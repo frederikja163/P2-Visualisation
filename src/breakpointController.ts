@@ -12,9 +12,8 @@ let isRunning: boolean = false;
 /** Stopping the current running of code by resolving all promises*/
 function stopCode(): void{
 	
-	if(codeFunction != null && isRunning && awaitingPromise) {
+	if(isRunning) {
 		isStopping = true;
-		resolveCurrentPromise();
 	}
 
 	removeAllHighlighting();
@@ -84,6 +83,7 @@ function parseCode(): void{
 
 	// Getting a list of all lines of code. 
     const lines: NodeListOf<HTMLSpanElement> = <NodeListOf<HTMLSpanElement>>document.getElementById("code")?.querySelectorAll("span");
+	let functionNames: string[] = getFunctionNames(lines);
 
 	// Adding each line of code to the code string.
 	for (let i: number = 0; i < lines.length; i++){
@@ -91,8 +91,7 @@ function parseCode(): void{
 		// Inserting the current line, but adding async in front of any function.
 		let currentLine: string = lines[i].innerHTML.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
 
-		currentLine = addAwait(currentLine, lines.length, i);
-		currentLine = addAsync(currentLine);
+		currentLine = addAsyncAwait(currentLine, functionNames);
 		currentLine = addBreakpoint(currentLine, lines, i); 
 
 		code += currentLine + "\n"
@@ -100,35 +99,45 @@ function parseCode(): void{
 
 	// Creating a function from the string.
 	codeFunction = new Function('return ' + code)();
+}
 
+/** Getting the names of all of the functions declared in codeFunction*/
+function getFunctionNames(lines: NodeListOf<HTMLSpanElement>): string[]{
+	let functionNames: string[] = [];
+
+	for(let i = 0; i < lines.length; i++){
+		let currentLine: string = lines[i].innerHTML.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
+		let indexOfFunction: number = currentLine.indexOf("function");
+		
+		if(indexOfFunction != -1){
+			functionNames.push(currentLine.substring(indexOfFunction + "function".length + 1, currentLine.indexOf("(")));
+		}
+	}
+	
+	return functionNames;
 }
 
 /** Adds async to the current line if a function is found.*/
-function addAsync(currentLine: string):string{
+function addAsyncAwait(currentLine: string, functionNames: string[]):string{
 	
 	// Getting index of function and adding async in front of it.
 	let indexOfFunction: number = currentLine.indexOf("function");
 		
 	if(indexOfFunction != -1){
 		return currentLine.substring(0, indexOfFunction) + "async " + currentLine.substring(indexOfFunction, currentLine.length);
+	}else{
+		
+		//finds the name of the function on the current line
+		for(let i:number = 0; i < functionNames.length; i++){
+			let indexOfFunction: number = currentLine.indexOf(functionNames[i]);
+		
+			if(indexOfFunction != -1){
+				return currentLine.substring(0, indexOfFunction) + "await " + currentLine.substring(indexOfFunction, currentLine.length);
+			}
+		}
+
 	}
 	
-	return currentLine;
-}
-
-/** Adding await to the current line if the call of a function is found*/
-function addAwait(currentLine: string, lineCount: number, lineNum: number):string{
-
-	//if it is the second to last line and it contains "(" and ")"
-	const hasStartBracket: boolean = currentLine.includes("(");
-	const hasEndBracket: boolean = currentLine.includes(")");
-	const hasStartCurleyBracket: boolean = currentLine.includes("{");
-	const hasBeginCurleyBracket: boolean = currentLine.includes("}");
-
-	if(hasStartBracket && hasEndBracket && !hasStartCurleyBracket && !hasBeginCurleyBracket){
-		return "await " + currentLine;
-	}
-
 	return currentLine;
 }
 
