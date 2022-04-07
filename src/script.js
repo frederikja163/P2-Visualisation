@@ -8,50 +8,128 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 const breakpointClass = "breakpoint";
+const selectedCode = "selectedCode";
 function breakpoint(code) {
     const lines = code.querySelectorAll("span");
     for (let i = 0; i < lines.length; i++) {
-        lines[i].addEventListener("click", function () {
-            if (lines[i].classList.contains(breakpointClass)) {
-                lines[i].classList.remove(breakpointClass);
-            }
-            else {
-                lines[i].classList.add(breakpointClass);
-            }
-        });
+        lines[i].addEventListener("dblclick", statementOnDblClick);
+        lines[i].addEventListener("click", () => statementOnClick(lines[i]));
+    }
+}
+function statementOnDblClick() {
+    var _a;
+    (_a = document.getSelection()) === null || _a === void 0 ? void 0 : _a.removeAllRanges();
+}
+function statementOnClick(line) {
+    if (line.classList.contains(breakpointClass)) {
+        if (line.id === selectedCode) {
+            line.classList.remove(breakpointClass);
+            line.id = "";
+        }
+        else {
+            select(line);
+        }
+    }
+    else {
+        line.classList.add(breakpointClass);
+        select(line);
+    }
+    parseCode();
+}
+function select(line) {
+    const selected = document.getElementById(selectedCode);
+    line.id = selectedCode;
+    if (selected != null) {
+        selected.id = "";
     }
 }
 let currentPromise;
 let resolveCurrentPromise;
-function runCode() {
-    const lineCount = document.querySelectorAll("p").length;
-    for (let i = 0; i < lineCount; i++) {
-        removeHighLight(i);
+let codeFunction = null;
+let isStopping = false;
+let awaitingPromise = false;
+let isRunning = false;
+function stopCode() {
+    if (isRunning) {
+        isStopping = true;
     }
+    removeAllHighlighting();
+    setButtonToRun();
+}
+function runCode() {
+    parseCode();
     currentPromise = new Promise((resolve, reject) => {
         resolveCurrentPromise = resolve;
     });
-    let code = parseCode();
-    code();
+    if (codeFunction != null) {
+        isStopping = false;
+        isRunning = true;
+        setButtonToStop();
+        codeFunction().then((resolve, reject) => {
+            setButtonToRun();
+            isRunning = false;
+            isStopping = false;
+            removeAllHighlighting();
+        });
+    }
+    else {
+        removeAllHighlighting();
+    }
+}
+function setButtonToStop() {
+    const runButton = document.getElementById("runStopButton");
+    if (runButton != null) {
+        runButton.value = "Stop";
+        runButton.onclick = stopCode;
+    }
+}
+function setButtonToRun() {
+    const runButton = document.getElementById("runStopButton");
+    if (runButton != null) {
+        runButton.value = "Run";
+        runButton.onclick = runCode;
+    }
 }
 function next() {
     resolveCurrentPromise();
 }
 function parseCode() {
+    var _a;
+    stopCode();
     let code = "";
-    const lines = document.querySelectorAll("span");
+    const lines = (_a = document.getElementById("code")) === null || _a === void 0 ? void 0 : _a.querySelectorAll("span");
+    let functionNames = getFunctionNames(lines);
     for (let i = 0; i < lines.length; i++) {
         let currentLine = lines[i].innerHTML.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
-        currentLine = addAsync(currentLine);
+        currentLine = addAsyncAwait(currentLine, functionNames);
         currentLine = addBreakpoint(currentLine, lines, i);
         code += currentLine + "\n";
     }
-    return new Function('return ' + code)();
+    codeFunction = new Function('return ' + code)();
 }
-function addAsync(currentLine) {
+function getFunctionNames(lines) {
+    let functionNames = [];
+    for (let i = 0; i < lines.length; i++) {
+        let currentLine = lines[i].innerHTML.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+        let indexOfFunction = currentLine.indexOf("function");
+        if (indexOfFunction != -1) {
+            functionNames.push(currentLine.substring(indexOfFunction + "function".length + 1, currentLine.indexOf("(")));
+        }
+    }
+    return functionNames;
+}
+function addAsyncAwait(currentLine, functionNames) {
     let indexOfFunction = currentLine.indexOf("function");
     if (indexOfFunction != -1) {
         return currentLine.substring(0, indexOfFunction) + "async " + currentLine.substring(indexOfFunction, currentLine.length);
+    }
+    else {
+        for (let i = 0; i < functionNames.length; i++) {
+            let indexOfFunction = currentLine.indexOf(functionNames[i]);
+            if (indexOfFunction != -1) {
+                return currentLine.substring(0, indexOfFunction) + "await " + currentLine.substring(indexOfFunction, currentLine.length);
+            }
+        }
     }
     return currentLine;
 }
@@ -59,31 +137,35 @@ function addBreakpoint(currentLine, lines, lineNum) {
     if (lineNum == lines.length - 1) {
         return currentLine;
     }
-    if (!lines[lineNum].classList.contains(breakpointClass)) {
+    if (!(lines[lineNum].classList.contains(breakpointClass))) {
         return currentLine;
     }
-    let indexOfDo = currentLine.indexOf("do");
-    let indexOfWhile = currentLine.indexOf("while");
-    let indexOfFor = currentLine.indexOf("for");
-    let indexOfIf = currentLine.indexOf("if");
-    let indexOfSwitch = currentLine.indexOf("switch");
-    if (indexOfDo != -1 || indexOfSwitch != -1) {
-        currentLine = `await debug(${lineNum});\n` + currentLine;
-    }
-    else if (indexOfWhile != -1 || indexOfFor != -1 || indexOfIf != -1) {
-        let indexOfExpr = indexOfFor != -1 ? currentLine.indexOf(";") : currentLine.indexOf("(");
+    let hasWhile = currentLine.includes("while");
+    let hasFor = currentLine.includes("for");
+    let hasIf = currentLine.includes("if");
+    let hasElse = currentLine.includes("else");
+    let hasFunction = currentLine.includes("function");
+    if (hasWhile || hasFor || hasIf) {
+        let indexOfExpr = hasFor ? currentLine.indexOf(";") : currentLine.indexOf("(");
         currentLine = currentLine.substring(0, indexOfExpr + 1) + `await debug(${lineNum}) && ` + currentLine.substring(indexOfExpr + 1, currentLine.length);
     }
-    else {
+    else if (hasElse || hasFunction) {
         currentLine += `\nawait debug(${lineNum});`;
+    }
+    else {
+        currentLine = `await debug(${lineNum});\n` + currentLine;
     }
     return currentLine;
 }
 function debug(line) {
     return __awaiter(this, void 0, void 0, function* () {
-        highLight(line);
-        yield currentPromise;
-        removeHighLight(line);
+        if (!isStopping) {
+            awaitingPromise = true;
+            highLight(line);
+            yield currentPromise;
+            removeHighLight(line);
+            awaitingPromise = false;
+        }
         currentPromise = new Promise((resolve, reject) => {
             resolveCurrentPromise = resolve;
         });
@@ -92,14 +174,8 @@ function debug(line) {
 }
 function darkMode() {
     const bodyElement = document.body;
-    const textBoxElement = document.querySelectorAll(".textbox");
     const darkModeBtn = document.querySelector("#darkModeBtn");
-    const rightTextBox = document.querySelector("#righttextbox");
-    rightTextBox.classList.toggle("dark-mode");
     bodyElement.classList.toggle("dark-mode");
-    for (let element of textBoxElement) {
-        element.classList.toggle("dark-mode");
-    }
     bodyElement.classList.contains("dark-mode") ? darkModeBtn.value = "Light Mode" :
         darkModeBtn.value = "Dark Mode";
 }
@@ -120,98 +196,242 @@ function wrapStrings(elementTag, functionString) {
         const trimmedStr = currString.substring(indents);
         lines[i] = `${"&nbsp;".repeat(indents)}<${elementTag} index="${i}">${trimmedStr}</${elementTag}></br>`;
     }
-    let word = ['for', 'let', 'if', 'console.log', 'function', 'switch', 'while', 'do'];
-    let color = ['red', 'green', 'blue', 'magenta', 'gray', 'red', 'red', 'red',];
+    const highlight = [
+        { word: "for", color: "red" },
+        { word: "let", color: "green" },
+        { word: "if", color: "blue" },
+        { word: "console.log", color: "magenta" },
+        { word: "function", color: "gray" },
+        { word: "switch", color: "red" },
+        { word: "while", color: "red" },
+        { word: "do", color: "red" }
+    ];
     for (let i = 0; i < lines.length; i++) {
-        for (let k = 0; k < word.length; k++)
-            if (lines[i].includes(word[k])) {
-                lines[i] = lines[i].replace(word[k], `<span style="color: ${color[k]};">${word[k]}</span>`);
+        for (let k = 0; k < highlight.length; k++) {
+            if (lines[i].includes(highlight[k].word)) {
+                lines[i] = lines[i].replace(highlight[k].word, `<span style="color: ${highlight[k].color};">${highlight[k].word}</span>`);
             }
+        }
     }
     return lines.join("");
 }
-let options = document.querySelectorAll(".dropdown-content > a");
-let left = document.querySelector("#left");
-for (let option of options) {
-    option.addEventListener("click", function dropDownSelector(event) {
-        let dropdownBtn = document.querySelector(".dropdown > button");
-        switch (event.target.id) {
-            case "mergesort":
-                displayCodeAsString(left, algMergeSort);
-                dropdownBtn.innerHTML = "MergeSort";
-                break;
-            case "binarysearch":
-                displayCodeAsString(left, algBinarySearch);
-                dropdownBtn.innerHTML = "Binary Search";
-                break;
-            case "bubblesort":
-                displayCodeAsString(left, algBubbleSort);
-                dropdownBtn.innerHTML = "Bubble Sort";
-                break;
-        }
-    });
+function initDropDown() {
+    let options = document.querySelectorAll(".dropdown-content > a");
+    let left = document.querySelector("#left");
+    for (let i = 0; i < options.length; i++) {
+        options[i].addEventListener("click", function dropDownSelector(event) {
+            let dropdownBtn = document.querySelector(".dropdown > button");
+            switch (event.target.id) {
+                case "mergesort":
+                    if (left != null)
+                        displayCodeAsString(left, algMergeSort);
+                    if (dropdownBtn != null)
+                        dropdownBtn.innerHTML = "MergeSort";
+                    break;
+                case "binarysearch":
+                    if (left != null)
+                        displayCodeAsString(left, algBinarySearch);
+                    if (dropdownBtn != null)
+                        dropdownBtn.innerHTML = "Binary Search";
+                    break;
+                case "bubblesort":
+                    if (left != null)
+                        displayCodeAsString(left, algBubbleSort);
+                    if (dropdownBtn != null)
+                        dropdownBtn.innerHTML = "Bubble Sort";
+                    break;
+            }
+        });
+    }
 }
 function highLight(index) {
-    let currParagraph = document.querySelector("span[index=\"" + index + "\"]");
-    if (currParagraph != null)
-        currParagraph.classList.add("highlighted");
+    const codeSpans = document.querySelectorAll(`span[index=\"${index}\"]`);
+    for (let i = 0; i < codeSpans.length; i++) {
+        codeSpans[i].classList.add("highlighted");
+    }
 }
 function removeHighLight(index) {
-    let currParagraph = document.querySelector("span[index=\"" + index + "\"]");
-    if (currParagraph != null)
-        currParagraph.classList.remove("highlighted");
+    const codeSpans = document.querySelectorAll(`span[index=\"${index}\"]`);
+    for (let i = 0; i < codeSpans.length; i++) {
+        codeSpans[i].classList.remove("highlighted");
+    }
+}
+function removeAllHighlighting() {
+    var _a, _b;
+    const lineCount = (_b = (_a = document.getElementById("code")) === null || _a === void 0 ? void 0 : _a.querySelectorAll("span")) === null || _b === void 0 ? void 0 : _b.length;
+    for (let i = 0; i < lineCount; i++) {
+        removeHighLight(i);
+    }
 }
 window.onload = main;
 function main() {
+    setButtonToRun();
+    initDropDown();
+    const left = document.querySelector("#left");
+    const right = document.querySelector("#right");
+    if (right != null)
+        pseudocode(right);
+    if (left != null)
+        displayCodeAsString(left, algMergeSort);
 }
-function algBinarySearch(sortedArray, key) {
-    let start = 0;
-    let end = sortedArray.length - 1;
-    while (start <= end) {
-        let middle = Math.floor((start + end) / 2);
-        if (sortedArray[middle] === key) {
-            return middle;
-        }
-        else if (sortedArray[middle] < key) {
-            start = middle + 1;
-        }
-        else {
-            end = middle - 1;
-        }
-    }
-    return -1;
+function pseudocode(right) {
+    right.addEventListener("click", pseudocodeOnClick);
 }
-function algBubbleSort(arr) {
-    var i, j;
-    var len = arr.length;
-    var isSwapped = false;
-    for (i = 0; i < len; i++) {
-        isSwapped = false;
-        for (j = 0; j < len; j++) {
-            if (arr[j] > arr[j + 1]) {
-                var temp = arr[j];
-                arr[j] = arr[j + 1];
-                arr[j + 1] = temp;
-                isSwapped = true;
+let oldActiveElement = null;
+function pseudocodeOnClick() {
+    let activeElement = document.activeElement;
+    if (!(activeElement instanceof HTMLSpanElement)) {
+        activeElement = document.querySelector("#right > span:last-child");
+        if (activeElement != null) {
+            const textContent = activeElement.textContent;
+            if (textContent) {
+                setCaretPosition(activeElement, textContent.length);
             }
         }
-        if (!isSwapped) {
-            break;
+    }
+    if (activeElement != oldActiveElement && oldActiveElement != null && oldActiveElement.innerHTML === "") {
+        const prevElement = oldActiveElement.previousElementSibling;
+        const nextElement = oldActiveElement.nextElementSibling;
+        const prevIndex = prevElement === null || prevElement === void 0 ? void 0 : prevElement.getAttribute("index");
+        const nextIndex = nextElement === null || nextElement === void 0 ? void 0 : nextElement.getAttribute("index");
+        if (prevElement != null && nextElement != null && prevIndex === nextIndex) {
+            const prevText = prevElement.textContent;
+            const nextText = nextElement.textContent;
+            if (prevText != null && nextText != null && prevIndex != null) {
+                const mergedElement = createPseudocodeSpan(prevText + nextText, prevIndex);
+                const previous = oldActiveElement.previousElementSibling;
+                const next = oldActiveElement.nextElementSibling;
+                if (previous != null && next != null) {
+                    previous.remove();
+                    next.remove();
+                    oldActiveElement.replaceWith(mergedElement);
+                }
+            }
+        }
+        else {
+            oldActiveElement.remove();
         }
     }
-    console.log(arr);
+    const caretPosition = getCaretPosition();
+    const selectedBreakpoint = document.querySelector("#selectedCode");
+    let breakpointIndex = "-1";
+    if (selectedBreakpoint != null) {
+        breakpointIndex = selectedBreakpoint.getAttribute("index");
+    }
+    if (activeElement != null && activeElement.getAttribute("index") === breakpointIndex) {
+        oldActiveElement = activeElement;
+    }
+    else if (activeElement != null && breakpointIndex != null) {
+        splitHtmlElement(activeElement, caretPosition);
+        const newElement = createPseudocodeSpan("", breakpointIndex);
+        activeElement.replaceWith(newElement);
+        setCaretPosition(newElement, 0);
+        oldActiveElement = newElement;
+    }
 }
-var arr = [243, 45, 23, 356, 3, 5346, 35, 5];
+function splitHtmlElement(element, index) {
+    const text = element.innerText;
+    const beforeText = text.slice(0, index);
+    const afterText = text.slice(index, text.length);
+    const activeElementCodeIndex = element.getAttribute("index");
+    if (activeElementCodeIndex != null) {
+        if (beforeText === "") {
+            const afterElement = createPseudocodeSpan(afterText, activeElementCodeIndex);
+            element.after(afterElement);
+        }
+        else if (afterText === "") {
+            const beforeElement = createPseudocodeSpan(beforeText, activeElementCodeIndex);
+            element.before(beforeElement);
+        }
+        else {
+            const beforeElement = createPseudocodeSpan(beforeText, activeElementCodeIndex);
+            element.before(beforeElement);
+            const afterElement = createPseudocodeSpan(afterText, activeElementCodeIndex);
+            element.after(afterElement);
+        }
+    }
+}
+function createPseudocodeSpan(text, codeIndex) {
+    const element = document.createElement("span");
+    element.setAttribute("contenteditable", "true");
+    element.setAttribute("index", codeIndex);
+    element.innerText = text;
+    return element;
+}
+function setCaretPosition(element, caretPos) {
+    const selection = window.getSelection();
+    if (selection == null)
+        return;
+    const range = document.createRange();
+    selection.removeAllRanges();
+    range.selectNodeContents(element);
+    range.collapse(false);
+    range.setStart(element, caretPos);
+    range.setEnd(element, caretPos);
+    selection.addRange(range);
+    element.focus();
+}
+function getCaretPosition() {
+    const selection = window.getSelection();
+    if (selection == null)
+        return -1;
+    selection.getRangeAt(0);
+    return selection.getRangeAt(0).startOffset;
+}
+function algBinarySearch() {
+    function binarySearch(sortedArray, key) {
+        let start = 0;
+        let end = sortedArray.length - 1;
+        while (start <= end) {
+            let middle = Math.floor((start + end) / 2);
+            if (sortedArray[middle] === key) {
+                return middle;
+            }
+            else if (sortedArray[middle] < key) {
+                start = middle + 1;
+            }
+            else {
+                end = middle - 1;
+            }
+        }
+        return -1;
+    }
+    binarySearch([201, 176, 90, 63, 12, 1], 12);
+}
+function algBubbleSort() {
+    function bubbleSort(array) {
+        var i, j;
+        var len = array.length;
+        var isSwapped = false;
+        for (i = 0; i < len; i++) {
+            isSwapped = false;
+            for (j = 0; j < len; j++) {
+                if (array[j] > array[j + 1]) {
+                    var temp = array[j];
+                    array[j] = array[j + 1];
+                    array[j + 1] = temp;
+                    isSwapped = true;
+                }
+            }
+            if (!isSwapped) {
+                break;
+            }
+        }
+        return array;
+    }
+    bubbleSort([243, 45, 23, 356, 3, 5346, 35, 5]);
+}
 function algMergeSort() {
     function mergeSort(array) {
         if (array.length <= 1) {
             return array;
         }
-        const middle = Math.floor(array.length);
+        const middle = Math.floor(array.length / 2);
         const left = array.slice(0, middle);
         const right = array.slice(middle);
-        console.log(array);
-        return merge(mergeSort(left), mergeSort(right));
+        const sortedLeft = mergeSort(left);
+        const sortedRight = mergeSort(right);
+        return merge(sortedLeft, sortedRight);
     }
     function merge(left, right) {
         const array = [];
@@ -237,7 +457,6 @@ function algMergeSort() {
                 rIndex++;
             }
         }
-        console.log(array);
         return array;
     }
     mergeSort([5, 2, 3, 1, 58]);
