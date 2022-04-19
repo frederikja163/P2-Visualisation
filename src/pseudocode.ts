@@ -15,6 +15,7 @@ let oldActiveElement: HTMLElement | null = null;
 
 /** Event for when there has been clicked on a pseudocode span. */
 function pseudocodeOnClick(): void {
+
     // Get the currently active span element, or the last span element.
     let activeElement: HTMLElement | null = document.activeElement as HTMLElement;
     if (!(activeElement instanceof HTMLSpanElement)) {
@@ -29,7 +30,7 @@ function pseudocodeOnClick(): void {
     }
 
     // Runs on the first click and on all clicks which change the active element.
-    if (activeElement != oldActiveElement && oldActiveElement != null && oldActiveElement.innerHTML === "" ) {
+    if (activeElement != oldActiveElement && oldActiveElement != null && oldActiveElement.innerHTML === "") {
         const prevElement: Element | null = oldActiveElement.previousElementSibling;
         const nextElement: Element | null = oldActiveElement.nextElementSibling;
         const prevIndex: string | null | undefined = prevElement?.getAttribute("index");

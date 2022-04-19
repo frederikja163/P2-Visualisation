@@ -9,7 +9,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 const breakpointClass = "breakpoint";
 const selectedCode = "selectedCode";
+<<<<<<< HEAD
 function initBreakpoints(code) {
+=======
+function initBreakpoint(code) {
+>>>>>>> 6b1b241 (changed naming and more)
     const lines = code.querySelectorAll("span");
     for (let i = 0; i < lines.length; i++) {
         lines[i].addEventListener("dblclick", statementOnDblClick);
@@ -34,6 +38,10 @@ function statementOnClick(line) {
         line.classList.add(breakpointClass);
         select(line);
     }
+<<<<<<< HEAD
+=======
+    stopCode();
+>>>>>>> 6b1b241 (changed naming and more)
 }
 function select(line) {
     const selected = document.getElementById(selectedCode);
@@ -46,36 +54,20 @@ function select(line) {
 }
 let currentPromise;
 let resolveCurrentPromise;
-let codeFunction = null;
 let isStopping = false;
-let awaitingPromise = false;
-let isRunning = false;
 function stopCode() {
-    if (isRunning) {
+    if (resolveCurrentPromise != null) {
         isStopping = true;
+        resolveCurrentPromise();
     }
-    removeAllHighlighting();
-    setButtonToRun();
 }
 function runCode() {
-    parseCode();
-    currentPromise = new Promise((resolve, reject) => {
+    currentPromise = new Promise((resolve) => {
         resolveCurrentPromise = resolve;
     });
-    if (codeFunction != null) {
-        isStopping = false;
-        isRunning = true;
-        setButtonToStop();
-        codeFunction().then((resolve, reject) => {
-            setButtonToRun();
-            isRunning = false;
-            isStopping = false;
-            removeAllHighlighting();
-        });
-    }
-    else {
-        removeAllHighlighting();
-    }
+    isStopping = false;
+    setButtonToStop();
+    runParsedCode().then(() => setButtonToRun());
 }
 function setButtonToStop() {
     const runButton = document.getElementById("runStopButton");
@@ -94,9 +86,8 @@ function setButtonToRun() {
 function next() {
     resolveCurrentPromise();
 }
-function parseCode() {
+function runParsedCode() {
     var _a;
-    stopCode();
     let code = "";
     const lines = (_a = document.getElementById("code")) === null || _a === void 0 ? void 0 : _a.querySelectorAll("span");
     const functionNames = getFunctionNames(lines);
@@ -106,7 +97,8 @@ function parseCode() {
         currentLine = addBreakpoint(currentLine, lines, i);
         code += currentLine + "\n";
     }
-    codeFunction = new Function('return ' + code)();
+    const codeFunction = new Function('return ' + code)();
+    return codeFunction();
 }
 function getFunctionNames(lines) {
     const functionNames = [];
@@ -147,7 +139,11 @@ function addBreakpoint(currentLine, lines, lineNum) {
     const hasElse = currentLine.includes("else");
     const hasFunction = currentLine.includes("function");
     if (hasWhile || hasFor || hasIf) {
+<<<<<<< HEAD
         const indexOfExpr = hasFor ? currentLine.indexOf(";") : currentLine.indexOf("(");
+=======
+        let indexOfExpr = hasFor ? currentLine.indexOf(";") : currentLine.indexOf("(");
+>>>>>>> 6b1b241 (changed naming and more)
         currentLine = currentLine.substring(0, indexOfExpr + 1) + `await breakpoint(${lineNum}) && ` + currentLine.substring(indexOfExpr + 1, currentLine.length);
     }
     else if (hasElse || hasFunction) {
@@ -160,14 +156,12 @@ function addBreakpoint(currentLine, lines, lineNum) {
 }
 function breakpoint(line) {
     return __awaiter(this, void 0, void 0, function* () {
-        if (!isStopping) {
-            awaitingPromise = true;
-            highLight(line);
-            yield currentPromise;
-            removeHighLight(line);
-            awaitingPromise = false;
-        }
-        currentPromise = new Promise((resolve, reject) => {
+        if (isStopping)
+            return true;
+        highLight(line);
+        yield currentPromise;
+        removeHighLight(line);
+        currentPromise = new Promise((resolve) => {
             resolveCurrentPromise = resolve;
         });
         return true;
@@ -185,7 +179,11 @@ function displayCodeAsString(textBox, printFunction) {
     const lines = functionString.split(/(?<=\{\})|[\r\n]+/);
     const paragraphString = wrapStrings("span", lines);
     textBox.innerHTML = "<pre id= \"code\">" + paragraphString + "</pre>";
+<<<<<<< HEAD
     initBreakpoints(textBox);
+=======
+    initBreakpoint(textBox);
+>>>>>>> 6b1b241 (changed naming and more)
 }
 function wrapStrings(elementTag, lines) {
     for (let i = 0; i < lines.length; i++) {
@@ -255,10 +253,10 @@ function main() {
     initDropDown();
     const left = document.querySelector("#left");
     const right = document.querySelector("#right");
-    if (right != null)
-        pseudocode(right);
     if (left != null)
         displayCodeAsString(left, algMergeSort);
+    if (right != null)
+        pseudocode(right);
 }
 function pseudocode(right) {
     right.addEventListener("click", pseudocodeOnClick);

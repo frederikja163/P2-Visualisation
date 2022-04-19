@@ -1,9 +1,9 @@
-:root{
+:root {
   --trans: 0.15s
 }
 
 .breakpoint {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
 textarea {
@@ -13,51 +13,51 @@ textarea {
 }
 
 #selectedCode {
-    text-decoration-color: red;
+  text-decoration-color: red;
 }
 
 span:focus-visible {
-    outline: none;
+  outline: none;
 }
 
-p:hover{
-    cursor: pointer;
-    width: fit-content;
+p:hover {
+  cursor: pointer;
+  width: fit-content;
 }
 
-.highlighted{
-    font-weight: bold;
-    font-size: 110%;
+.highlighted {
+  font-weight: bold;
+  font-size: 110%;
 }
 
-.textbox{
-  display:inline-block;
-  font-family: courier; 
+.textbox {
+  display: inline-block;
+  font-family: courier;
   height: 95%;
   margin: 1%;
   border-width: 3px;
   border-color: #57b3b6;
   border-style: solid;
   flex-grow: 1;
-  overflow:auto;
+  overflow: auto;
   width: 50%;
   padding-left: 1em;
 }
 
-body{
-    display: flex;
-	margin: 0;
-	height: 100vh;
+body {
+  display: flex;
+  margin: 0;
+  height: 100vh;
   transition-property: background-color, color;
   transition-duration: var(--trans);
 }
 
-#right{
+#right {
   transition-property: background-color, color;
   transition-duration: var(--trans);
 }
 
-.dark-mode{
+.dark-mode {
   background-color: rgb(36, 36, 36);
   color: white;
 }
@@ -66,94 +66,101 @@ body{
   width: 6em;
 }
 
-.buttons{
+.buttons {
   margin: 1%;
 }
 
-.controlBtn{
-    color: white;
-    background-color: #57b3b6;
-    font-weight: bold;
-    height: 25px;
-    margin: 1%;
-    border: none;
-    font-variant-numeric: lining-nums;
+.controlBtn {
+  color: white;
+  background-color: #57b3b6;
+  font-weight: bold;
+  height: 25px;
+  margin: 1%;
+  border: none;
+  font-variant-numeric: lining-nums;
 }
 
 .dropbtn {
-	font-family: courier;
-    font-weight: bold; 
-    background-color: #57b3b6;
-    color: white;
-    padding: 16px;
-    font-size: 16px;
-    border: none;
-    min-width: 180px;
-    height: 55px;
-  }
+  font-family: courier;
+  font-weight: bold;
+  background-color: #57b3b6;
+  color: white;
+  padding: 16px;
+  font-size: 16px;
+  border: none;
+  min-width: 180px;
+  height: 55px;
+}
 
-  /* The container <div> - needed to position the dropdown content */
-  .dropdown {
-    position: relative;
-    display: inline-block;
-    height: 55px;
-    margin: 1%;
-  }
+/* The container <div> - needed to position the dropdown content */
+.dropdown {
+  position: relative;
+  display: inline-block;
+  height: 55px;
+  margin: 1%;
+}
 
-  /* Dropdown Content (Hidden by Default) */
-  .dropdown-content {
-	font-family: courier; 
-    display: block;
-    position: absolute;
-    background-color: #f1f1f1;
-    min-width: 180px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    z-index: 1;
-    height: 0;
-    max-height: 400%;
-    overflow:scroll;
-    transition: all .5s ease;
-  }
+/* Dropdown Content (Hidden by Default) */
+.dropdown-content {
+  font-family: courier;
+  display: block;
+  position: absolute;
+  background-color: #f1f1f1;
+  min-width: 180px;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+  height: 0;
+  max-height: 400%;
+  overflow: scroll;
+  transition: all .5s ease;
+}
 
-  /* Links inside the dropdown */
-  .dropdown-content a {
-    color: black;
-    padding: 12px 16px;
-    text-decoration: none;
-    display: block;
-  }
-  .dropdown-content:hover {cursor: pointer;}
+/* Links inside the dropdown */
+.dropdown-content a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
 
-  /* Change color of dropdown links on hover */
-  .dropdown-content a:hover {background-color: #ddd;}
+.dropdown-content:hover {
+  cursor: pointer;
+}
 
-  /* Show the dropdown menu on hover */
-  .dropdown:hover .dropdown-content {
+/* Change color of dropdown links on hover */
+.dropdown-content a:hover {
+  background-color: #ddd;
+}
 
-      height:250%;
-      transform: translateY(0);
-    }
+/* Show the dropdown menu on hover */
+.dropdown:hover .dropdown-content {
 
-  /* Change the background color of the dropdown button when the dropdown content is shown */
-  .dropdown:hover .dropbtn {background-color: #51a5a8;} 
+  height: 250%;
+  transform: translateY(0);
+}
+
+/* Change the background color of the dropdown button when the dropdown content is shown */
+.dropdown:hover .dropbtn {
+  background-color: #51a5a8;
+}
 
 
-  /* width */
+/* width */
 ::-webkit-scrollbar {
-    width: 10px;
-  }
-  
-  /* Track */
-  ::-webkit-scrollbar-track {
-    background: #f1f1f1;
-  }
-  
-  /* Handle */
-  ::-webkit-scrollbar-thumb {
-    background: #888;
-  }
-  
-  /* Handle on hover */
-  ::-webkit-scrollbar-thumb:hover {
-    background: #555;
-  }
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #888;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}

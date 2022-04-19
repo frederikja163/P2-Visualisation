@@ -1,7 +1,11 @@
 const breakpointClass: string = "breakpoint";
 const selectedCode: string = "selectedCode";
 
+<<<<<<< HEAD
 function initBreakpoints(code: Element): void
+=======
+function initBreakpoint(code: Element): void
+>>>>>>> 6b1b241 (changed naming and more)
 {
     const lines: NodeListOf<HTMLSpanElement> = code.querySelectorAll("span");
     for (let i: number = 0; i < lines.length; i++)
@@ -39,6 +43,10 @@ function statementOnClick(line: HTMLElement): void{
         // Select
         select(line);
     }
+
+    //stops the current algorithm execution
+	stopCode();
+
 }
 
 

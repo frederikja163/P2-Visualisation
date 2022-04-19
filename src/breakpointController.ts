@@ -4,46 +4,29 @@
 let currentPromise: Promise<void>;
 let resolveCurrentPromise: Function;
 
-let codeFunction:Function | null = null;
 let isStopping: boolean = false;
-let awaitingPromise: boolean = false;
-let isRunning: boolean = false;
 
 /** Stopping the current running of code by resolving all promises*/
 function stopCode(): void{
 	
-	if(isRunning) {
+	if(resolveCurrentPromise != null){
 		isStopping = true;
+		resolveCurrentPromise();
 	}
 
-	removeAllHighlighting();
-	setButtonToRun();
 }
 
 /** Gets the breakable code and runs the code until the first breakpoint.*/
 function runCode(): void{
-	parseCode();
-	
 	// Setting up promises.
-	currentPromise = new Promise((resolve:Function, reject:Function) => { 
+	currentPromise = new Promise((resolve:Function) => { 
 		resolveCurrentPromise = resolve; 
 	});
 
 	// Running function.
-	if(codeFunction != null) {
-		isStopping = false;
-		isRunning = true;
-		setButtonToStop();
-		codeFunction().then((resolve:Function, reject: Function) => {
-			setButtonToRun();
-			isRunning = false;
-			isStopping = false;
-
-			removeAllHighlighting();
-		});
-	}else{
-		removeAllHighlighting();
-	}
+	isStopping = false;
+	setButtonToStop();
+	runParsedCode().then(() => setButtonToRun());
 }
 
 /** Setting the run button to be a stop button.*/
@@ -72,9 +55,7 @@ function next():void{
 }
 
 /** This function gets all lines of code, adds breakpoints, and returns this as a function. */
-function parseCode(): void{
-
-	stopCode();
+function runParsedCode(): Promise<void>{
 
 	let code: string = "";
 
@@ -95,7 +76,9 @@ function parseCode(): void{
     }
 
 	// Creating a function from the string.
-	codeFunction = new Function('return ' + code)();
+	const codeFunction = new Function('return ' + code)();
+
+	return codeFunction();
 }
 
 /** Getting the names of all of the functions declared in codeFunction*/
@@ -162,7 +145,11 @@ function addBreakpoint(currentLine: string, lines: NodeListOf<HTMLSpanElement>, 
 	if(hasWhile || hasFor || hasIf){
 		
 		// Insert breakpoint in line.
+<<<<<<< HEAD
 		const indexOfExpr = hasFor ? currentLine.indexOf(";") : currentLine.indexOf("(");
+=======
+		let indexOfExpr = hasFor ? currentLine.indexOf(";") : currentLine.indexOf("(");
+>>>>>>> 6b1b241 (changed naming and more)
 		currentLine = currentLine.substring(0, indexOfExpr + 1) + `await breakpoint(${lineNum}) && ` + currentLine.substring(indexOfExpr + 1, currentLine.length);
 
 	}else if(hasElse || hasFunction){ 
@@ -184,16 +171,14 @@ function addBreakpoint(currentLine: string, lines: NodeListOf<HTMLSpanElement>, 
 async function breakpoint(line: number): Promise<boolean>{
 	
 	// Adding/removing highlighting and waiting by using a promise.
-	if(!isStopping){
-		awaitingPromise = true;
-		highLight(line);
-		await currentPromise;
-		removeHighLight(line)
-		awaitingPromise = false;
-	}
+	if(isStopping) return true;
+	
+	highLight(line);
+	await currentPromise;
+	removeHighLight(line);
 
 	// Creating a new promise.
-	currentPromise = new Promise((resolve:Function, reject:Function) => {
+	currentPromise = new Promise((resolve:Function) => {
 		resolveCurrentPromise = resolve; 
 	});
 
