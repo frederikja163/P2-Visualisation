@@ -82,21 +82,21 @@ function parseCode(): void{
 	let code: string = "";
 
 	// Getting a list of all lines of code. 
-    const lines: NodeListOf<HTMLSpanElement> = <NodeListOf<HTMLSpanElement>>document.getElementById("code")?.querySelectorAll("span");
+    const lines: NodeListOf<HTMLSpanElement> = <NodeListOf<HTMLSpanElement>>document.querySelectorAll("#code > span");
 	let functionNames: string[] = getFunctionNames(lines);
 
 	// Adding each line of code to the code string.
 	for (let i: number = 0; i < lines.length; i++){
 		
 		// Inserting the current line, but adding async in front of any function.
-		let currentLine: string = lines[i].innerHTML.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
+		let currentLine: string = lines[i].innerText.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
 
 		currentLine = addAsyncAwait(currentLine, functionNames);
 		currentLine = addBreakpoint(currentLine, lines, i); 
 
 		code += currentLine + "\n"
     }
-
+	console.log(code);
 	// Creating a function from the string.
 	codeFunction = new Function('return ' + code)();
 }

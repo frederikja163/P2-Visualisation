@@ -94,17 +94,17 @@ function next() {
     resolveCurrentPromise();
 }
 function parseCode() {
-    var _a;
     stopCode();
     let code = "";
-    const lines = (_a = document.getElementById("code")) === null || _a === void 0 ? void 0 : _a.querySelectorAll("span");
+    const lines = document.querySelectorAll("#code > span");
     let functionNames = getFunctionNames(lines);
     for (let i = 0; i < lines.length; i++) {
-        let currentLine = lines[i].innerHTML.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+        let currentLine = lines[i].innerText.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
         currentLine = addAsyncAwait(currentLine, functionNames);
         currentLine = addBreakpoint(currentLine, lines, i);
         code += currentLine + "\n";
     }
+    console.log(code);
     codeFunction = new Function('return ' + code)();
 }
 function getFunctionNames(lines) {
@@ -207,6 +207,7 @@ function wrapStrings(elementTag, functionString) {
         { word: "return", color: "red" },
         { word: "const", color: "red" },
         { word: "else", color: "blue" },
+        { word: "var", color: "green" },
     ];
     for (let i = 0; i < lines.length; i++) {
         for (let k = 0; k < highlight.length; k++) {
