@@ -1,9 +1,10 @@
 // Optimized implementation of bubble sort Algorithm
 
-function algBubbleSort(arr : number[]){
+function algBubbleSort(){
+  function bubbleSort(array : number[]): number[]{
 
     var i, j;
-    var len = arr.length;
+    var len = array.length;
   
     var isSwapped = false;
   
@@ -12,15 +13,15 @@ function algBubbleSort(arr : number[]){
       isSwapped = false;
   
       for(j = 0; j < len; j++){
-          if(arr[j] > arr[j + 1]){
-            var temp = arr[j]
-            arr[j] = arr[j+1];
-            arr[j+1] = temp;
+          if(array[j] > array[j + 1]){
+            var temp = array[j]
+            array[j] = array[j+1];
+            array[j+1] = temp;
             isSwapped = true;
           }
       }
   
-      // IF no two elements were swapped by inner loop, then break 
+      // If no two elements were swapped by inner loop, then break 
   
       if(!isSwapped){
         break;
@@ -28,8 +29,10 @@ function algBubbleSort(arr : number[]){
     }
   
     // Print the array
-    console.log(arr)
+    return array;
   }
   
+  bubbleSort([243, 45, 23, 356, 3, 5346, 35, 5]); 
+} 
   
-  var arr = [243, 45, 23, 356, 3, 5346, 35, 5]; 
+ 
