@@ -196,13 +196,24 @@ function wrapStrings(elementTag, functionString) {
         const trimmedStr = currString.substring(indents);
         lines[i] = `${"&nbsp;".repeat(indents)}<${elementTag} index="${i}">${trimmedStr}</${elementTag}></br>`;
     }
-    let word = ['for', 'let', 'if', 'console.log', 'function', 'switch', 'while', 'do'];
-    let color = ['red', 'green', 'blue', 'magenta', 'gray', 'red', 'red', 'red',];
+    const highlight = [
+        { word: "for", color: "red" },
+        { word: "let", color: "green" },
+        { word: "if", color: "blue" },
+        { word: "console.log", color: "magenta" },
+        { word: "function", color: "gray" },
+        { word: "switch", color: "red" },
+        { word: "while", color: "red" },
+        { word: "return", color: "red" },
+        { word: "const", color: "red" },
+        { word: "else", color: "blue" },
+    ];
     for (let i = 0; i < lines.length; i++) {
-        for (let k = 0; k < word.length; k++)
-            if (lines[i].includes(word[k])) {
-                lines[i] = lines[i].replace(word[k], `<span style="color: ${color[k]};">${word[k]}</span>`);
+        for (let k = 0; k < highlight.length; k++) {
+            if (lines[i].includes(highlight[k].word)) {
+                lines[i] = lines[i].replace(highlight[k].word, `<span style="color: ${highlight[k].color};">${highlight[k].word}</span>`);
             }
+        }
     }
     return lines.join("");
 }
