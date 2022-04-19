@@ -79,6 +79,7 @@ function pseudocodeOnClick(): void {
         // Create the new element with the cursor.
         const newElement: HTMLElement = createPseudocodeSpan("", breakpointIndex);
         activeElement.replaceWith(newElement);
+        newElement.classList.add("highlighted");
         setCaretPosition(newElement, 0);
         
         oldActiveElement = newElement;

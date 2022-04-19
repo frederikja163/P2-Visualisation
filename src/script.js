@@ -9,11 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 const breakpointClass = "breakpoint";
 const selectedCode = "selectedCode";
-<<<<<<< HEAD
 function initBreakpoints(code) {
-=======
-function initBreakpoint(code) {
->>>>>>> 6b1b241 (changed naming and more)
     const lines = code.querySelectorAll("span");
     for (let i = 0; i < lines.length; i++) {
         lines[i].addEventListener("dblclick", statementOnDblClick);
@@ -27,7 +23,7 @@ function statementOnDblClick() {
 function statementOnClick(line) {
     if (line.classList.contains(breakpointClass)) {
         if (line.id === selectedCode) {
-            line.classList.remove(breakpointClass);
+            line.classList.remove(breakpointClass, "highlighted");
             line.id = "";
         }
         else {
@@ -38,10 +34,7 @@ function statementOnClick(line) {
         line.classList.add(breakpointClass);
         select(line);
     }
-<<<<<<< HEAD
-=======
     stopCode();
->>>>>>> 6b1b241 (changed naming and more)
 }
 function select(line) {
     const selected = document.getElementById(selectedCode);
@@ -62,6 +55,7 @@ function stopCode() {
     }
 }
 function runCode() {
+    removeAllHighlighting();
     currentPromise = new Promise((resolve) => {
         resolveCurrentPromise = resolve;
     });
@@ -139,11 +133,7 @@ function addBreakpoint(currentLine, lines, lineNum) {
     const hasElse = currentLine.includes("else");
     const hasFunction = currentLine.includes("function");
     if (hasWhile || hasFor || hasIf) {
-<<<<<<< HEAD
         const indexOfExpr = hasFor ? currentLine.indexOf(";") : currentLine.indexOf("(");
-=======
-        let indexOfExpr = hasFor ? currentLine.indexOf(";") : currentLine.indexOf("(");
->>>>>>> 6b1b241 (changed naming and more)
         currentLine = currentLine.substring(0, indexOfExpr + 1) + `await breakpoint(${lineNum}) && ` + currentLine.substring(indexOfExpr + 1, currentLine.length);
     }
     else if (hasElse || hasFunction) {
@@ -179,11 +169,7 @@ function displayCodeAsString(textBox, printFunction) {
     const lines = functionString.split(/(?<=\{\})|[\r\n]+/);
     const paragraphString = wrapStrings("span", lines);
     textBox.innerHTML = "<pre id= \"code\">" + paragraphString + "</pre>";
-<<<<<<< HEAD
     initBreakpoints(textBox);
-=======
-    initBreakpoint(textBox);
->>>>>>> 6b1b241 (changed naming and more)
 }
 function wrapStrings(elementTag, lines) {
     for (let i = 0; i < lines.length; i++) {
@@ -229,9 +215,7 @@ function initDropDown() {
 function highLight(index) {
     const codeSpans = document.querySelectorAll(`span[index=\"${index}\"]`);
     for (let i = 0; i < codeSpans.length; i++) {
-        console.log(codeSpans[i]);
         codeSpans[i].classList.add("highlighted");
-        console.log(codeSpans[i]);
     }
 }
 function removeHighLight(index) {
@@ -309,6 +293,7 @@ function pseudocodeOnClick() {
         splitHtmlElement(activeElement, caretPosition);
         const newElement = createPseudocodeSpan("", breakpointIndex);
         activeElement.replaceWith(newElement);
+        newElement.classList.add("highlighted");
         setCaretPosition(newElement, 0);
         oldActiveElement = newElement;
     }

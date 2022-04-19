@@ -18,6 +18,8 @@ function stopCode(): void{
 
 /** Gets the breakable code and runs the code until the first breakpoint.*/
 function runCode(): void{
+	removeAllHighlighting();
+	
 	// Setting up promises.
 	currentPromise = new Promise((resolve:Function) => { 
 		resolveCurrentPromise = resolve; 
@@ -145,11 +147,7 @@ function addBreakpoint(currentLine: string, lines: NodeListOf<HTMLSpanElement>, 
 	if(hasWhile || hasFor || hasIf){
 		
 		// Insert breakpoint in line.
-<<<<<<< HEAD
 		const indexOfExpr = hasFor ? currentLine.indexOf(";") : currentLine.indexOf("(");
-=======
-		let indexOfExpr = hasFor ? currentLine.indexOf(";") : currentLine.indexOf("(");
->>>>>>> 6b1b241 (changed naming and more)
 		currentLine = currentLine.substring(0, indexOfExpr + 1) + `await breakpoint(${lineNum}) && ` + currentLine.substring(indexOfExpr + 1, currentLine.length);
 
 	}else if(hasElse || hasFunction){ 
