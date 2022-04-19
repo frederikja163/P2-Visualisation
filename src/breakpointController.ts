@@ -22,7 +22,6 @@ function stopCode(): void{
 
 /** Gets the breakable code and runs the code until the first breakpoint.*/
 function runCode(): void{
-	
 	parseCode();
 	
 	// Setting up promises.
@@ -45,7 +44,6 @@ function runCode(): void{
 	}else{
 		removeAllHighlighting();
 	}
-
 }
 
 /** Setting the run button to be a stop button.*/
@@ -65,7 +63,6 @@ function setButtonToRun():void{
 	if(runButton != null){
 		runButton.value = "Run";
 		runButton.onclick = runCode;
-	
 	}
 }
 
@@ -83,7 +80,7 @@ function parseCode(): void{
 
 	// Getting a list of all lines of code. 
     const lines: NodeListOf<HTMLSpanElement> = <NodeListOf<HTMLSpanElement>>document.getElementById("code")?.querySelectorAll("span");
-	let functionNames: string[] = getFunctionNames(lines);
+	const functionNames: string[] = getFunctionNames(lines);
 
 	// Adding each line of code to the code string.
 	for (let i: number = 0; i < lines.length; i++){
@@ -103,11 +100,11 @@ function parseCode(): void{
 
 /** Getting the names of all of the functions declared in codeFunction*/
 function getFunctionNames(lines: NodeListOf<HTMLSpanElement>): string[]{
-	let functionNames: string[] = [];
+	const functionNames: string[] = [];
 
 	for(let i = 0; i < lines.length; i++){
-		let currentLine: string = lines[i].innerHTML.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
-		let indexOfFunction: number = currentLine.indexOf("function");
+		const currentLine: string = lines[i].innerHTML.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
+		const indexOfFunction: number = currentLine.indexOf("function");
 		
 		if(indexOfFunction != -1){
 			functionNames.push(currentLine.substring(indexOfFunction + "function".length + 1, currentLine.indexOf("(")));
@@ -121,7 +118,7 @@ function getFunctionNames(lines: NodeListOf<HTMLSpanElement>): string[]{
 function addAsyncAwait(currentLine: string, functionNames: string[]):string{
 	
 	// Getting index of function and adding async in front of it.
-	let indexOfFunction: number = currentLine.indexOf("function");
+	const indexOfFunction: number = currentLine.indexOf("function");
 		
 	if(indexOfFunction != -1){
 		return currentLine.substring(0, indexOfFunction) + "async " + currentLine.substring(indexOfFunction, currentLine.length);
@@ -129,7 +126,7 @@ function addAsyncAwait(currentLine: string, functionNames: string[]):string{
 		
 		//finds the name of the function on the current line
 		for(let i:number = 0; i < functionNames.length; i++){
-			let indexOfFunction: number = currentLine.indexOf(functionNames[i]);
+			const indexOfFunction: number = currentLine.indexOf(functionNames[i]);
 		
 			if(indexOfFunction != -1){
 				return currentLine.substring(0, indexOfFunction) + "await " + currentLine.substring(indexOfFunction, currentLine.length);
@@ -155,28 +152,28 @@ function addBreakpoint(currentLine: string, lines: NodeListOf<HTMLSpanElement>, 
 	} 
 
 	// Checks if line has While, for, if, else, switch or function
-	let hasWhile: boolean = currentLine.includes("while"); 		//in
-	let hasFor: boolean = currentLine.includes("for"); 			//in
-	let hasIf: boolean = currentLine.includes("if"); 			//in
-	let hasElse: boolean = currentLine.includes("else"); 		//after
-	let hasFunction: boolean = currentLine.includes("function");//after
+	const hasWhile: boolean = currentLine.includes("while"); 		//in
+	const hasFor: boolean = currentLine.includes("for"); 			//in
+	const hasIf: boolean = currentLine.includes("if"); 			//in
+	const hasElse: boolean = currentLine.includes("else"); 		//after
+	const hasFunction: boolean = currentLine.includes("function");//after
 	
 	// Adding breakpoint.
 	if(hasWhile || hasFor || hasIf){
 		
 		// Insert breakpoint in line.
-		let indexOfExpr = hasFor ? currentLine.indexOf(";") : currentLine.indexOf("(");
-		currentLine = currentLine.substring(0, indexOfExpr + 1) + `await debug(${lineNum}) && ` + currentLine.substring(indexOfExpr + 1, currentLine.length);
+		const indexOfExpr = hasFor ? currentLine.indexOf(";") : currentLine.indexOf("(");
+		currentLine = currentLine.substring(0, indexOfExpr + 1) + `await breakpoint(${lineNum}) && ` + currentLine.substring(indexOfExpr + 1, currentLine.length);
 
 	}else if(hasElse || hasFunction){ 
 
 		// Insert breakpoint after line.
-		currentLine += `\nawait debug(${lineNum});`;
+		currentLine += `\nawait breakpoint(${lineNum});`;
 		
 	}else{ 
 		
 		// Insert breakpoint before line.
-		currentLine = `await debug(${lineNum});\n` + currentLine; 
+		currentLine = `await breakpoint(${lineNum});\n` + currentLine; 
 
 	}
 	
@@ -184,7 +181,7 @@ function addBreakpoint(currentLine: string, lines: NodeListOf<HTMLSpanElement>, 
 }
 
 /** Waiting for a specific promise.*/
-async function debug(line: number): Promise<boolean>{
+async function breakpoint(line: number): Promise<boolean>{
 	
 	// Adding/removing highlighting and waiting by using a promise.
 	if(!isStopping){
