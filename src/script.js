@@ -55,11 +55,11 @@ function stopCode() {
     }
 }
 function runCode() {
-    removeAllHighlighting();
     currentPromise = new Promise((resolve) => {
         resolveCurrentPromise = resolve;
     });
     isStopping = false;
+    removeAllHighlighting();
     setButtonToStop();
     runParsedCode().then(() => setButtonToRun());
 }
@@ -68,6 +68,7 @@ function setButtonToStop() {
     if (runButton != null) {
         runButton.value = "Stop";
         runButton.onclick = stopCode;
+        console.log(runButton);
     }
 }
 function setButtonToRun() {
@@ -75,29 +76,34 @@ function setButtonToRun() {
     if (runButton != null) {
         runButton.value = "Run";
         runButton.onclick = runCode;
+        console.log(runButton);
     }
 }
 function next() {
     resolveCurrentPromise();
 }
 function runParsedCode() {
-    var _a;
     let code = "";
-    const lines = (_a = document.getElementById("code")) === null || _a === void 0 ? void 0 : _a.querySelectorAll("span");
+    const lineElements = document.querySelectorAll("#code > span");
+    const lines = [];
+    for (let i = 0; i < lineElements.length; i++) {
+        lines[i] = lineElements[i].innerText.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+    }
     const functionNames = getFunctionNames(lines);
     for (let i = 0; i < lines.length; i++) {
-        let currentLine = lines[i].innerHTML.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+        let currentLine = lines[i];
         currentLine = addAsyncAwait(currentLine, functionNames);
-        currentLine = addBreakpoint(currentLine, lines, i);
+        currentLine = addBreakpoint(currentLine, lineElements, i);
         code += currentLine + "\n";
     }
     const codeFunction = new Function('return ' + code)();
+    console.log(code, codeFunction);
     return codeFunction();
 }
 function getFunctionNames(lines) {
     const functionNames = [];
     for (let i = 0; i < lines.length; i++) {
-        const currentLine = lines[i].innerHTML.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+        const currentLine = lines[i];
         const indexOfFunction = currentLine.indexOf("function");
         if (indexOfFunction != -1) {
             functionNames.push(currentLine.substring(indexOfFunction + "function".length + 1, currentLine.indexOf("(")));
@@ -180,6 +186,26 @@ function wrapStrings(elementTag, lines) {
         }
         const trimmedStr = currString.substring(indents);
         lines[i] = `${"&nbsp;".repeat(indents)}<${elementTag} index="${i}">${trimmedStr}</${elementTag}></br>`;
+    }
+    const highlight = [
+        { word: "for", color: "red" },
+        { word: "let", color: "green" },
+        { word: "if", color: "blue" },
+        { word: "console.log", color: "magenta" },
+        { word: "function", color: "gray" },
+        { word: "switch", color: "red" },
+        { word: "while", color: "red" },
+        { word: "return", color: "red" },
+        { word: "const", color: "red" },
+        { word: "else", color: "blue" },
+        { word: "var", color: "green" },
+    ];
+    for (let i = 0; i < lines.length; i++) {
+        for (let k = 0; k < highlight.length; k++) {
+            if (lines[i].includes(highlight[k].word)) {
+                lines[i] = lines[i].replace(highlight[k].word, `<span style="color: ${highlight[k].color};">${highlight[k].word}</span>`);
+            }
+        }
     }
     return lines.join("");
 }

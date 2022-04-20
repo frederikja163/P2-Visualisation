@@ -18,15 +18,15 @@ function stopCode(): void{
 
 /** Gets the breakable code and runs the code until the first breakpoint.*/
 function runCode(): void{
-	removeAllHighlighting();
 	
 	// Setting up promises.
 	currentPromise = new Promise((resolve:Function) => { 
 		resolveCurrentPromise = resolve; 
 	});
-
+	
 	// Running function.
 	isStopping = false;
+	removeAllHighlighting();
 	setButtonToStop();
 	runParsedCode().then(() => setButtonToRun());
 }
@@ -35,19 +35,22 @@ function runCode(): void{
 function setButtonToStop():void{
 	const runButton: HTMLInputElement | null = <HTMLInputElement | null> document.getElementById("runStopButton");
 
+	
 	if(runButton != null){
 		runButton.value = "Stop";
 		runButton.onclick = stopCode;
+		console.log(runButton);
 	}
 }
 
 /** Setting the stop button to be a run button.*/
 function setButtonToRun():void{
 	const runButton: HTMLInputElement | null = <HTMLInputElement | null> document.getElementById("runStopButton");
-
+	
 	if(runButton != null){
 		runButton.value = "Run";
 		runButton.onclick = runCode;
+		console.log(runButton);
 	}
 }
 
@@ -62,17 +65,22 @@ function runParsedCode(): Promise<void>{
 	let code: string = "";
 
 	// Getting a list of all lines of code. 
-    const lines: NodeListOf<HTMLSpanElement> = <NodeListOf<HTMLSpanElement>>document.getElementById("code")?.querySelectorAll("span");
+    const lineElements: NodeListOf<HTMLSpanElement> = <NodeListOf<HTMLSpanElement>>document.querySelectorAll("#code > span");
+	const lines: string[] = [];
+	for (let i = 0; i < lineElements.length; i++){
+		lines[i] = lineElements[i].innerText.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
+	}
+
 	const functionNames: string[] = getFunctionNames(lines);
 
 	// Adding each line of code to the code string.
 	for (let i: number = 0; i < lines.length; i++){
 		
 		// Inserting the current line, but adding async in front of any function.
-		let currentLine: string = lines[i].innerHTML.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
+		let currentLine: string = lines[i];
 
 		currentLine = addAsyncAwait(currentLine, functionNames);
-		currentLine = addBreakpoint(currentLine, lines, i); 
+		currentLine = addBreakpoint(currentLine, lineElements, i); 
 
 		code += currentLine + "\n"
     }
@@ -80,15 +88,18 @@ function runParsedCode(): Promise<void>{
 	// Creating a function from the string.
 	const codeFunction = new Function('return ' + code)();
 
+	console.log(code, codeFunction);
+	
+
 	return codeFunction();
 }
 
 /** Getting the names of all of the functions declared in codeFunction*/
-function getFunctionNames(lines: NodeListOf<HTMLSpanElement>): string[]{
+function getFunctionNames(lines: string[]): string[]{
 	const functionNames: string[] = [];
 
 	for(let i = 0; i < lines.length; i++){
-		const currentLine: string = lines[i].innerHTML.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
+		const currentLine: string = lines[i];
 		const indexOfFunction: number = currentLine.indexOf("function");
 		
 		if(indexOfFunction != -1){
