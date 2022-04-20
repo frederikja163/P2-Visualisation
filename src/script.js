@@ -95,7 +95,6 @@ function runParsedCode() {
         code += currentLine + "\n";
     }
     const codeFunction = new Function('return ' + code)();
-    console.log(code, codeFunction);
     return codeFunction();
 }
 function getFunctionNames(lines) {

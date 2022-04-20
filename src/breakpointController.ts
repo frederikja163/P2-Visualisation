@@ -35,7 +35,6 @@ function runCode(): void{
 function setButtonToStop():void{
 	const runButton: HTMLInputElement | null = <HTMLInputElement | null> document.getElementById("runStopButton");
 
-	
 	if(runButton != null){
 		runButton.value = "Stop";
 		runButton.onclick = stopCode;
@@ -85,9 +84,6 @@ function runParsedCode(): Promise<void>{
 
 	// Creating a function from the string.
 	const codeFunction = new Function('return ' + code)();
-
-	console.log(code, codeFunction);
-	
 
 	return codeFunction();
 }
