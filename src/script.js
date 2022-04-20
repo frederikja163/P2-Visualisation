@@ -68,7 +68,6 @@ function setButtonToStop() {
     if (runButton != null) {
         runButton.value = "Stop";
         runButton.onclick = stopCode;
-        console.log(runButton);
     }
 }
 function setButtonToRun() {
@@ -76,7 +75,6 @@ function setButtonToRun() {
     if (runButton != null) {
         runButton.value = "Run";
         runButton.onclick = runCode;
-        console.log(runButton);
     }
 }
 function next() {

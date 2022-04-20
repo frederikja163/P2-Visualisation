@@ -39,7 +39,6 @@ function setButtonToStop():void{
 	if(runButton != null){
 		runButton.value = "Stop";
 		runButton.onclick = stopCode;
-		console.log(runButton);
 	}
 }
 
@@ -50,7 +49,6 @@ function setButtonToRun():void{
 	if(runButton != null){
 		runButton.value = "Run";
 		runButton.onclick = runCode;
-		console.log(runButton);
 	}
 }
 
