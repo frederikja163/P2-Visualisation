@@ -1,7 +1,7 @@
 const breakpointClass: string = "breakpoint";
 const selectedCode: string = "selectedCode";
 
-function breakpoint(code: Element): void
+function initBreakpoints(code: Element): void
 {
     const lines: NodeListOf<HTMLSpanElement> = code.querySelectorAll("span");
     for (let i: number = 0; i < lines.length; i++)
@@ -23,7 +23,7 @@ function statementOnClick(line: HTMLElement): void{
         if (line.id === selectedCode) // Breakpoint, selected
         {
             // Remove breakpoint
-            line.classList.remove(breakpointClass);
+            line.classList.remove(breakpointClass, "highlighted");
             line.id = "";
         }
         else // Breakpoint, not selected
@@ -39,10 +39,10 @@ function statementOnClick(line: HTMLElement): void{
         // Select
         select(line);
     }
-    
-    //reconstructs the code
-    parseCode(); 
-    
+
+    //stops the current algorithm execution
+	stopCode();
+
 }
 
 
@@ -50,7 +50,9 @@ function select(line: HTMLElement): void
 {
     const selected: HTMLElement | null = document.getElementById(selectedCode);
     line.id = selectedCode;
+    highLight(parseInt(line.getAttribute("index")));
     if (selected != null) {
+        removeHighLight(parseInt(selected.getAttribute("index")));
         selected.id = "";
     }
 }

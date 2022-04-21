@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 const breakpointClass = "breakpoint";
 const selectedCode = "selectedCode";
-function breakpoint(code) {
+function initBreakpoints(code) {
     const lines = code.querySelectorAll("span");
     for (let i = 0; i < lines.length; i++) {
         lines[i].addEventListener("dblclick", statementOnDblClick);
@@ -23,7 +23,7 @@ function statementOnDblClick() {
 function statementOnClick(line) {
     if (line.classList.contains(breakpointClass)) {
         if (line.id === selectedCode) {
-            line.classList.remove(breakpointClass);
+            line.classList.remove(breakpointClass, "highlighted");
             line.id = "";
         }
         else {
@@ -34,47 +34,34 @@ function statementOnClick(line) {
         line.classList.add(breakpointClass);
         select(line);
     }
-    parseCode();
+    stopCode();
 }
 function select(line) {
     const selected = document.getElementById(selectedCode);
     line.id = selectedCode;
+    highLight(parseInt(line.getAttribute("index")));
     if (selected != null) {
+        removeHighLight(parseInt(selected.getAttribute("index")));
         selected.id = "";
     }
 }
 let currentPromise;
 let resolveCurrentPromise;
-let codeFunction = null;
 let isStopping = false;
-let awaitingPromise = false;
-let isRunning = false;
 function stopCode() {
-    if (isRunning) {
+    if (resolveCurrentPromise != null) {
         isStopping = true;
+        resolveCurrentPromise();
     }
-    removeAllHighlighting();
-    setButtonToRun();
 }
 function runCode() {
-    parseCode();
-    currentPromise = new Promise((resolve, reject) => {
+    currentPromise = new Promise((resolve) => {
         resolveCurrentPromise = resolve;
     });
-    if (codeFunction != null) {
-        isStopping = false;
-        isRunning = true;
-        setButtonToStop();
-        codeFunction().then((resolve, reject) => {
-            setButtonToRun();
-            isRunning = false;
-            isStopping = false;
-            removeAllHighlighting();
-        });
-    }
-    else {
-        removeAllHighlighting();
-    }
+    isStopping = false;
+    removeAllHighlighting();
+    setButtonToStop();
+    runParsedCode().then(() => setButtonToRun());
 }
 function setButtonToStop() {
     const runButton = document.getElementById("runStopButton");
@@ -93,25 +80,28 @@ function setButtonToRun() {
 function next() {
     resolveCurrentPromise();
 }
-function parseCode() {
-    var _a;
-    stopCode();
+function runParsedCode() {
     let code = "";
-    const lines = (_a = document.getElementById("code")) === null || _a === void 0 ? void 0 : _a.querySelectorAll("span");
-    let functionNames = getFunctionNames(lines);
+    const lineElements = document.querySelectorAll("#code > span");
+    const lines = [];
+    for (let i = 0; i < lineElements.length; i++) {
+        lines[i] = lineElements[i].innerText.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+    }
+    const functionNames = getFunctionNames(lines);
     for (let i = 0; i < lines.length; i++) {
-        let currentLine = lines[i].innerHTML.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+        let currentLine = lines[i];
         currentLine = addAsyncAwait(currentLine, functionNames);
-        currentLine = addBreakpoint(currentLine, lines, i);
+        currentLine = addBreakpoint(currentLine, lineElements, i);
         code += currentLine + "\n";
     }
-    codeFunction = new Function('return ' + code)();
+    const codeFunction = new Function('return ' + code)();
+    return codeFunction();
 }
 function getFunctionNames(lines) {
-    let functionNames = [];
+    const functionNames = [];
     for (let i = 0; i < lines.length; i++) {
-        let currentLine = lines[i].innerHTML.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
-        let indexOfFunction = currentLine.indexOf("function");
+        const currentLine = lines[i];
+        const indexOfFunction = currentLine.indexOf("function");
         if (indexOfFunction != -1) {
             functionNames.push(currentLine.substring(indexOfFunction + "function".length + 1, currentLine.indexOf("(")));
         }
@@ -119,13 +109,13 @@ function getFunctionNames(lines) {
     return functionNames;
 }
 function addAsyncAwait(currentLine, functionNames) {
-    let indexOfFunction = currentLine.indexOf("function");
+    const indexOfFunction = currentLine.indexOf("function");
     if (indexOfFunction != -1) {
         return currentLine.substring(0, indexOfFunction) + "async " + currentLine.substring(indexOfFunction, currentLine.length);
     }
     else {
         for (let i = 0; i < functionNames.length; i++) {
-            let indexOfFunction = currentLine.indexOf(functionNames[i]);
+            const indexOfFunction = currentLine.indexOf(functionNames[i]);
             if (indexOfFunction != -1) {
                 return currentLine.substring(0, indexOfFunction) + "await " + currentLine.substring(indexOfFunction, currentLine.length);
             }
@@ -140,33 +130,31 @@ function addBreakpoint(currentLine, lines, lineNum) {
     if (!(lines[lineNum].classList.contains(breakpointClass))) {
         return currentLine;
     }
-    let hasWhile = currentLine.includes("while");
-    let hasFor = currentLine.includes("for");
-    let hasIf = currentLine.includes("if");
-    let hasElse = currentLine.includes("else");
-    let hasFunction = currentLine.includes("function");
+    const hasWhile = currentLine.includes("while");
+    const hasFor = currentLine.includes("for");
+    const hasIf = currentLine.includes("if");
+    const hasElse = currentLine.includes("else");
+    const hasFunction = currentLine.includes("function");
     if (hasWhile || hasFor || hasIf) {
-        let indexOfExpr = hasFor ? currentLine.indexOf(";") : currentLine.indexOf("(");
-        currentLine = currentLine.substring(0, indexOfExpr + 1) + `await debug(${lineNum}) && ` + currentLine.substring(indexOfExpr + 1, currentLine.length);
+        const indexOfExpr = hasFor ? currentLine.indexOf(";") : currentLine.indexOf("(");
+        currentLine = currentLine.substring(0, indexOfExpr + 1) + `await breakpoint(${lineNum}) && ` + currentLine.substring(indexOfExpr + 1, currentLine.length);
     }
     else if (hasElse || hasFunction) {
-        currentLine += `\nawait debug(${lineNum});`;
+        currentLine += `\nawait breakpoint(${lineNum});`;
     }
     else {
-        currentLine = `await debug(${lineNum});\n` + currentLine;
+        currentLine = `await breakpoint(${lineNum});\n` + currentLine;
     }
     return currentLine;
 }
-function debug(line) {
+function breakpoint(line) {
     return __awaiter(this, void 0, void 0, function* () {
-        if (!isStopping) {
-            awaitingPromise = true;
-            highLight(line);
-            yield currentPromise;
-            removeHighLight(line);
-            awaitingPromise = false;
-        }
-        currentPromise = new Promise((resolve, reject) => {
+        if (isStopping)
+            return true;
+        highLight(line);
+        yield currentPromise;
+        removeHighLight(line);
+        currentPromise = new Promise((resolve) => {
             resolveCurrentPromise = resolve;
         });
         return true;
@@ -176,17 +164,17 @@ function darkMode() {
     const bodyElement = document.body;
     const darkModeBtn = document.querySelector("#darkModeBtn");
     bodyElement.classList.toggle("dark-mode");
-    bodyElement.classList.contains("dark-mode") ? darkModeBtn.value = "Light Mode" :
-        darkModeBtn.value = "Dark Mode";
+    darkModeBtn.value = bodyElement.classList.contains("dark-mode") ? "Light Mode" :
+        "Dark Mode";
 }
 function displayCodeAsString(textBox, printFunction) {
-    let functionString = printFunction.toString();
-    const paragraphString = wrapStrings("span", functionString);
+    const functionString = printFunction.toString();
+    const lines = functionString.split(/(?<=\{\})|[\r\n]+/);
+    const paragraphString = wrapStrings("span", lines);
     textBox.innerHTML = "<pre id= \"code\">" + paragraphString + "</pre>";
-    breakpoint(textBox);
+    initBreakpoints(textBox);
 }
-function wrapStrings(elementTag, functionString) {
-    let lines = functionString.split(/(?<=\{\})|[\r\n]+/);
+function wrapStrings(elementTag, lines) {
     for (let i = 0; i < lines.length; i++) {
         let indents = 0;
         const currString = lines[i];
@@ -196,14 +184,34 @@ function wrapStrings(elementTag, functionString) {
         const trimmedStr = currString.substring(indents);
         lines[i] = `${"&nbsp;".repeat(indents)}<${elementTag} index="${i}">${trimmedStr}</${elementTag}></br>`;
     }
+    const highlight = [
+        { word: "for", color: "red" },
+        { word: "let", color: "green" },
+        { word: "if", color: "blue" },
+        { word: "console.log", color: "magenta" },
+        { word: "function", color: "gray" },
+        { word: "switch", color: "red" },
+        { word: "while", color: "red" },
+        { word: "return", color: "red" },
+        { word: "const", color: "red" },
+        { word: "else", color: "blue" },
+        { word: "var", color: "green" },
+    ];
+    for (let i = 0; i < lines.length; i++) {
+        for (let k = 0; k < highlight.length; k++) {
+            if (lines[i].includes(highlight[k].word)) {
+                lines[i] = lines[i].replace(highlight[k].word, `<span style="color: ${highlight[k].color};">${highlight[k].word}</span>`);
+            }
+        }
+    }
     return lines.join("");
 }
 function initDropDown() {
-    let options = document.querySelectorAll(".dropdown-content > a");
-    let left = document.querySelector("#left");
+    const options = document.querySelectorAll(".dropdown-content > a");
+    const left = document.querySelector("#left");
     for (let i = 0; i < options.length; i++) {
         options[i].addEventListener("click", function dropDownSelector(event) {
-            let dropdownBtn = document.querySelector(".dropdown > button");
+            const dropdownBtn = document.querySelector(".dropdown > button");
             switch (event.target.id) {
                 case "mergesort":
                     if (left != null)
@@ -252,10 +260,10 @@ function main() {
     initDropDown();
     const left = document.querySelector("#left");
     const right = document.querySelector("#right");
-    if (right != null)
-        pseudocode(right);
     if (left != null)
         displayCodeAsString(left, algMergeSort);
+    if (right != null)
+        pseudocode(right);
 }
 function pseudocode(right) {
     right.addEventListener("click", pseudocodeOnClick);
@@ -308,6 +316,7 @@ function pseudocodeOnClick() {
         splitHtmlElement(activeElement, caretPosition);
         const newElement = createPseudocodeSpan("", breakpointIndex);
         activeElement.replaceWith(newElement);
+        newElement.classList.add("highlighted");
         setCaretPosition(newElement, 0);
         oldActiveElement = newElement;
     }

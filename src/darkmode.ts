@@ -3,7 +3,6 @@ function darkMode() : void{
     const darkModeBtn = document.querySelector("#darkModeBtn") as HTMLInputElement;
     
     bodyElement.classList.toggle("dark-mode");
-    bodyElement.classList.contains("dark-mode") ?   darkModeBtn.value="Light Mode" : 
-                                                    darkModeBtn.value="Dark Mode";
-
- }
+    darkModeBtn.value = bodyElement.classList.contains("dark-mode") ?   "Light Mode" : 
+                                                                        "Dark Mode";
+}
