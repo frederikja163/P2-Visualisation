@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 const breakpointClass = "breakpoint";
 const selectedCode = "selectedCode";
 function initBreakpoints(code) {
-    const lines = code.querySelectorAll("span");
+    const lines = document.querySelectorAll("#code > span");
     for (let i = 0; i < lines.length; i++) {
         lines[i].addEventListener("dblclick", statementOnDblClick);
         lines[i].addEventListener("click", () => statementOnClick(lines[i]));
