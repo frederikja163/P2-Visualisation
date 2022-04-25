@@ -1,9 +1,9 @@
 const breakpointClass: string = "breakpoint";
 const selectedCode: string = "selectedCode";
 
-function initBreakpoints(code: Element): void
+function initBreakpoints(): void
 {
-    const lines: NodeListOf<HTMLSpanElement> = code.querySelectorAll("span");
+    const lines: NodeListOf<HTMLSpanElement> = document.querySelectorAll("#code > span");
     for (let i: number = 0; i < lines.length; i++)
     {
         // Listen for events on every lines of code.
