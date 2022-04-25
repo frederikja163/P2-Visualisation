@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 const breakpointClass = "breakpoint";
 const selectedCode = "selectedCode";
-function initBreakpoints(code) {
+function initBreakpoints() {
     const lines = document.querySelectorAll("#code > span");
     for (let i = 0; i < lines.length; i++) {
         lines[i].addEventListener("dblclick", statementOnDblClick);
@@ -172,7 +172,7 @@ function displayCodeAsString(textBox, printFunction) {
     const lines = functionString.split(/(?<=\{\})|[\r\n]+/);
     const paragraphString = wrapStrings("span", lines);
     textBox.innerHTML = "<pre id= \"code\">" + paragraphString + "</pre>";
-    initBreakpoints(textBox);
+    initBreakpoints();
 }
 function wrapStrings(elementTag, lines) {
     for (let i = 0; i < lines.length; i++) {
@@ -185,17 +185,17 @@ function wrapStrings(elementTag, lines) {
         lines[i] = `${"&nbsp;".repeat(indents)}<${elementTag} index="${i}">${trimmedStr}</${elementTag}></br>`;
     }
     const highlight = [
-        { word: "for", color: "red" },
-        { word: "let", color: "green" },
-        { word: "if", color: "blue" },
+        { word: "for", color: "#F13269" },
+        { word: "let", color: "#0EC86B" },
+        { word: "if", color: "#499CFF" },
         { word: "console.log", color: "magenta" },
-        { word: "function", color: "gray" },
-        { word: "switch", color: "red" },
-        { word: "while", color: "red" },
-        { word: "return", color: "red" },
-        { word: "const", color: "red" },
-        { word: "else", color: "blue" },
-        { word: "var", color: "green" },
+        { word: "function", color: "#F13269" },
+        { word: "switch", color: "#9D57CB" },
+        { word: "while", color: "#9D57CB" },
+        { word: "return", color: "#9D57CB" },
+        { word: "const", color: "#0EC86B" },
+        { word: "else", color: "#499CFF" },
+        { word: "var", color: "#0EC86B" },
     ];
     for (let i = 0; i < lines.length; i++) {
         for (let k = 0; k < highlight.length; k++) {

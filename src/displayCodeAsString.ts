@@ -8,7 +8,7 @@ function displayCodeAsString(textBox : Element, printFunction : Function) : void
     // Display string on website.
     textBox.innerHTML = "<pre id= \"code\">" + paragraphString + "</pre>";
 
-    initBreakpoints(textBox);
+    initBreakpoints();
 }
 
 function wrapStrings(elementTag : string, lines : string[]) : string {
@@ -30,18 +30,18 @@ function wrapStrings(elementTag : string, lines : string[]) : string {
     //Syntax highlight. To add another word/color, simply add another element to highlight.
     type Highlight = {word: string, color : string};
     const highlight: Highlight[] = [
-        {word : "for", color : "red"}, 
-        {word : "let", color : "green"}, 
-        {word : "if", color : "blue"}, 
-        {word : "console.log", color : "magenta"}, 
-        {word : "function", color : "gray"}, 
-        {word : "switch", color : "red"}, 
-        {word : "while", color : "red"}, 
-        {word : "return", color : "red"},
-        {word : "const", color : "red"},
-        {word : "else", color : "blue"},
-        {word : "var", color : "green"},
-        ];
+        { word: "for", color: "#F13269" },
+        { word: "let", color: "#0EC86B" },
+        { word: "if", color: "#499CFF" },
+        { word: "console.log", color: "magenta" },
+        { word: "function", color: "#F13269" },
+        { word: "switch", color: "#9D57CB" },
+        { word: "while", color: "#9D57CB" },
+        { word: "return", color: "#9D57CB" },
+        { word: "const", color: "#0EC86B" },
+        { word: "else", color: "#499CFF" },
+        { word: "var", color: "#0EC86B" },
+    ];
       
     for(let i : number = 0; i < lines.length; i++){
         for(let k : number = 0; k < highlight.length; k++){
