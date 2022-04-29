@@ -30,6 +30,10 @@ function initDropDown(){
                     if(left != null) displayCodeAsString(left, algBubbleSort);
                     if(dropdownBtn != null) dropdownBtn.innerHTML = "Bubble Sort";
                     break;
+                case "gcd": 
+                    if(left != null) displayCodeAsString(left, algGCD);
+                    if(dropdownBtn != null) dropdownBtn.innerHTML = "Euclid's<br /> algorithm";
+                    break;
             } 
         });
     } 

@@ -231,6 +231,12 @@ function initDropDown() {
                     if (dropdownBtn != null)
                         dropdownBtn.innerHTML = "Bubble Sort";
                     break;
+                case "gcd":
+                    if (left != null)
+                        displayCodeAsString(left, algGCD);
+                    if (dropdownBtn != null)
+                        dropdownBtn.innerHTML = "Euclid's<br /> algorithm";
+                    break;
             }
         });
     }
@@ -388,7 +394,7 @@ function algBinarySearch() {
         }
         return -1;
     }
-    binarySearch([201, 176, 90, 63, 12, 1], 12);
+    binarySearch([420, 336, 201, 176, 101, 98, 90, 69, 63, 43, 12, 1], 69);
 }
 function algBubbleSort() {
     function bubbleSort(array) {
@@ -412,6 +418,20 @@ function algBubbleSort() {
         return array;
     }
     bubbleSort([243, 45, 23, 356, 3, 5346, 35, 5]);
+}
+function algGCD() {
+    function gcd(a, b) {
+        while (a !== b) {
+            if (a > b) {
+                a -= b;
+            }
+            else {
+                b -= a;
+            }
+        }
+        return a;
+    }
+    gcd(48, 18);
 }
 function algMergeSort() {
     function mergeSort(array) {
