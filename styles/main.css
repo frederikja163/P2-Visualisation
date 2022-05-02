@@ -57,6 +57,10 @@ body {
   transition-duration: var(--trans);
 }
 
+#right > span{
+  white-space: pre;
+}
+
 .dark-mode {
   background-color: rgb(36, 36, 36);
   color: white;

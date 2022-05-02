@@ -1,18 +1,61 @@
 /*
     TODO: Make enter work - sometimes it makes a double <br tag>
     TODO: Make arrows work
-    TODO: Make tabs work
+    TODO: Make tabs work (VI)
     TODO: Make delete work        
 */
 
 /** Initialize pseudocode and subscribe to the correct events. */
+
 function pseudocode(right: HTMLElement): void
 {
     right.addEventListener("click", pseudocodeOnClick);
+    right.addEventListener('keydown',pseudocodeOnTab);
 }
+/* Make tab work like normal tab 
+Tab makes 4 spaces normally
+
+
+When
+    - pseudicodeOnTab
+Relevant
+    - oldCaretPosition
+TODO
+    - make the indentation matches each other
+
+
+*/
+
+function pseudocodeOnTab(eventProperties: KeyboardEvent): void
+{
+
+    let oldCaretPosition: number = getCaretPosition();
+    let highlightedSpan: Element = document.activeElement;
+    const tab: string = insertString(highlightedSpan.innerHTML, getCaretPosition(), " ");
+
+    if(eventProperties.key == "Tab")
+    {
+        eventProperties.preventDefault();
+        
+
+        highlightedSpan.innerHTML = insertString(highlightedSpan.innerHTML, getCaretPosition(), "   ");
+        setCaretPosition(<HTMLElement>highlightedSpan, oldCaretPosition + 1);
+        
+        console.log(tab);
+
+    }
+/*
+Hvis highlightedSpan har en tegn foran, så lav skal den lave 3 mellemrum
+*/
+    
+}
+
 
 let oldActiveElement: HTMLElement | null = null;
 
+function insertString(defaultString: string, stringPosition: number, insertedString: string): string {
+    return defaultString.slice(0, stringPosition) + insertedString + defaultString.slice(stringPosition);     
+}
 /** Event for when there has been clicked on a pseudocode span. */
 function pseudocodeOnClick(): void {
 
@@ -87,7 +130,7 @@ function pseudocodeOnClick(): void {
 }
 
 /** Splits 'element' into two different html elements, the text is split at 'index'. */
-function splitHtmlElement(element: HTMLElement, index: number) {
+function splitHtmlElement(element: HTMLElement, index: number) { 
     const text: string = element.innerText;
 
     // Get the text before and after the index.
@@ -127,13 +170,14 @@ function createPseudocodeSpan(text: string, codeIndex: string): HTMLElement {
 /** Sets the caret position on 'element' to 'caretPos'. */
 function setCaretPosition(element: HTMLElement, caretPos: number): void {
     const selection: Selection | null = window.getSelection();
+    const node = element.childNodes.length != 0 ? element.firstChild : element;
     if(selection == null) return;
     const range: Range = document.createRange();  
     selection.removeAllRanges();
-    range.selectNodeContents(element); 
+    range.selectNodeContents(node);
     range.collapse(false);
-    range.setStart(element, caretPos);
-    range.setEnd(element, caretPos);
+    range.setStart(node, caretPos);
+    range.setEnd(node, caretPos);
     selection.addRange(range);
     element.focus();
 }
@@ -142,7 +186,6 @@ function setCaretPosition(element: HTMLElement, caretPos: number): void {
 function getCaretPosition(): number {
     const selection: Selection | null = window.getSelection();
     if(selection == null) return -1;
-    selection.getRangeAt(0);
-
+    selection.getRangeAt(0);   
     return selection.getRangeAt(0).startOffset;
 }

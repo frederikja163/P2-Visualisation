@@ -267,8 +267,23 @@ function main() {
 }
 function pseudocode(right) {
     right.addEventListener("click", pseudocodeOnClick);
+    right.addEventListener('keydown', pseudocodeOnTab);
+}
+function pseudocodeOnTab(eventProperties) {
+    let oldCaretPosition = getCaretPosition();
+    let highlightedSpan = document.activeElement;
+    const tab = insertString(highlightedSpan.innerHTML, getCaretPosition(), " ");
+    if (eventProperties.key == "Tab") {
+        eventProperties.preventDefault();
+        highlightedSpan.innerHTML = insertString(highlightedSpan.innerHTML, getCaretPosition(), "   ");
+        setCaretPosition(highlightedSpan, oldCaretPosition + 1);
+        console.log(tab);
+    }
 }
 let oldActiveElement = null;
+function insertString(defaultString, stringPosition, insertedString) {
+    return defaultString.slice(0, stringPosition) + insertedString + defaultString.slice(stringPosition);
+}
 function pseudocodeOnClick() {
     let activeElement = document.activeElement;
     if (!(activeElement instanceof HTMLSpanElement)) {
@@ -352,14 +367,15 @@ function createPseudocodeSpan(text, codeIndex) {
 }
 function setCaretPosition(element, caretPos) {
     const selection = window.getSelection();
+    const node = element.childNodes.length != 0 ? element.firstChild : element;
     if (selection == null)
         return;
     const range = document.createRange();
     selection.removeAllRanges();
-    range.selectNodeContents(element);
+    range.selectNodeContents(node);
     range.collapse(false);
-    range.setStart(element, caretPos);
-    range.setEnd(element, caretPos);
+    range.setStart(node, caretPos);
+    range.setEnd(node, caretPos);
     selection.addRange(range);
     element.focus();
 }
