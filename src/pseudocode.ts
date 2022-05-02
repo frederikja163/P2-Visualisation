@@ -2,20 +2,39 @@
     TODO: Make enter work - sometimes it makes a double <br tag>
     TODO: Make arrows work
     TODO: Make tabs work
-    TODO: Make delete work        
+    TODO: Make delete work
+
 */
 
 /** Initialize pseudocode and subscribe to the correct events. */
 function pseudocode(right: HTMLElement): void
 {
+    right.addEventListener("keyup", pseudocodeOnKeyPress);
     right.addEventListener("click", pseudocodeOnClick);
 }
 
 let oldActiveElement: HTMLElement | null = null;
 
+function pseudocodeOnKeyPress(e: KeyboardEvent): void {
+    if (e.key === "Enter") {
+        const breaks: NodeListOf<Element> = document.querySelectorAll("#right > span > br");
+        for (let i: number = 0; i < breaks.length; i++) {
+            const br = breaks[i];
+            br.remove();
+        }
+        const activeElement: Element = document.activeElement;
+        const beforeCursor: string = activeElement.childNodes[0].nodeValue;
+        const afterCursor: string = activeElement.childNodes[1].nodeValue;
+
+        const beforeElement: HTMLElement = createPseudocodeSpan(beforeCursor, activeElement.getAttribute("index"));
+        const breakElement = document.createElement("br");
+        const afterElement: HTMLElement = createPseudocodeSpan(afterCursor, activeElement.getAttribute("index"));
+        activeElement.replaceWith(beforeElement, breakElement, afterElement);
+   }
+}
+
 /** Event for when there has been clicked on a pseudocode span. */
 function pseudocodeOnClick(): void {
-
     // Get the currently active span element, or the last span element.
     let activeElement: HTMLElement | null = document.activeElement as HTMLElement;
     if (!(activeElement instanceof HTMLSpanElement)) {
@@ -90,7 +109,7 @@ function pseudocodeOnClick(): void {
 function splitHtmlElement(element: HTMLElement, index: number) {
     const text: string = element.innerText;
 
-    // Get the text before and after the index.
+    // Get the text before and aftsplitHtmlElementer the index.
     const beforeText: string = text.slice(0, index);
     const afterText: string = text.slice(index, text.length);
     const activeElementCodeIndex: string | null = element.getAttribute("index");
