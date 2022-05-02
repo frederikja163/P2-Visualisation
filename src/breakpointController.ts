@@ -18,7 +18,8 @@ function stopCode(): void{
 
 /** Gets the breakable code and runs the code until the first breakpoint.*/
 function runCode(): void{
-	
+	//deselecting currently selected line
+	document.querySelector("#selectedCode").id = "";
 	// Setting up promises.
 	currentPromise = new Promise((resolve:Function) => { 
 		resolveCurrentPromise = resolve; 
