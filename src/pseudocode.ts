@@ -1,3 +1,5 @@
+/// <reference lib="dom" />
+
 /*
     TODO: Make enter work - sometimes it makes a double <br tag>
     TODO: Make arrows work
@@ -6,9 +8,102 @@
 */
 
 /** Initialize pseudocode and subscribe to the correct events. */
-function pseudocode(right: HTMLElement): void
-{
+function pseudocode(right: HTMLElement): void {
     right.addEventListener("click", pseudocodeOnClick);
+    right.addEventListener("keydown", fixDelete);
+    right.addEventListener("keydown", fixArrows);
+}
+
+function fixDelete(eventParameters: KeyboardEvent) {
+    const caret: number = getCaretPosition();
+    const activeElement: HTMLElement = <HTMLElement>document.activeElement;
+    let adjElement: HTMLElement;
+    let adjAdjElement: HTMLElement = null;
+    let adjIsRight: boolean;
+
+    if (eventParameters.key === "Backspace" && caret === 0) { //if "backspace" and at the first position of the span
+        //removing the last character from the previous span
+        adjElement = <HTMLElement>activeElement.previousElementSibling;
+        adjAdjElement = <HTMLElement>adjElement.previousElementSibling;
+        adjElement.innerText = adjElement.innerText.slice(0, adjElement.innerText.length - 1);
+        adjIsRight = false;
+    } else if (eventParameters.key === "Delete" && caret === activeElement.innerText.length) { // "delete" and at the last position of the current span
+        //removing the first character from the next span
+        adjElement = <HTMLElement>activeElement.nextElementSibling;
+        adjAdjElement = <HTMLElement>adjElement.nextElementSibling;
+        adjElement.innerText = adjElement.innerText.slice(1, adjElement.innerText.length);
+        adjIsRight = true;
+    }
+
+    //merge adjacent elements
+    if (adjAdjElement != null && adjElement.innerText.length === 0 && adjAdjElement.getAttribute("index") === activeElement.getAttribute("index")) {
+        setCaretPosition(adjAdjElement, adjIsRight ? 0 : adjAdjElement.innerText.length);
+        oldActiveElement = adjAdjElement;
+        activeElement.remove();
+        eventParameters.preventDefault();
+    }
+
+    //if adjacent highlighted pseudocode span is empty: remove it
+    if (adjElement != null && adjElement.innerText.length == 0) adjElement.remove();
+
+}
+
+function fixArrows(eventParameters: KeyboardEvent) {
+
+    const activeElement: HTMLElement = <HTMLElement>document.activeElement;
+    let adjElement: HTMLElement = null;
+    let adjAdjElement: HTMLElement = null;
+    let adjIsRight: boolean;
+
+    let caret: number = getCaretPosition();
+
+    if (eventParameters.key === "ArrowLeft" && caret === 0) {
+        //if "backspace" and at the first position of the span
+        adjElement = <HTMLElement>activeElement.previousElementSibling;
+        if (adjElement != null) adjAdjElement = <HTMLElement>adjElement.previousElementSibling;
+        adjIsRight = false;
+    } else if (eventParameters.key === "ArrowRight" && caret === activeElement.innerText.length) {
+        // "delete" and at the last position of the current span
+        adjElement = <HTMLElement>activeElement.nextElementSibling;
+        if (adjElement != null) adjAdjElement = <HTMLElement>adjElement.nextElementSibling;
+        adjIsRight = true;
+    }
+
+    if (adjElement === null) return;
+
+    //setting caret position
+    const index: string | null = activeElement.getAttribute("index");
+    let newElement: HTMLElement = null;
+
+    if (adjAdjElement != null && adjElement.innerText.length === 1 && adjAdjElement.getAttribute("index") === index) {
+        //inserting in existing span
+        setCaretPosition(adjAdjElement, adjIsRight ? 0 : adjAdjElement.innerText.length);
+        newElement = adjAdjElement;
+        activeElement.remove();
+        eventParameters.preventDefault();
+    } else {
+        //inserting new empty span
+        newElement = createPseudocodeSpan("", index == null ? "" : index);
+        if (activeElement.classList.contains("highlighted")) newElement.classList.add("highlighted");
+
+        insertPseudocodeSpan(newElement, adjElement, adjIsRight ? 1 : adjElement.innerText.length - 1);
+        setCaretPosition(newElement, 0);
+    }
+
+    //removing prev span if empty
+    if (activeElement.innerText.length == 0) activeElement.remove();
+
+    //merging previously split spans
+    if (adjIsRight) {
+        if (newElement.previousElementSibling.previousElementSibling !== null && newElement.previousElementSibling !== null) {
+            mergeElements(<HTMLElement>newElement.previousElementSibling.previousElementSibling, <HTMLElement>newElement.previousElementSibling);
+        }
+    } else if (newElement.nextElementSibling !== null && newElement.nextElementSibling.nextElementSibling !== null) {
+        mergeElements(<HTMLElement>newElement.nextElementSibling, <HTMLElement>newElement.nextElementSibling.nextElementSibling);
+    }
+
+    oldActiveElement = newElement;
+
 }
 
 let oldActiveElement: HTMLElement | null = null;
@@ -20,10 +115,10 @@ function pseudocodeOnClick(): void {
     let activeElement: HTMLElement | null = document.activeElement as HTMLElement;
     if (!(activeElement instanceof HTMLSpanElement)) {
         activeElement = document.querySelector("#right > span:last-child");
-        if(activeElement != null){
-            const textContent : string | null = activeElement.textContent;
-            
-            if(textContent){
+        if (activeElement != null) {
+            const textContent: string | null = activeElement.textContent;
+
+            if (textContent) {
                 setCaretPosition(activeElement, textContent.length);
             }
         }
@@ -35,18 +130,18 @@ function pseudocodeOnClick(): void {
         const nextElement: Element | null = oldActiveElement.nextElementSibling;
         const prevIndex: string | null | undefined = prevElement?.getAttribute("index");
         const nextIndex: string | null | undefined = nextElement?.getAttribute("index");
-       
+
         // Merge the siblings of the old last element if they had the same index.
-        if (prevElement != null && nextElement != null && prevIndex === nextIndex){
+        if (prevElement != null && nextElement != null && prevIndex === nextIndex) {
             const prevText: string | null = prevElement.textContent;
             const nextText: string | null = nextElement.textContent;
-            
-            if(prevText != null && nextText != null && prevIndex != null){
+
+            if (prevText != null && nextText != null && prevIndex != null) {
                 const mergedElement: HTMLElement = createPseudocodeSpan(prevText + nextText, prevIndex);
                 const previous: Element | null = oldActiveElement.previousElementSibling;
-                const next: Element | null =  oldActiveElement.nextElementSibling;
-                
-                if(previous != null && next != null){
+                const next: Element | null = oldActiveElement.nextElementSibling;
+
+                if (previous != null && next != null) {
                     previous.remove();
                     next.remove();
                     oldActiveElement.replaceWith(mergedElement);
@@ -62,28 +157,56 @@ function pseudocodeOnClick(): void {
     }
 
     const caretPosition: number = getCaretPosition();
-    
+
     // Get selected breakpoint index.
     const selectedBreakpoint: HTMLElement | null = document.querySelector("#selectedCode");
     let breakpointIndex: string | null = "-1";
     if (selectedBreakpoint != null) {
-        breakpointIndex = selectedBreakpoint.getAttribute("index");  
+        breakpointIndex = selectedBreakpoint.getAttribute("index");
     }
-    
-    if(activeElement != null && activeElement.getAttribute("index") === breakpointIndex){
+
+    if (activeElement != null && activeElement.getAttribute("index") === breakpointIndex) {
         oldActiveElement = activeElement;
     }
-    else if(activeElement != null && breakpointIndex != null){
-        splitHtmlElement(activeElement, caretPosition);
-        
+    else if (activeElement != null && breakpointIndex != null) {
+
+
+        //      splitHtmlElement(activeElement, caretPosition);
+        //       
         // Create the new element with the cursor.
         const newElement: HTMLElement = createPseudocodeSpan("", breakpointIndex);
-        activeElement.replaceWith(newElement);
+        insertPseudocodeSpan(newElement, activeElement, caretPosition);
         newElement.classList.add("highlighted");
-        setCaretPosition(newElement, 0);
-        
+        //      activeElement.replaceWith(newElement);
+        //      setCaretPosition(newElement, 0);
+
         oldActiveElement = newElement;
+
+
     }
+}
+
+/** Merges two elements if they have the same index value*/
+function mergeElements(e1: HTMLElement, e2: HTMLElement): HTMLElement {
+    const i1: string | null | undefined = e1?.getAttribute("index");
+    const i2: string | null | undefined = e2?.getAttribute("index");
+
+    // Merge the siblings of the old last element if they had the same index.
+    if (e1 != null && e2 != null && i1 != null && i1 === i2) {
+        const text1: string | null = e1.textContent;
+        const text2: string | null = e2.textContent;
+
+        if (text1 != null && text2 != null) {
+            e1.remove();
+
+            const mergedElements: HTMLElement = createPseudocodeSpan(text1 + text2, i1);
+            e2.replaceWith(mergedElements);
+
+            return mergedElements;
+        }
+    }
+
+    return null;
 }
 
 /** Splits 'element' into two different html elements, the text is split at 'index'. */
@@ -96,20 +219,25 @@ function splitHtmlElement(element: HTMLElement, index: number) {
     const activeElementCodeIndex: string | null = element.getAttribute("index");
 
     // Create before and after elements with the correct text.
-    if(activeElementCodeIndex != null){
-        if (beforeText === ""){
+    if (activeElementCodeIndex != null) {
+        if (beforeText === "") {
             const afterElement: HTMLElement = createPseudocodeSpan(afterText, activeElementCodeIndex);
+            if (element.classList.contains("highlighted")) afterElement.classList.add("highlighted");
             element.after(afterElement);
         }
-        else if (afterText === ""){
+        else if (afterText === "") {
             const beforeElement: HTMLElement = createPseudocodeSpan(beforeText, activeElementCodeIndex);
+            if (element.classList.contains("highlighted")) beforeElement.classList.add("highlighted");
             element.before(beforeElement);
         }
         else {
             const beforeElement: HTMLElement = createPseudocodeSpan(beforeText, activeElementCodeIndex);
-            element.before(beforeElement);
-            
             const afterElement: HTMLElement = createPseudocodeSpan(afterText, activeElementCodeIndex);
+            if (element.classList.contains("highlighted")) {
+                afterElement.classList.add("highlighted");
+                beforeElement.classList.add("highlighted");
+            }
+            element.before(beforeElement);
             element.after(afterElement);
         }
     }
@@ -124,16 +252,24 @@ function createPseudocodeSpan(text: string, codeIndex: string): HTMLElement {
     return element;
 }
 
+/** Insertes a pseudocode span at the given index in the element. */
+function insertPseudocodeSpan(newSpan: HTMLElement, splitableSpan: HTMLElement, index: number) {
+    splitHtmlElement(splitableSpan, index);
+    splitableSpan.replaceWith(newSpan);
+    setCaretPosition(newSpan, 0);
+}
+
 /** Sets the caret position on 'element' to 'caretPos'. */
 function setCaretPosition(element: HTMLElement, caretPos: number): void {
     const selection: Selection | null = window.getSelection();
-    if(selection == null) return;
-    const range: Range = document.createRange();  
+    const node = element.childNodes.length != 0 ? element.firstChild : element;
+    if (selection == null) return;
+    const range: Range = document.createRange();
     selection.removeAllRanges();
-    range.selectNodeContents(element); 
+    range.selectNodeContents(node);
     range.collapse(false);
-    range.setStart(element, caretPos);
-    range.setEnd(element, caretPos);
+    range.setStart(node, caretPos);
+    range.setEnd(node, caretPos);
     selection.addRange(range);
     element.focus();
 }
@@ -141,7 +277,7 @@ function setCaretPosition(element: HTMLElement, caretPos: number): void {
 /** Gets the current caret position as a number. */
 function getCaretPosition(): number {
     const selection: Selection | null = window.getSelection();
-    if(selection == null) return -1;
+    if (selection == null) return -1;
     selection.getRangeAt(0);
 
     return selection.getRangeAt(0).startOffset;

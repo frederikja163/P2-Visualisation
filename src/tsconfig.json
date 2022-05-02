@@ -6,9 +6,11 @@
         "preserveConstEnums": true,
         "sourceMap": true,
         "outFile": "script.js",
-        "target": "es2015"
+        "target": "es2021",
+        
     },
     "include": [
         "./**/*.ts"
     ],
+    
 }
