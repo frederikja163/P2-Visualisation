@@ -55,6 +55,7 @@ function stopCode() {
     }
 }
 function runCode() {
+    document.querySelector("#selectedCode").id = "";
     currentPromise = new Promise((resolve) => {
         resolveCurrentPromise = resolve;
     });
@@ -207,31 +208,18 @@ function wrapStrings(elementTag, lines) {
     return lines.join("");
 }
 function initDropDown() {
-    const options = document.querySelectorAll(".dropdown-content > a");
     const left = document.querySelector("#left");
-    for (let i = 0; i < options.length; i++) {
-        options[i].addEventListener("click", function dropDownSelector(event) {
-            const dropdownBtn = document.querySelector(".dropdown > button");
-            switch (event.target.id) {
-                case "mergesort":
-                    if (left != null)
-                        displayCodeAsString(left, algMergeSort);
-                    if (dropdownBtn != null)
-                        dropdownBtn.innerHTML = "MergeSort";
-                    break;
-                case "binarysearch":
-                    if (left != null)
-                        displayCodeAsString(left, algBinarySearch);
-                    if (dropdownBtn != null)
-                        dropdownBtn.innerHTML = "Binary Search";
-                    break;
-                case "bubblesort":
-                    if (left != null)
-                        displayCodeAsString(left, algBubbleSort);
-                    if (dropdownBtn != null)
-                        dropdownBtn.innerHTML = "Bubble Sort";
-                    break;
-            }
+    const dropdownBtn = document.querySelector(".dropbtn");
+    const dropdownContent = document.querySelector(".dropdown-content");
+    let optionContent, option;
+    for (let i = 0; i < algorithmList.length; i++) {
+        option = document.createElement("a");
+        optionContent = document.createTextNode(algorithmList[i].name);
+        option.appendChild(optionContent);
+        dropdownContent.appendChild(option);
+        dropdownContent.children[i].addEventListener("click", function () {
+            displayCodeAsString(left, algorithmList[i].fnc);
+            dropdownBtn.innerHTML = algorithmList[i].name;
         });
     }
 }
@@ -387,6 +375,24 @@ function getCaretPosition() {
     selection.getRangeAt(0);
     return selection.getRangeAt(0).startOffset;
 }
+let algorithmList = [
+    {
+        name: "MergeSort",
+        fnc: algMergeSort,
+    },
+    {
+        name: "Euclid (GCD)",
+        fnc: algGCD
+    },
+    {
+        name: "Bubblesort",
+        fnc: algBubbleSort
+    },
+    {
+        name: "Binary Search",
+        fnc: algBinarySearch
+    }
+];
 function algBinarySearch() {
     function binarySearch(sortedArray, key) {
         let start = 0;
@@ -405,7 +411,7 @@ function algBinarySearch() {
         }
         return -1;
     }
-    binarySearch([201, 176, 90, 63, 12, 1], 12);
+    binarySearch([420, 336, 201, 176, 101, 98, 90, 69, 63, 43, 12, 1], 69);
 }
 function algBubbleSort() {
     function bubbleSort(array) {
@@ -429,6 +435,20 @@ function algBubbleSort() {
         return array;
     }
     bubbleSort([243, 45, 23, 356, 3, 5346, 35, 5]);
+}
+function algGCD() {
+    function gcd(a, b) {
+        while (a !== b) {
+            if (a > b) {
+                a -= b;
+            }
+            else {
+                b -= a;
+            }
+        }
+        return a;
+    }
+    gcd(48, 18);
 }
 function algMergeSort() {
     function mergeSort(array) {
