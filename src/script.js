@@ -266,9 +266,26 @@ function main() {
         pseudocode(right);
 }
 function pseudocode(right) {
+    right.addEventListener("keyup", pseudocodeOnKeyPress);
     right.addEventListener("click", pseudocodeOnClick);
 }
 let oldActiveElement = null;
+function pseudocodeOnKeyPress(e) {
+    if (e.key === "Enter") {
+        const breaks = document.querySelectorAll("#right > span > br");
+        for (let i = 0; i < breaks.length; i++) {
+            const br = breaks[i];
+            br.remove();
+        }
+        const activeElement = document.activeElement;
+        const beforeCursor = activeElement.childNodes[0].nodeValue;
+        const afterCursor = activeElement.childNodes[1].nodeValue;
+        const beforeElement = createPseudocodeSpan(beforeCursor, activeElement.getAttribute("index"));
+        const breakElement = document.createElement("br");
+        const afterElement = createPseudocodeSpan(afterCursor, activeElement.getAttribute("index"));
+        activeElement.replaceWith(beforeElement, breakElement, afterElement);
+    }
+}
 function pseudocodeOnClick() {
     let activeElement = document.activeElement;
     if (!(activeElement instanceof HTMLSpanElement)) {
