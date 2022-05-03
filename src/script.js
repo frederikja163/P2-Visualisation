@@ -413,8 +413,8 @@ function mergeElements(e1, e2) {
         const text1 = e1.textContent;
         const text2 = e2.textContent;
         if (text1 != null && text2 != null) {
-            e1.remove();
             const mergedElements = createPseudocodeSpan(text1 + text2, i1);
+            e1.remove();
             e2.replaceWith(mergedElements);
             return mergedElements;
         }

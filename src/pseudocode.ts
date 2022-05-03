@@ -165,8 +165,8 @@ function pseudocodeOnClick(): void {
     if (activeElement != oldActiveElement && oldActiveElement != null && oldActiveElement.innerHTML === "") {
         const prevElement: Element | null = oldActiveElement.previousElementSibling;
         const nextElement: Element | null = oldActiveElement.nextElementSibling;
-        const prevIndex: string | null | undefined = prevElement?.getAttribute("index");
-        const nextIndex: string | null | undefined = nextElement?.getAttribute("index");
+        const prevIndex: string | null = prevElement?.getAttribute("index");
+        const nextIndex: string | null = nextElement?.getAttribute("index");
 
         // Merge the siblings of the old last element if they had the same index.
         if (prevElement != null && nextElement != null && prevIndex === nextIndex) {
@@ -224,19 +224,19 @@ function pseudocodeOnClick(): void {
 }
 
 /** Merges two elements if they have the same index value*/
-function mergeElements(e1: HTMLElement, e2: HTMLElement): HTMLElement {
-    const i1: string | null | undefined = e1?.getAttribute("index");
-    const i2: string | null | undefined = e2?.getAttribute("index");
+function mergeElements(e1: HTMLElement | null, e2: HTMLElement | null): HTMLElement | null {
+
+    const i1: string | null = e1?.getAttribute("index");
+    const i2: string | null = e2?.getAttribute("index");
 
     // Merge the siblings of the old last element if they had the same index.
     if (e1 != null && e2 != null && i1 != null && i1 === i2) {
-        const text1: string | null = e1.textContent;
-        const text2: string | null = e2.textContent;
+        const text1: string = e1.textContent;
+        const text2: string = e2.textContent;
 
         if (text1 != null && text2 != null) {
-            e1.remove();
-
             const mergedElements: HTMLElement = createPseudocodeSpan(text1 + text2, i1);
+            e1.remove();
             e2.replaceWith(mergedElements);
 
             return mergedElements;
