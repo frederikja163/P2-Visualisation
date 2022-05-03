@@ -45,7 +45,10 @@ function stopCode() {
     }
 }
 function runCode() {
-    document.querySelector("#selectedCode").id = "";
+    const selected = document.querySelector("#selectedCode");
+    if (selected != null) {
+        selected.id = "";
+    }
     currentPromise = new Promise((resolve) => {
         resolveCurrentPromise = resolve;
     });
