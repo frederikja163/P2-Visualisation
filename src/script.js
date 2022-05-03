@@ -1,7 +1,7 @@
 const breakpointClass = "breakpoint";
 const selectedCode = "selectedCode";
-function initBreakpoints(code) {
-    const lines = code.querySelectorAll("span");
+function initBreakpoints() {
+    const lines = document.querySelectorAll("#code > span");
     for (let i = 0; i < lines.length; i++) {
         lines[i].addEventListener("dblclick", statementOnDblClick);
         lines[i].addEventListener("click", () => statementOnClick(lines[i]));
@@ -45,6 +45,7 @@ function stopCode() {
     }
 }
 function runCode() {
+    document.querySelector("#selectedCode").id = "";
     currentPromise = new Promise((resolve) => {
         resolveCurrentPromise = resolve;
     });
@@ -85,7 +86,6 @@ function runParsedCode() {
         code += currentLine + "\n";
     }
     const codeFunction = new Function('return ' + code)();
-    console.log(codeFunction.toString());
     return codeFunction();
 }
 function getFunctionNames(lines) {
@@ -161,7 +161,7 @@ function displayCodeAsString(textBox, printFunction) {
     const lines = functionString.split(/(?<=\{\})|[\r\n]+/);
     const paragraphString = wrapStrings("span", lines);
     textBox.innerHTML = "<pre id= \"code\">" + paragraphString + "</pre>";
-    initBreakpoints(textBox);
+    initBreakpoints();
 }
 function wrapStrings(elementTag, lines) {
     for (let i = 0; i < lines.length; i++) {
@@ -174,17 +174,17 @@ function wrapStrings(elementTag, lines) {
         lines[i] = `${"&nbsp;".repeat(indents)}<${elementTag} index="${i}">${trimmedStr}</${elementTag}></br>`;
     }
     const highlight = [
-        { word: "for", color: "red" },
-        { word: "let", color: "green" },
-        { word: "if", color: "blue" },
+        { word: "for", color: "#F13269" },
+        { word: "let", color: "#0EC86B" },
+        { word: "if", color: "#499CFF" },
         { word: "console.log", color: "magenta" },
-        { word: "function", color: "gray" },
-        { word: "switch", color: "red" },
-        { word: "while", color: "red" },
-        { word: "return", color: "red" },
-        { word: "const", color: "red" },
-        { word: "else", color: "blue" },
-        { word: "var", color: "green" },
+        { word: "function", color: "#F13269" },
+        { word: "switch", color: "#9D57CB" },
+        { word: "while", color: "#9D57CB" },
+        { word: "return", color: "#9D57CB" },
+        { word: "const", color: "#0EC86B" },
+        { word: "else", color: "#499CFF" },
+        { word: "var", color: "#0EC86B" },
     ];
     for (let i = 0; i < lines.length; i++) {
         for (let k = 0; k < highlight.length; k++) {
@@ -196,31 +196,18 @@ function wrapStrings(elementTag, lines) {
     return lines.join("");
 }
 function initDropDown() {
-    const options = document.querySelectorAll(".dropdown-content > a");
     const left = document.querySelector("#left");
-    for (let i = 0; i < options.length; i++) {
-        options[i].addEventListener("click", function dropDownSelector(event) {
-            const dropdownBtn = document.querySelector(".dropdown > button");
-            switch (event.target.id) {
-                case "mergesort":
-                    if (left != null)
-                        displayCodeAsString(left, algMergeSort);
-                    if (dropdownBtn != null)
-                        dropdownBtn.innerHTML = "MergeSort";
-                    break;
-                case "binarysearch":
-                    if (left != null)
-                        displayCodeAsString(left, algBinarySearch);
-                    if (dropdownBtn != null)
-                        dropdownBtn.innerHTML = "Binary Search";
-                    break;
-                case "bubblesort":
-                    if (left != null)
-                        displayCodeAsString(left, algBubbleSort);
-                    if (dropdownBtn != null)
-                        dropdownBtn.innerHTML = "Bubble Sort";
-                    break;
-            }
+    const dropdownBtn = document.querySelector(".dropbtn");
+    const dropdownContent = document.querySelector(".dropdown-content");
+    let optionContent, option;
+    for (let i = 0; i < algorithmList.length; i++) {
+        option = document.createElement("a");
+        optionContent = document.createTextNode(algorithmList[i].name);
+        option.appendChild(optionContent);
+        dropdownContent.appendChild(option);
+        dropdownContent.children[i].addEventListener("click", function () {
+            displayCodeAsString(left, algorithmList[i].fnc);
+            dropdownBtn.innerHTML = algorithmList[i].name;
         });
     }
 }
@@ -252,21 +239,9 @@ function main() {
         displayCodeAsString(left, algMergeSort);
     if (right != null)
         pseudocode(right);
-    console.log(gcd);
-    displayCodeAsString(document.querySelector("#left"), gcd);
-}
-function gcd(a, b) {
-    while (a != b) {
-        if (a > b) {
-            a -= b;
-        }
-        else {
-            b -= a;
-        }
-    }
-    return a;
 }
 function pseudocode(right) {
+    right.addEventListener("keyup", pseudocodeOnKeyPress);
     right.addEventListener("click", pseudocodeOnClick);
     right.addEventListener("keydown", fixDelete);
     right.addEventListener("keydown", fixArrows);
@@ -279,24 +254,41 @@ function fixDelete(eventParameters) {
     let adjIsRight;
     if (eventParameters.key === "Backspace" && caret === 0) {
         adjElement = activeElement.previousElementSibling;
-        adjAdjElement = adjElement.previousElementSibling;
-        adjElement.innerText = adjElement.innerText.slice(0, adjElement.innerText.length - 1);
+        if (adjElement != null) {
+            adjAdjElement = adjElement.previousElementSibling;
+            adjElement.innerText = adjElement.innerText.slice(0, adjElement.innerText.length - 1);
+        }
         adjIsRight = false;
     }
     else if (eventParameters.key === "Delete" && caret === activeElement.innerText.length) {
         adjElement = activeElement.nextElementSibling;
-        adjAdjElement = adjElement.nextElementSibling;
-        adjElement.innerText = adjElement.innerText.slice(1, adjElement.innerText.length);
+        if (adjElement != null) {
+            adjAdjElement = adjElement.nextElementSibling;
+            adjElement.innerText = adjElement.innerText.slice(1, adjElement.innerText.length);
+        }
         adjIsRight = true;
     }
     if (adjAdjElement != null && adjElement.innerText.length === 0 && adjAdjElement.getAttribute("index") === activeElement.getAttribute("index")) {
         setCaretPosition(adjAdjElement, adjIsRight ? 0 : adjAdjElement.innerText.length);
         oldActiveElement = adjAdjElement;
-        activeElement.remove();
         eventParameters.preventDefault();
     }
     if (adjElement != null && adjElement.innerText.length == 0)
         adjElement.remove();
+    let mergedElement = null;
+    const newActiveElement = document.activeElement;
+    if (newActiveElement.nextElementSibling != null && newActiveElement.nextElementSibling.getAttribute("index") === newActiveElement.getAttribute("index")) {
+        const sibSize = newActiveElement.innerText.length;
+        mergedElement = mergeElements(newActiveElement, newActiveElement.nextElementSibling);
+        setCaretPosition(mergedElement, sibSize);
+    }
+    else if (newActiveElement.previousElementSibling != null && newActiveElement.previousElementSibling.getAttribute("index") === newActiveElement.getAttribute("index")) {
+        const sibSize = newActiveElement.previousElementSibling.innerText.length;
+        mergedElement = mergeElements(newActiveElement.previousElementSibling, newActiveElement);
+        setCaretPosition(mergedElement, sibSize);
+    }
+    if (mergedElement !== null && newActiveElement.classList.contains("highlighted"))
+        mergedElement.classList.add("highlighted");
 }
 function fixArrows(eventParameters) {
     const activeElement = document.activeElement;
@@ -323,7 +315,6 @@ function fixArrows(eventParameters) {
     if (adjAdjElement != null && adjElement.innerText.length === 1 && adjAdjElement.getAttribute("index") === index) {
         setCaretPosition(adjAdjElement, adjIsRight ? 0 : adjAdjElement.innerText.length);
         newElement = adjAdjElement;
-        activeElement.remove();
         eventParameters.preventDefault();
     }
     else {
@@ -346,6 +337,22 @@ function fixArrows(eventParameters) {
     oldActiveElement = newElement;
 }
 let oldActiveElement = null;
+function pseudocodeOnKeyPress(e) {
+    if (e.key === "Enter") {
+        const breaks = document.querySelectorAll("#right > span > br");
+        for (let i = 0; i < breaks.length; i++) {
+            const br = breaks[i];
+            br.remove();
+        }
+        const activeElement = document.activeElement;
+        const beforeCursor = activeElement.childNodes[0].nodeValue;
+        const afterCursor = activeElement.childNodes[1].nodeValue;
+        const beforeElement = createPseudocodeSpan(beforeCursor, activeElement.getAttribute("index"));
+        const breakElement = document.createElement("br");
+        const afterElement = createPseudocodeSpan(afterCursor, activeElement.getAttribute("index"));
+        activeElement.replaceWith(beforeElement, breakElement, afterElement);
+    }
+}
 function pseudocodeOnClick() {
     let activeElement = document.activeElement;
     if (!(activeElement instanceof HTMLSpanElement)) {
@@ -474,6 +481,24 @@ function getCaretPosition() {
     selection.getRangeAt(0);
     return selection.getRangeAt(0).startOffset;
 }
+let algorithmList = [
+    {
+        name: "MergeSort",
+        fnc: algMergeSort,
+    },
+    {
+        name: "Euclid (GCD)",
+        fnc: algGCD
+    },
+    {
+        name: "Bubblesort",
+        fnc: algBubbleSort
+    },
+    {
+        name: "Binary Search",
+        fnc: algBinarySearch
+    }
+];
 function algBinarySearch() {
     function binarySearch(sortedArray, key) {
         let start = 0;
@@ -492,7 +517,7 @@ function algBinarySearch() {
         }
         return -1;
     }
-    binarySearch([201, 176, 90, 63, 12, 1], 12);
+    binarySearch([420, 336, 201, 176, 101, 98, 90, 69, 63, 43, 12, 1], 69);
 }
 function algBubbleSort() {
     function bubbleSort(array) {
@@ -516,6 +541,20 @@ function algBubbleSort() {
         return array;
     }
     bubbleSort([243, 45, 23, 356, 3, 5346, 35, 5]);
+}
+function algGCD() {
+    function gcd(a, b) {
+        while (a !== b) {
+            if (a > b) {
+                a -= b;
+            }
+            else {
+                b -= a;
+            }
+        }
+        return a;
+    }
+    gcd(48, 18);
 }
 function algMergeSort() {
     function mergeSort(array) {

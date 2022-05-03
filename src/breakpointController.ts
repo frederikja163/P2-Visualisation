@@ -1,4 +1,3 @@
-/// <reference lib="dom" />
 
 // Setting up all variables.
 let currentPromise: Promise<void>;
@@ -18,6 +17,8 @@ function stopCode(): void {
 
 /** Gets the breakable code and runs the code until the first breakpoint.*/
 function runCode(): void {
+	//deselecting currently selected line
+	document.querySelector("#selectedCode").id = "";
 
 	// Setting up promises.
 	currentPromise = new Promise((resolve: Function) => {
@@ -84,8 +85,6 @@ function runParsedCode(): Promise<void> {
 
 	// Creating a function from the string.
 	const codeFunction: () => Promise<void> = new Function('return ' + code)();
-
-	console.log(codeFunction.toString());
 
 	return codeFunction();
 }

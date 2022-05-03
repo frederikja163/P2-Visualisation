@@ -1,14 +1,15 @@
-/// <reference lib="dom" />
 
 /*
     TODO: Make enter work - sometimes it makes a double <br tag>
     TODO: Make arrows work
     TODO: Make tabs work
-    TODO: Make delete work        
+    TODO: Make delete work
+
 */
 
 /** Initialize pseudocode and subscribe to the correct events. */
 function pseudocode(right: HTMLElement): void {
+    right.addEventListener("keyup", pseudocodeOnKeyPress);
     right.addEventListener("click", pseudocodeOnClick);
     right.addEventListener("keydown", fixDelete);
     right.addEventListener("keydown", fixArrows);
@@ -24,14 +25,18 @@ function fixDelete(eventParameters: KeyboardEvent) {
     if (eventParameters.key === "Backspace" && caret === 0) { //if "backspace" and at the first position of the span
         //removing the last character from the previous span
         adjElement = <HTMLElement>activeElement.previousElementSibling;
-        adjAdjElement = <HTMLElement>adjElement.previousElementSibling;
-        adjElement.innerText = adjElement.innerText.slice(0, adjElement.innerText.length - 1);
+        if (adjElement != null) {
+            adjAdjElement = <HTMLElement>adjElement.previousElementSibling;
+            adjElement.innerText = adjElement.innerText.slice(0, adjElement.innerText.length - 1);
+        }
         adjIsRight = false;
     } else if (eventParameters.key === "Delete" && caret === activeElement.innerText.length) { // "delete" and at the last position of the current span
         //removing the first character from the next span
         adjElement = <HTMLElement>activeElement.nextElementSibling;
-        adjAdjElement = <HTMLElement>adjElement.nextElementSibling;
-        adjElement.innerText = adjElement.innerText.slice(1, adjElement.innerText.length);
+        if (adjElement != null) {
+            adjAdjElement = <HTMLElement>adjElement.nextElementSibling;
+            adjElement.innerText = adjElement.innerText.slice(1, adjElement.innerText.length);
+        }
         adjIsRight = true;
     }
 
@@ -39,12 +44,28 @@ function fixDelete(eventParameters: KeyboardEvent) {
     if (adjAdjElement != null && adjElement.innerText.length === 0 && adjAdjElement.getAttribute("index") === activeElement.getAttribute("index")) {
         setCaretPosition(adjAdjElement, adjIsRight ? 0 : adjAdjElement.innerText.length);
         oldActiveElement = adjAdjElement;
-        activeElement.remove();
         eventParameters.preventDefault();
     }
 
     //if adjacent highlighted pseudocode span is empty: remove it
     if (adjElement != null && adjElement.innerText.length == 0) adjElement.remove();
+
+    //merge adjacent elements
+    let mergedElement: HTMLElement = null;
+
+    const newActiveElement: HTMLElement = <HTMLElement>document.activeElement;
+    if (newActiveElement.nextElementSibling != null && newActiveElement.nextElementSibling.getAttribute("index") === newActiveElement.getAttribute("index")) {
+        const sibSize = newActiveElement.innerText.length;
+        mergedElement = mergeElements(newActiveElement, <HTMLElement>newActiveElement.nextElementSibling);
+        setCaretPosition(mergedElement, sibSize);
+    } else if (newActiveElement.previousElementSibling != null && newActiveElement.previousElementSibling.getAttribute("index") === newActiveElement.getAttribute("index")) {
+        const sibSize = (<HTMLElement>newActiveElement.previousElementSibling).innerText.length;
+        mergedElement = mergeElements(<HTMLElement>newActiveElement.previousElementSibling, newActiveElement);
+        setCaretPosition(mergedElement, sibSize);
+    }
+
+    if (mergedElement !== null && newActiveElement.classList.contains("highlighted")) mergedElement.classList.add("highlighted");
+
 
 }
 
@@ -79,7 +100,6 @@ function fixArrows(eventParameters: KeyboardEvent) {
         //inserting in existing span
         setCaretPosition(adjAdjElement, adjIsRight ? 0 : adjAdjElement.innerText.length);
         newElement = adjAdjElement;
-        activeElement.remove();
         eventParameters.preventDefault();
     } else {
         //inserting new empty span
@@ -108,9 +128,26 @@ function fixArrows(eventParameters: KeyboardEvent) {
 
 let oldActiveElement: HTMLElement | null = null;
 
+function pseudocodeOnKeyPress(e: KeyboardEvent): void {
+    if (e.key === "Enter") {
+        const breaks: NodeListOf<Element> = document.querySelectorAll("#right > span > br");
+        for (let i: number = 0; i < breaks.length; i++) {
+            const br = breaks[i];
+            br.remove();
+        }
+        const activeElement: Element = document.activeElement;
+        const beforeCursor: string = activeElement.childNodes[0].nodeValue;
+        const afterCursor: string = activeElement.childNodes[1].nodeValue;
+
+        const beforeElement: HTMLElement = createPseudocodeSpan(beforeCursor, activeElement.getAttribute("index"));
+        const breakElement = document.createElement("br");
+        const afterElement: HTMLElement = createPseudocodeSpan(afterCursor, activeElement.getAttribute("index"));
+        activeElement.replaceWith(beforeElement, breakElement, afterElement);
+    }
+}
+
 /** Event for when there has been clicked on a pseudocode span. */
 function pseudocodeOnClick(): void {
-
     // Get the currently active span element, or the last span element.
     let activeElement: HTMLElement | null = document.activeElement as HTMLElement;
     if (!(activeElement instanceof HTMLSpanElement)) {
@@ -213,7 +250,7 @@ function mergeElements(e1: HTMLElement, e2: HTMLElement): HTMLElement {
 function splitHtmlElement(element: HTMLElement, index: number) {
     const text: string = element.innerText;
 
-    // Get the text before and after the index.
+    // Get the text before and aftsplitHtmlElementer the index.
     const beforeText: string = text.slice(0, index);
     const afterText: string = text.slice(index, text.length);
     const activeElementCodeIndex: string | null = element.getAttribute("index");
