@@ -19,7 +19,7 @@ function stopCode(): void{
 /** Gets the breakable code and runs the code until the first breakpoint.*/
 function runCode(): void{
 	//deselecting currently selected line if one is selected
-	if(!!document.querySelector("#selectedCode")){
+	if(document.querySelector("#selectedCode") != null){
 		document.querySelector("#selectedCode").id = "";
 	}
 	// Setting up promises.

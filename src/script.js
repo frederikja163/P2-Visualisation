@@ -55,7 +55,7 @@ function stopCode() {
     }
 }
 function runCode() {
-    if (!!document.querySelector("#selectedCode")) {
+    if (document.querySelector("#selectedCode") != null) {
         document.querySelector("#selectedCode").id = "";
     }
     currentPromise = new Promise((resolve) => {
