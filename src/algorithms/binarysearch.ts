@@ -21,6 +21,6 @@ function algBinarySearch(){
         return -1;
     } 
   
-    binarySearch([201, 176, 90, 63, 12, 1], 12);
+    binarySearch([420, 336, 201, 176, 101, 98, 90, 69, 63, 43, 12, 1], 69);
 
 }

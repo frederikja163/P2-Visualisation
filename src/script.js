@@ -55,6 +55,7 @@ function stopCode() {
     }
 }
 function runCode() {
+    document.querySelector("#selectedCode").id = "";
     currentPromise = new Promise((resolve) => {
         resolveCurrentPromise = resolve;
     });
@@ -207,31 +208,18 @@ function wrapStrings(elementTag, lines) {
     return lines.join("");
 }
 function initDropDown() {
-    const options = document.querySelectorAll(".dropdown-content > a");
     const left = document.querySelector("#left");
-    for (let i = 0; i < options.length; i++) {
-        options[i].addEventListener("click", function dropDownSelector(event) {
-            const dropdownBtn = document.querySelector(".dropdown > button");
-            switch (event.target.id) {
-                case "mergesort":
-                    if (left != null)
-                        displayCodeAsString(left, algMergeSort);
-                    if (dropdownBtn != null)
-                        dropdownBtn.innerHTML = "MergeSort";
-                    break;
-                case "binarysearch":
-                    if (left != null)
-                        displayCodeAsString(left, algBinarySearch);
-                    if (dropdownBtn != null)
-                        dropdownBtn.innerHTML = "Binary Search";
-                    break;
-                case "bubblesort":
-                    if (left != null)
-                        displayCodeAsString(left, algBubbleSort);
-                    if (dropdownBtn != null)
-                        dropdownBtn.innerHTML = "Bubble Sort";
-                    break;
-            }
+    const dropdownBtn = document.querySelector(".dropbtn");
+    const dropdownContent = document.querySelector(".dropdown-content");
+    let optionContent, option;
+    for (let i = 0; i < algorithmList.length; i++) {
+        option = document.createElement("a");
+        optionContent = document.createTextNode(algorithmList[i].name);
+        option.appendChild(optionContent);
+        dropdownContent.appendChild(option);
+        dropdownContent.children[i].addEventListener("click", function () {
+            displayCodeAsString(left, algorithmList[i].fnc);
+            dropdownBtn.innerHTML = algorithmList[i].name;
         });
     }
 }
@@ -266,24 +254,52 @@ function main() {
         pseudocode(right);
 }
 function pseudocode(right) {
+    right.addEventListener("keyup", pseudocodeOnKeyPress);
     right.addEventListener("click", pseudocodeOnClick);
     right.addEventListener('keydown', pseudocodeOnTab);
 }
 function pseudocodeOnTab(eventProperties) {
     let oldCaretPosition = getCaretPosition();
-    let highlightedSpan = document.activeElement;
-    const tab = insertString(highlightedSpan.innerHTML, getCaretPosition(), " ");
+    let activeElement = document.activeElement;
     if (eventProperties.key == "Tab") {
         eventProperties.preventDefault();
-        highlightedSpan.innerHTML = insertString(highlightedSpan.innerHTML, getCaretPosition(), "   ");
-        setCaretPosition(highlightedSpan, oldCaretPosition + 1);
-        console.log(tab);
+        let length = 0;
+        let currentElement = activeElement.previousElementSibling;
+        while (currentElement != null && currentElement.tagName === "SPAN") {
+            console.log(currentElement.tagName);
+            length += currentElement.innerHTML.length;
+            currentElement = currentElement.previousElementSibling;
+        }
+        const lineLength = length + getCaretPosition();
+        const tabLength = 4 - (lineLength % 4);
+        let spaces = "";
+        for (let i = 0; i < tabLength; i++) {
+            spaces += " ";
+        }
+        activeElement.innerHTML = insertString(activeElement.innerHTML, getCaretPosition(), spaces);
+        setCaretPosition(activeElement, oldCaretPosition + tabLength);
     }
 }
-let oldActiveElement = null;
 function insertString(defaultString, stringPosition, insertedString) {
     return defaultString.slice(0, stringPosition) + insertedString + defaultString.slice(stringPosition);
 }
+function pseudocodeOnKeyPress(e) {
+    if (e.key === "Enter") {
+        const breaks = document.querySelectorAll("#right > span > br");
+        for (let i = 0; i < breaks.length; i++) {
+            const br = breaks[i];
+            br.remove();
+        }
+        const activeElement = document.activeElement;
+        const beforeCursor = activeElement.childNodes[0].nodeValue;
+        const afterCursor = activeElement.childNodes[1].nodeValue;
+        const beforeElement = createPseudocodeSpan(beforeCursor, activeElement.getAttribute("index"));
+        const breakElement = document.createElement("br");
+        const afterElement = createPseudocodeSpan(afterCursor, activeElement.getAttribute("index"));
+        activeElement.replaceWith(beforeElement, breakElement, afterElement);
+    }
+}
+let oldActiveElement = null;
 function pseudocodeOnClick() {
     let activeElement = document.activeElement;
     if (!(activeElement instanceof HTMLSpanElement)) {
@@ -386,6 +402,24 @@ function getCaretPosition() {
     selection.getRangeAt(0);
     return selection.getRangeAt(0).startOffset;
 }
+let algorithmList = [
+    {
+        name: "MergeSort",
+        fnc: algMergeSort,
+    },
+    {
+        name: "Euclid (GCD)",
+        fnc: algGCD
+    },
+    {
+        name: "Bubblesort",
+        fnc: algBubbleSort
+    },
+    {
+        name: "Binary Search",
+        fnc: algBinarySearch
+    }
+];
 function algBinarySearch() {
     function binarySearch(sortedArray, key) {
         let start = 0;
@@ -404,7 +438,7 @@ function algBinarySearch() {
         }
         return -1;
     }
-    binarySearch([201, 176, 90, 63, 12, 1], 12);
+    binarySearch([420, 336, 201, 176, 101, 98, 90, 69, 63, 43, 12, 1], 69);
 }
 function algBubbleSort() {
     function bubbleSort(array) {
@@ -428,6 +462,20 @@ function algBubbleSort() {
         return array;
     }
     bubbleSort([243, 45, 23, 356, 3, 5346, 35, 5]);
+}
+function algGCD() {
+    function gcd(a, b) {
+        while (a !== b) {
+            if (a > b) {
+                a -= b;
+            }
+            else {
+                b -= a;
+            }
+        }
+        return a;
+    }
+    gcd(48, 18);
 }
 function algMergeSort() {
     function mergeSort(array) {

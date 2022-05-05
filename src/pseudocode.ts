@@ -1,64 +1,90 @@
 /*
     TODO: Make enter work - sometimes it makes a double <br tag>
     TODO: Make arrows work
-    TODO: Make tabs work (VI)
-    TODO: Make delete work        
+    TODO: Make tabs work
+    TODO: Make delete work
+
 */
 
 /** Initialize pseudocode and subscribe to the correct events. */
-
 function pseudocode(right: HTMLElement): void
 {
+    right.addEventListener("keyup", pseudocodeOnKeyPress);
     right.addEventListener("click", pseudocodeOnClick);
     right.addEventListener('keydown',pseudocodeOnTab);
 }
-/* Make tab work like normal tab 
-Tab makes 4 spaces normally
-
-
-When
-    - pseudicodeOnTab
-Relevant
-    - oldCaretPosition
-TODO
-    - make the indentation matches each other
-
-
-*/
 
 function pseudocodeOnTab(eventProperties: KeyboardEvent): void
 {
 
     let oldCaretPosition: number = getCaretPosition();
-    let highlightedSpan: Element = document.activeElement;
-    const tab: string = insertString(highlightedSpan.innerHTML, getCaretPosition(), " ");
-
+    let activeElement: Element = document.activeElement;
+    
     if(eventProperties.key == "Tab")
     {
+
+        //Remove default tab properties
         eventProperties.preventDefault();
         
+        //Get caret position of the current line
+        let length: number = 0;
+        let currentElement: Element = activeElement.previousElementSibling;
+    
+        while(currentElement != null && currentElement.tagName === "SPAN"){
+            console.log(currentElement.tagName);
 
-        highlightedSpan.innerHTML = insertString(highlightedSpan.innerHTML, getCaretPosition(), "   ");
-        setCaretPosition(<HTMLElement>highlightedSpan, oldCaretPosition + 1);
+            length += currentElement.innerHTML.length;
+            currentElement = currentElement.previousElementSibling;
+
+        }
+        const lineLength: number = length + getCaretPosition();
+
+        //Finds the amount of spaces to insert
+        const tabLength: number = 4 - (lineLength % 4); 
+
+        //Create a new sting with tabLength amount of spaces
+        let spaces: string = "";
+       
+        for(let i: number = 0; i < tabLength; i++){
+            spaces += " ";
+        }
         
-        console.log(tab);
+        //Insert spaces to the text of activeElement.innerHTML onto getCaretPosition()
+        activeElement.innerHTML = insertString(activeElement.innerHTML, getCaretPosition(), spaces);
+        
+        setCaretPosition(<HTMLElement>activeElement, oldCaretPosition + tabLength);
 
     }
-/*
-Hvis highlightedSpan har en tegn foran, så lav skal den lave 3 mellemrum
-*/
     
 }
 
 
-let oldActiveElement: HTMLElement | null = null;
-
 function insertString(defaultString: string, stringPosition: number, insertedString: string): string {
     return defaultString.slice(0, stringPosition) + insertedString + defaultString.slice(stringPosition);     
 }
+
+function pseudocodeOnKeyPress(e: KeyboardEvent): void {
+    if (e.key === "Enter") {
+        const breaks: NodeListOf<Element> = document.querySelectorAll("#right > span > br");
+        for (let i: number = 0; i < breaks.length; i++) {
+            const br = breaks[i];
+            br.remove();
+        }
+        const activeElement: Element = document.activeElement;
+        const beforeCursor: string = activeElement.childNodes[0].nodeValue;
+        const afterCursor: string = activeElement.childNodes[1].nodeValue;
+        
+        const beforeElement: HTMLElement = createPseudocodeSpan(beforeCursor, activeElement.getAttribute("index"));
+        const breakElement = document.createElement("br");
+        const afterElement: HTMLElement = createPseudocodeSpan(afterCursor, activeElement.getAttribute("index"));
+        activeElement.replaceWith(beforeElement, breakElement, afterElement);
+    }
+}
+
+let oldActiveElement: HTMLElement | null = null;
+
 /** Event for when there has been clicked on a pseudocode span. */
 function pseudocodeOnClick(): void {
-
     // Get the currently active span element, or the last span element.
     let activeElement: HTMLElement | null = document.activeElement as HTMLElement;
     if (!(activeElement instanceof HTMLSpanElement)) {
@@ -133,7 +159,7 @@ function pseudocodeOnClick(): void {
 function splitHtmlElement(element: HTMLElement, index: number) { 
     const text: string = element.innerText;
 
-    // Get the text before and after the index.
+    // Get the text before and aftsplitHtmlElementer the index.
     const beforeText: string = text.slice(0, index);
     const afterText: string = text.slice(index, text.length);
     const activeElementCodeIndex: string | null = element.getAttribute("index");
