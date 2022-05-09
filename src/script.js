@@ -266,7 +266,6 @@ function pseudocodeOnTab(eventProperties) {
         let length = 0;
         let currentElement = activeElement.previousElementSibling;
         while (currentElement != null && currentElement.tagName === "SPAN") {
-            console.log(currentElement.tagName);
             length += currentElement.innerHTML.length;
             currentElement = currentElement.previousElementSibling;
         }
