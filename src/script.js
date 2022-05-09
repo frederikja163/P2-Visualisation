@@ -258,8 +258,32 @@ function main() {
 function pseudocode(right) {
     right.addEventListener("keyup", pseudocodeOnKeyPress);
     right.addEventListener("click", pseudocodeOnClick);
+    right.addEventListener('keydown', pseudocodeOnTab);
 }
-let oldActiveElement = null;
+function pseudocodeOnTab(eventProperties) {
+    let oldCaretPosition = getCaretPosition();
+    let activeElement = document.activeElement;
+    if (eventProperties.key == "Tab") {
+        eventProperties.preventDefault();
+        let length = 0;
+        let currentElement = activeElement.previousElementSibling;
+        while (currentElement != null && currentElement.tagName === "SPAN") {
+            length += currentElement.innerHTML.length;
+            currentElement = currentElement.previousElementSibling;
+        }
+        const lineLength = length + getCaretPosition();
+        const tabLength = 4 - (lineLength % 4);
+        let spaces = "";
+        for (let i = 0; i < tabLength; i++) {
+            spaces += " ";
+        }
+        activeElement.innerHTML = insertString(activeElement.innerHTML, getCaretPosition(), spaces);
+        setCaretPosition(activeElement, oldCaretPosition + tabLength);
+    }
+}
+function insertString(defaultString, stringPosition, insertedString) {
+    return defaultString.slice(0, stringPosition) + insertedString + defaultString.slice(stringPosition);
+}
 function pseudocodeOnKeyPress(e) {
     if (e.key === "Enter") {
         const breaks = document.querySelectorAll("#right > span > br");
@@ -276,6 +300,7 @@ function pseudocodeOnKeyPress(e) {
         activeElement.replaceWith(beforeElement, breakElement, afterElement);
     }
 }
+let oldActiveElement = null;
 function pseudocodeOnClick() {
     let activeElement = document.activeElement;
     if (!(activeElement instanceof HTMLSpanElement)) {
@@ -359,14 +384,15 @@ function createPseudocodeSpan(text, codeIndex) {
 }
 function setCaretPosition(element, caretPos) {
     const selection = window.getSelection();
+    const node = element.childNodes.length != 0 ? element.firstChild : element;
     if (selection == null)
         return;
     const range = document.createRange();
     selection.removeAllRanges();
-    range.selectNodeContents(element);
+    range.selectNodeContents(node);
     range.collapse(false);
-    range.setStart(element, caretPos);
-    range.setEnd(element, caretPos);
+    range.setStart(node, caretPos);
+    range.setEnd(node, caretPos);
     selection.addRange(range);
     element.focus();
 }

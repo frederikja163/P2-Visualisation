@@ -11,9 +11,55 @@ function pseudocode(right: HTMLElement): void
 {
     right.addEventListener("keyup", pseudocodeOnKeyPress);
     right.addEventListener("click", pseudocodeOnClick);
+    right.addEventListener('keydown',pseudocodeOnTab);
 }
 
-let oldActiveElement: HTMLElement | null = null;
+function pseudocodeOnTab(eventProperties: KeyboardEvent): void
+{
+
+    let oldCaretPosition: number = getCaretPosition();
+    let activeElement: Element = document.activeElement;
+    
+    if(eventProperties.key == "Tab")
+    {
+
+        //Remove default tab properties
+        eventProperties.preventDefault();
+        
+        //Get caret position of the current line
+        let length: number = 0;
+        let currentElement: Element = activeElement.previousElementSibling;
+    
+        while(currentElement != null && currentElement.tagName === "SPAN"){
+            length += currentElement.innerHTML.length;
+            currentElement = currentElement.previousElementSibling;
+
+        }
+        const lineLength: number = length + getCaretPosition();
+
+        //Finds the amount of spaces to insert
+        const tabLength: number = 4 - (lineLength % 4); 
+
+        //Create a new sting with tabLength amount of spaces
+        let spaces: string = "";
+       
+        for(let i: number = 0; i < tabLength; i++){
+            spaces += " ";
+        }
+        
+        //Insert spaces to the text of activeElement.innerHTML onto getCaretPosition()
+        activeElement.innerHTML = insertString(activeElement.innerHTML, getCaretPosition(), spaces);
+        
+        setCaretPosition(<HTMLElement>activeElement, oldCaretPosition + tabLength);
+
+    }
+    
+}
+
+
+function insertString(defaultString: string, stringPosition: number, insertedString: string): string {
+    return defaultString.slice(0, stringPosition) + insertedString + defaultString.slice(stringPosition);     
+}
 
 function pseudocodeOnKeyPress(e: KeyboardEvent): void {
     if (e.key === "Enter") {
@@ -25,13 +71,15 @@ function pseudocodeOnKeyPress(e: KeyboardEvent): void {
         const activeElement: Element = document.activeElement;
         const beforeCursor: string = activeElement.childNodes[0].nodeValue;
         const afterCursor: string = activeElement.childNodes[1].nodeValue;
-
+        
         const beforeElement: HTMLElement = createPseudocodeSpan(beforeCursor, activeElement.getAttribute("index"));
         const breakElement = document.createElement("br");
         const afterElement: HTMLElement = createPseudocodeSpan(afterCursor, activeElement.getAttribute("index"));
         activeElement.replaceWith(beforeElement, breakElement, afterElement);
-   }
+    }
 }
+
+let oldActiveElement: HTMLElement | null = null;
 
 /** Event for when there has been clicked on a pseudocode span. */
 function pseudocodeOnClick(): void {
@@ -106,7 +154,7 @@ function pseudocodeOnClick(): void {
 }
 
 /** Splits 'element' into two different html elements, the text is split at 'index'. */
-function splitHtmlElement(element: HTMLElement, index: number) {
+function splitHtmlElement(element: HTMLElement, index: number) { 
     const text: string = element.innerText;
 
     // Get the text before and aftsplitHtmlElementer the index.
@@ -146,13 +194,14 @@ function createPseudocodeSpan(text: string, codeIndex: string): HTMLElement {
 /** Sets the caret position on 'element' to 'caretPos'. */
 function setCaretPosition(element: HTMLElement, caretPos: number): void {
     const selection: Selection | null = window.getSelection();
+    const node = element.childNodes.length != 0 ? element.firstChild : element;
     if(selection == null) return;
     const range: Range = document.createRange();  
     selection.removeAllRanges();
-    range.selectNodeContents(element); 
+    range.selectNodeContents(node);
     range.collapse(false);
-    range.setStart(element, caretPos);
-    range.setEnd(element, caretPos);
+    range.setStart(node, caretPos);
+    range.setEnd(node, caretPos);
     selection.addRange(range);
     element.focus();
 }
@@ -161,7 +210,6 @@ function setCaretPosition(element: HTMLElement, caretPos: number): void {
 function getCaretPosition(): number {
     const selection: Selection | null = window.getSelection();
     if(selection == null) return -1;
-    selection.getRangeAt(0);
-
+    selection.getRangeAt(0);   
     return selection.getRangeAt(0).startOffset;
 }
