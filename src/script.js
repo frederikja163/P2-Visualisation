@@ -246,6 +246,7 @@ function main() {
 function pseudocode(right) {
     right.addEventListener("keyup", pseudocodeOnKeyPress);
     right.addEventListener("click", pseudocodeOnClick);
+    right.addEventListener('keydown', pseudocodeOnTab);
     right.addEventListener("keydown", fixDelete);
     right.addEventListener("keydown", fixArrows);
 }
@@ -339,7 +340,30 @@ function fixArrows(eventParameters) {
     }
     oldActiveElement = newElement;
 }
-let oldActiveElement = null;
+function pseudocodeOnTab(eventProperties) {
+    let oldCaretPosition = getCaretPosition();
+    let activeElement = document.activeElement;
+    if (eventProperties.key == "Tab") {
+        eventProperties.preventDefault();
+        let length = 0;
+        let currentElement = activeElement.previousElementSibling;
+        while (currentElement != null && currentElement.tagName === "SPAN") {
+            length += currentElement.innerHTML.length;
+            currentElement = currentElement.previousElementSibling;
+        }
+        const lineLength = length + getCaretPosition();
+        const tabLength = 4 - (lineLength % 4);
+        let spaces = "";
+        for (let i = 0; i < tabLength; i++) {
+            spaces += " ";
+        }
+        activeElement.innerHTML = insertString(activeElement.innerHTML, getCaretPosition(), spaces);
+        setCaretPosition(activeElement, oldCaretPosition + tabLength);
+    }
+}
+function insertString(defaultString, stringPosition, insertedString) {
+    return defaultString.slice(0, stringPosition) + insertedString + defaultString.slice(stringPosition);
+}
 function pseudocodeOnKeyPress(e) {
     if (e.key === "Enter") {
         const breaks = document.querySelectorAll("#right > span > br");
@@ -356,6 +380,7 @@ function pseudocodeOnKeyPress(e) {
         activeElement.replaceWith(beforeElement, breakElement, afterElement);
     }
 }
+let oldActiveElement = null;
 function pseudocodeOnClick() {
     let activeElement = document.activeElement;
     if (!(activeElement instanceof HTMLSpanElement)) {

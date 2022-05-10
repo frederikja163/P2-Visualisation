@@ -11,6 +11,9 @@
 function pseudocode(right: HTMLElement): void {
     right.addEventListener("keyup", pseudocodeOnKeyPress);
     right.addEventListener("click", pseudocodeOnClick);
+
+    right.addEventListener('keydown', pseudocodeOnTab);
+
     right.addEventListener("keydown", fixDelete);
     right.addEventListener("keydown", fixArrows);
 }
@@ -126,7 +129,50 @@ function fixArrows(eventParameters: KeyboardEvent) {
 
 }
 
-let oldActiveElement: HTMLElement | null = null;
+function pseudocodeOnTab(eventProperties: KeyboardEvent): void {
+
+    let oldCaretPosition: number = getCaretPosition();
+    let activeElement: Element = document.activeElement;
+
+    if (eventProperties.key == "Tab") {
+
+        //Remove default tab properties
+        eventProperties.preventDefault();
+
+        //Get caret position of the current line
+        let length: number = 0;
+        let currentElement: Element = activeElement.previousElementSibling;
+
+        while (currentElement != null && currentElement.tagName === "SPAN") {
+            length += currentElement.innerHTML.length;
+            currentElement = currentElement.previousElementSibling;
+
+        }
+        const lineLength: number = length + getCaretPosition();
+
+        //Finds the amount of spaces to insert
+        const tabLength: number = 4 - (lineLength % 4);
+
+        //Create a new sting with tabLength amount of spaces
+        let spaces: string = "";
+
+        for (let i: number = 0; i < tabLength; i++) {
+            spaces += " ";
+        }
+
+        //Insert spaces to the text of activeElement.innerHTML onto getCaretPosition()
+        activeElement.innerHTML = insertString(activeElement.innerHTML, getCaretPosition(), spaces);
+
+        setCaretPosition(<HTMLElement>activeElement, oldCaretPosition + tabLength);
+
+    }
+
+}
+
+
+function insertString(defaultString: string, stringPosition: number, insertedString: string): string {
+    return defaultString.slice(0, stringPosition) + insertedString + defaultString.slice(stringPosition);
+}
 
 function pseudocodeOnKeyPress(e: KeyboardEvent): void {
     if (e.key === "Enter") {
@@ -145,6 +191,8 @@ function pseudocodeOnKeyPress(e: KeyboardEvent): void {
         activeElement.replaceWith(beforeElement, breakElement, afterElement);
     }
 }
+
+let oldActiveElement: HTMLElement | null = null;
 
 /** Event for when there has been clicked on a pseudocode span. */
 function pseudocodeOnClick(): void {
@@ -300,8 +348,10 @@ function insertPseudocodeSpan(newSpan: HTMLElement, splitableSpan: HTMLElement, 
 function setCaretPosition(element: HTMLElement, caretPos: number): void {
     const selection: Selection | null = window.getSelection();
     const node = element.childNodes.length != 0 ? element.firstChild : element;
+
     if (selection == null) return;
     const range: Range = document.createRange();
+
     selection.removeAllRanges();
     range.selectNodeContents(node);
     range.collapse(false);
@@ -314,6 +364,7 @@ function setCaretPosition(element: HTMLElement, caretPos: number): void {
 /** Gets the current caret position as a number. */
 function getCaretPosition(): number {
     const selection: Selection | null = window.getSelection();
+
     if (selection == null) return -1;
     selection.getRangeAt(0);
 
