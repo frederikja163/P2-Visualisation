@@ -1,12 +1,3 @@
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 const breakpointClass = "breakpoint";
 const selectedCode = "selectedCode";
 function initBreakpoints() {
@@ -17,8 +8,7 @@ function initBreakpoints() {
     }
 }
 function statementOnDblClick() {
-    var _a;
-    (_a = document.getSelection()) === null || _a === void 0 ? void 0 : _a.removeAllRanges();
+    document.getSelection()?.removeAllRanges();
 }
 function statementOnClick(line) {
     if (line.classList.contains(breakpointClass)) {
@@ -55,8 +45,9 @@ function stopCode() {
     }
 }
 function runCode() {
-    if (document.querySelector("#selectedCode") != null) {
-        document.querySelector("#selectedCode").id = "";
+    const selected = document.querySelector("#selectedCode");
+    if (selected != null) {
+        selected.id = "";
     }
     currentPromise = new Promise((resolve) => {
         resolveCurrentPromise = resolve;
@@ -150,18 +141,16 @@ function addBreakpoint(currentLine, lines, lineNum) {
     }
     return currentLine;
 }
-function breakpoint(line) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (isStopping)
-            return true;
-        highLight(line);
-        yield currentPromise;
-        removeHighLight(line);
-        currentPromise = new Promise((resolve) => {
-            resolveCurrentPromise = resolve;
-        });
+async function breakpoint(line) {
+    if (isStopping)
         return true;
+    highLight(line);
+    await currentPromise;
+    removeHighLight(line);
+    currentPromise = new Promise((resolve) => {
+        resolveCurrentPromise = resolve;
     });
+    return true;
 }
 function darkMode() {
     const bodyElement = document.body;
@@ -238,8 +227,7 @@ function removeHighLight(index) {
     }
 }
 function removeAllHighlighting() {
-    var _a, _b;
-    const lineCount = (_b = (_a = document.getElementById("code")) === null || _a === void 0 ? void 0 : _a.querySelectorAll("span")) === null || _b === void 0 ? void 0 : _b.length;
+    const lineCount = document.getElementById("code")?.querySelectorAll("span")?.length;
     for (let i = 0; i < lineCount; i++) {
         removeHighLight(i);
     }
@@ -259,6 +247,100 @@ function pseudocode(right) {
     right.addEventListener("keyup", pseudocodeOnKeyPress);
     right.addEventListener("click", pseudocodeOnClick);
     right.addEventListener('keydown', pseudocodeOnTab);
+    right.addEventListener("keydown", fixDelete);
+    right.addEventListener("keydown", fixArrows);
+}
+function fixDelete(eventParameters) {
+    const caret = getCaretPosition();
+    const activeElement = document.activeElement;
+    let adjElement;
+    let adjAdjElement = null;
+    let adjIsRight;
+    if (eventParameters.key === "Backspace" && caret === 0) {
+        adjElement = activeElement.previousElementSibling;
+        if (adjElement != null) {
+            adjAdjElement = adjElement.previousElementSibling;
+            adjElement.innerText = adjElement.innerText.slice(0, adjElement.innerText.length - 1);
+        }
+        adjIsRight = false;
+    }
+    else if (eventParameters.key === "Delete" && caret === activeElement.innerText.length) {
+        adjElement = activeElement.nextElementSibling;
+        if (adjElement != null) {
+            adjAdjElement = adjElement.nextElementSibling;
+            adjElement.innerText = adjElement.innerText.slice(1, adjElement.innerText.length);
+        }
+        adjIsRight = true;
+    }
+    if (adjAdjElement != null && adjElement.innerText.length === 0 && adjAdjElement.getAttribute("index") === activeElement.getAttribute("index")) {
+        setCaretPosition(adjAdjElement, adjIsRight ? 0 : adjAdjElement.innerText.length);
+        oldActiveElement = adjAdjElement;
+        eventParameters.preventDefault();
+    }
+    if (adjElement != null && adjElement.innerText.length == 0)
+        adjElement.remove();
+    let mergedElement = null;
+    const newActiveElement = document.activeElement;
+    if (newActiveElement.nextElementSibling != null && newActiveElement.nextElementSibling.getAttribute("index") === newActiveElement.getAttribute("index")) {
+        const sibSize = newActiveElement.innerText.length;
+        mergedElement = mergeElements(newActiveElement, newActiveElement.nextElementSibling);
+        setCaretPosition(mergedElement, sibSize);
+    }
+    else if (newActiveElement.previousElementSibling != null && newActiveElement.previousElementSibling.getAttribute("index") === newActiveElement.getAttribute("index")) {
+        const sibSize = newActiveElement.previousElementSibling.innerText.length;
+        mergedElement = mergeElements(newActiveElement.previousElementSibling, newActiveElement);
+        setCaretPosition(mergedElement, sibSize);
+    }
+    if (mergedElement !== null && newActiveElement.classList.contains("highlighted"))
+        mergedElement.classList.add("highlighted");
+}
+function fixArrows(eventParameters) {
+    const activeElement = document.activeElement;
+    let adjElement = null;
+    let adjAdjElement = null;
+    let adjIsRight;
+    let caret = getCaretPosition();
+    if (eventParameters.key === "ArrowLeft" && caret === 0) {
+        adjElement = activeElement.previousElementSibling;
+        if (adjElement != null) {
+            adjAdjElement = adjElement.previousElementSibling;
+        }
+        adjIsRight = false;
+    }
+    else if (eventParameters.key === "ArrowRight" && caret === activeElement.innerText.length) {
+        adjElement = activeElement.nextElementSibling;
+        if (adjElement != null) {
+            adjAdjElement = adjElement.nextElementSibling;
+        }
+        adjIsRight = true;
+    }
+    if (adjElement === null)
+        return;
+    const index = activeElement.getAttribute("index");
+    let newElement = null;
+    if (adjAdjElement != null && adjElement.innerText.length === 1 && adjAdjElement.getAttribute("index") === index) {
+        setCaretPosition(adjAdjElement, adjIsRight ? 0 : adjAdjElement.innerText.length);
+        newElement = adjAdjElement;
+        eventParameters.preventDefault();
+    }
+    else {
+        newElement = createPseudocodeSpan("", index == null ? "" : index);
+        if (activeElement.classList.contains("highlighted"))
+            newElement.classList.add("highlighted");
+        insertPseudocodeSpan(newElement, adjElement, adjIsRight ? 1 : adjElement.innerText.length - 1);
+        setCaretPosition(newElement, 0);
+    }
+    if (activeElement.innerText.length == 0)
+        activeElement.remove();
+    if (adjIsRight) {
+        if (newElement.previousElementSibling.previousElementSibling !== null && newElement.previousElementSibling !== null) {
+            mergeElements(newElement.previousElementSibling.previousElementSibling, newElement.previousElementSibling);
+        }
+    }
+    else if (newElement.nextElementSibling !== null && newElement.nextElementSibling.nextElementSibling !== null) {
+        mergeElements(newElement.nextElementSibling, newElement.nextElementSibling.nextElementSibling);
+    }
+    oldActiveElement = newElement;
 }
 function pseudocodeOnTab(eventProperties) {
     let oldCaretPosition = getCaretPosition();
@@ -315,8 +397,8 @@ function pseudocodeOnClick() {
     if (activeElement != oldActiveElement && oldActiveElement != null && oldActiveElement.innerHTML === "") {
         const prevElement = oldActiveElement.previousElementSibling;
         const nextElement = oldActiveElement.nextElementSibling;
-        const prevIndex = prevElement === null || prevElement === void 0 ? void 0 : prevElement.getAttribute("index");
-        const nextIndex = nextElement === null || nextElement === void 0 ? void 0 : nextElement.getAttribute("index");
+        const prevIndex = prevElement?.getAttribute("index");
+        const nextIndex = nextElement?.getAttribute("index");
         if (prevElement != null && nextElement != null && prevIndex === nextIndex) {
             const prevText = prevElement.textContent;
             const nextText = nextElement.textContent;
@@ -345,13 +427,26 @@ function pseudocodeOnClick() {
         oldActiveElement = activeElement;
     }
     else if (activeElement != null && breakpointIndex != null) {
-        splitHtmlElement(activeElement, caretPosition);
         const newElement = createPseudocodeSpan("", breakpointIndex);
-        activeElement.replaceWith(newElement);
+        insertPseudocodeSpan(newElement, activeElement, caretPosition);
         newElement.classList.add("highlighted");
-        setCaretPosition(newElement, 0);
         oldActiveElement = newElement;
     }
+}
+function mergeElements(e1, e2) {
+    const i1 = e1?.getAttribute("index");
+    const i2 = e2?.getAttribute("index");
+    if (e1 != null && e2 != null && i1 != null && i1 === i2) {
+        const text1 = e1.textContent;
+        const text2 = e2.textContent;
+        if (text1 != null && text2 != null) {
+            const mergedElements = createPseudocodeSpan(text1 + text2, i1);
+            e1.remove();
+            e2.replaceWith(mergedElements);
+            return mergedElements;
+        }
+    }
+    return null;
 }
 function splitHtmlElement(element, index) {
     const text = element.innerText;
@@ -361,16 +456,24 @@ function splitHtmlElement(element, index) {
     if (activeElementCodeIndex != null) {
         if (beforeText === "") {
             const afterElement = createPseudocodeSpan(afterText, activeElementCodeIndex);
+            if (element.classList.contains("highlighted"))
+                afterElement.classList.add("highlighted");
             element.after(afterElement);
         }
         else if (afterText === "") {
             const beforeElement = createPseudocodeSpan(beforeText, activeElementCodeIndex);
+            if (element.classList.contains("highlighted"))
+                beforeElement.classList.add("highlighted");
             element.before(beforeElement);
         }
         else {
             const beforeElement = createPseudocodeSpan(beforeText, activeElementCodeIndex);
-            element.before(beforeElement);
             const afterElement = createPseudocodeSpan(afterText, activeElementCodeIndex);
+            if (element.classList.contains("highlighted")) {
+                afterElement.classList.add("highlighted");
+                beforeElement.classList.add("highlighted");
+            }
+            element.before(beforeElement);
             element.after(afterElement);
         }
     }
@@ -381,6 +484,11 @@ function createPseudocodeSpan(text, codeIndex) {
     element.setAttribute("index", codeIndex);
     element.innerText = text;
     return element;
+}
+function insertPseudocodeSpan(newSpan, splitableSpan, index) {
+    splitHtmlElement(splitableSpan, index);
+    splitableSpan.replaceWith(newSpan);
+    setCaretPosition(newSpan, 0);
 }
 function setCaretPosition(element, caretPos) {
     const selection = window.getSelection();
