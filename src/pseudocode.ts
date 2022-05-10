@@ -82,14 +82,18 @@ function fixArrows(eventParameters: KeyboardEvent) {
     let caret: number = getCaretPosition();
 
     if (eventParameters.key === "ArrowLeft" && caret === 0) {
-        //if "backspace" and at the first position of the span
+        //if "leftarrow" and at the first position of the span
         adjElement = <HTMLElement>activeElement.previousElementSibling;
-        if (adjElement != null) adjAdjElement = <HTMLElement>adjElement.previousElementSibling;
+        if (adjElement != null) {
+            adjAdjElement = <HTMLElement>adjElement.previousElementSibling;
+        }
         adjIsRight = false;
     } else if (eventParameters.key === "ArrowRight" && caret === activeElement.innerText.length) {
-        // "delete" and at the last position of the current span
+        // "rightarrow" and at the last position of the current span
         adjElement = <HTMLElement>activeElement.nextElementSibling;
-        if (adjElement != null) adjAdjElement = <HTMLElement>adjElement.nextElementSibling;
+        if (adjElement != null) {
+            adjAdjElement = <HTMLElement>adjElement.nextElementSibling;
+        }
         adjIsRight = true;
     }
 

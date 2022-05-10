@@ -302,14 +302,16 @@ function fixArrows(eventParameters) {
     let caret = getCaretPosition();
     if (eventParameters.key === "ArrowLeft" && caret === 0) {
         adjElement = activeElement.previousElementSibling;
-        if (adjElement != null)
+        if (adjElement != null) {
             adjAdjElement = adjElement.previousElementSibling;
+        }
         adjIsRight = false;
     }
     else if (eventParameters.key === "ArrowRight" && caret === activeElement.innerText.length) {
         adjElement = activeElement.nextElementSibling;
-        if (adjElement != null)
+        if (adjElement != null) {
             adjAdjElement = adjElement.nextElementSibling;
+        }
         adjIsRight = true;
     }
     if (adjElement === null)
