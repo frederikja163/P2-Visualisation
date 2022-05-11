@@ -29,9 +29,9 @@ function statementOnClick(line) {
 function select(line) {
     const selected = document.getElementById(selectedCode);
     line.id = selectedCode;
+    removeAllHighlighting();
     highLight(parseInt(line.getAttribute("index")));
     if (selected != null) {
-        removeHighLight(parseInt(selected.getAttribute("index")));
         selected.id = "";
     }
 }
@@ -227,8 +227,8 @@ function removeHighLight(index) {
     }
 }
 function removeAllHighlighting() {
-    const lineCount = document.getElementById("code")?.querySelectorAll("span")?.length;
-    for (let i = 0; i < lineCount; i++) {
+    const lineCount = document.querySelectorAll("#code > span")?.length;
+    for (let i = -1; i < lineCount; i++) {
         removeHighLight(i);
     }
 }
@@ -368,18 +368,31 @@ function insertString(defaultString, stringPosition, insertedString) {
 }
 function pseudocodeOnKeyPress(e) {
     if (e.key === "Enter") {
-        const breaks = document.querySelectorAll("#right > span > br");
-        for (let i = 0; i < breaks.length; i++) {
-            const br = breaks[i];
-            br.remove();
-        }
+        const br = document.querySelector("#right > span > br");
+        br.remove();
+        const caretPosition = getCaretPosition();
         const activeElement = document.activeElement;
         const beforeCursor = activeElement.childNodes[0].nodeValue;
-        const afterCursor = activeElement.childNodes[1].nodeValue;
         const beforeElement = createPseudocodeSpan(beforeCursor, activeElement.getAttribute("index"));
+        beforeElement.classList.add("highlighted");
         const breakElement = document.createElement("br");
+        let afterCursor;
+        if (activeElement.childNodes[1] !== undefined) {
+            afterCursor = activeElement.childNodes[1].nodeValue;
+        }
+        else {
+            afterCursor = "";
+        }
         const afterElement = createPseudocodeSpan(afterCursor, activeElement.getAttribute("index"));
-        activeElement.replaceWith(beforeElement, breakElement, afterElement);
+        afterElement.classList.add("highlighted");
+        if (caretPosition == 0 && activeElement.childNodes[1] === undefined) {
+            activeElement.replaceWith(afterElement, breakElement, beforeElement);
+            setCaretPosition(beforeElement, 0);
+        }
+        else {
+            activeElement.replaceWith(beforeElement, breakElement, afterElement);
+            setCaretPosition(afterElement, 0);
+        }
     }
 }
 let oldActiveElement = null;

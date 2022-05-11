@@ -4,7 +4,6 @@
     TODO: Make arrows work
     TODO: Make tabs work
     TODO: Make delete work
-
 */
 
 /** Initialize pseudocode and subscribe to the correct events. */
@@ -180,20 +179,36 @@ function insertString(defaultString: string, stringPosition: number, insertedStr
 
 function pseudocodeOnKeyPress(e: KeyboardEvent): void {
     if (e.key === "Enter") {
-        const breaks: NodeListOf<Element> = document.querySelectorAll("#right > span > br");
-        for (let i: number = 0; i < breaks.length; i++) {
-            const br = breaks[i];
-            br.remove();
-        }
+        const br: Element = document.querySelector("#right > span > br");
+        br.remove();
+        
+        const caretPosition: number = getCaretPosition();
         const activeElement: Element = document.activeElement;
-        const beforeCursor: string = activeElement.childNodes[0].nodeValue;
-        const afterCursor: string = activeElement.childNodes[1].nodeValue;
 
+        const beforeCursor: string = activeElement.childNodes[0].nodeValue;
         const beforeElement: HTMLElement = createPseudocodeSpan(beforeCursor, activeElement.getAttribute("index"));
+        beforeElement.classList.add("highlighted");
+        
         const breakElement = document.createElement("br");
+        let afterCursor: string;
+        if (activeElement.childNodes[1] !== undefined){
+            afterCursor = activeElement.childNodes[1].nodeValue;
+        }
+        else{
+            afterCursor = "";
+        }
         const afterElement: HTMLElement = createPseudocodeSpan(afterCursor, activeElement.getAttribute("index"));
-        activeElement.replaceWith(beforeElement, breakElement, afterElement);
-    }
+        afterElement.classList.add("highlighted");
+        
+        if (caretPosition == 0 && activeElement.childNodes[1] === undefined){
+            activeElement.replaceWith(afterElement, breakElement, beforeElement);
+            setCaretPosition(beforeElement, 0);
+        }
+        else{
+            activeElement.replaceWith(beforeElement, breakElement, afterElement);
+            setCaretPosition(afterElement, 0);
+        }
+   }
 }
 
 let oldActiveElement: HTMLElement | null = null;

@@ -48,11 +48,12 @@ function statementOnClick(line: HTMLElement): void{
 
 function select(line: HTMLElement): void
 {
-    const selected: HTMLElement | null = document.getElementById(selectedCode);
+    const selected: HTMLElement | null = document.querySelector(selectedCode);
     line.id = selectedCode;
+    removeAllHighlighting();
     highLight(parseInt(line.getAttribute("index")));
+
     if (selected != null) {
-        removeHighLight(parseInt(selected.getAttribute("index")));
         selected.id = "";
     }
 }

@@ -15,10 +15,9 @@ function removeHighLight(index : number) : void{
 function removeAllHighlighting(){
     
 	// Removes all highligts.
-	const lineCount: number = <number> document.getElementById("code")?.querySelectorAll("span")?.length;
+	const lineCount: number = <number> document.querySelectorAll("#code > span")?.length;
 
-	for (let i: number = 0; i < lineCount; i++){
+	for (let i: number = -1; i < lineCount; i++){
 		removeHighLight(i);
 	}
-
 }
