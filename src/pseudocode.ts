@@ -16,11 +16,9 @@ let oldActiveElement: HTMLElement | null = null;
 
 function pseudocodeOnKeyPress(e: KeyboardEvent): void {
     if (e.key === "Enter") {
-        const breaks: Element = document.querySelector("#right > span > br");
-        breaks.remove();
-        // for (let i: number = 0; i < breaks.length; i++) {
-        //     const br = breaks[i];
-        // }
+        const br: Element = document.querySelector("#right > span > br");
+        br.remove();
+        
         const caretPosition: number = getCaretPosition();
         const activeElement: Element = document.activeElement;
 
