@@ -39,9 +39,9 @@ function statementOnClick(line) {
 function select(line) {
     const selected = document.getElementById(selectedCode);
     line.id = selectedCode;
+    removeAllHighlighting();
     highLight(parseInt(line.getAttribute("index")));
     if (selected != null) {
-        removeHighLight(parseInt(selected.getAttribute("index")));
         selected.id = "";
     }
 }
@@ -236,9 +236,9 @@ function removeHighLight(index) {
     }
 }
 function removeAllHighlighting() {
-    var _a, _b;
-    const lineCount = (_b = (_a = document.getElementById("code")) === null || _a === void 0 ? void 0 : _a.querySelectorAll("span")) === null || _b === void 0 ? void 0 : _b.length;
-    for (let i = 0; i < lineCount; i++) {
+    var _a;
+    const lineCount = (_a = document.querySelectorAll("code > span")) === null || _a === void 0 ? void 0 : _a.length;
+    for (let i = -1; i < lineCount; i++) {
         removeHighLight(i);
     }
 }
@@ -260,18 +260,31 @@ function pseudocode(right) {
 let oldActiveElement = null;
 function pseudocodeOnKeyPress(e) {
     if (e.key === "Enter") {
-        const breaks = document.querySelectorAll("#right > span > br");
-        for (let i = 0; i < breaks.length; i++) {
-            const br = breaks[i];
-            br.remove();
-        }
+        const breaks = document.querySelector("#right > span > br");
+        breaks.remove();
+        const caretPosition = getCaretPosition();
         const activeElement = document.activeElement;
         const beforeCursor = activeElement.childNodes[0].nodeValue;
-        const afterCursor = activeElement.childNodes[1].nodeValue;
         const beforeElement = createPseudocodeSpan(beforeCursor, activeElement.getAttribute("index"));
+        beforeElement.classList.add("highlighted");
         const breakElement = document.createElement("br");
+        let afterCursor;
+        if (activeElement.childNodes[1] !== undefined) {
+            afterCursor = activeElement.childNodes[1].nodeValue;
+        }
+        else {
+            afterCursor = "";
+        }
         const afterElement = createPseudocodeSpan(afterCursor, activeElement.getAttribute("index"));
-        activeElement.replaceWith(beforeElement, breakElement, afterElement);
+        afterElement.classList.add("highlighted");
+        if (caretPosition == 0 && activeElement.childNodes[1] === undefined) {
+            activeElement.replaceWith(afterElement, breakElement, beforeElement);
+            setCaretPosition(beforeElement, 0);
+        }
+        else {
+            activeElement.replaceWith(beforeElement, breakElement, afterElement);
+            setCaretPosition(afterElement, 0);
+        }
     }
 }
 function pseudocodeOnClick() {
