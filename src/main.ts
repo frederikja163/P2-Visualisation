@@ -11,3 +11,22 @@ function main(): void {
 
     //displayCodeAsString(document.querySelector("#left"), null);
 }
+
+
+
+/*
+COMMITS
+Fix af arrows
+top fil komentar (2 -  3 komentar til filer)
+funktions komentar (omhandlende input og output)
+Ingen var, const når det er muligt
+Variabel typer
+Fjern temp kode inkl. udkomenteret kode
+Quarry selector
+CSS (kommentar, inkl. opsætning)
+Typescript filopdeling (Logisk mening med hvad filerne de heder og gør)
+logik ændringer
+read me (overordnet)
+- hvordan man compiler
+read me (src) 
+*/

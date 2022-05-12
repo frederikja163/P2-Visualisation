@@ -1,59 +1,47 @@
 const breakpointClass: string = "breakpoint";
 const selectedCode: string = "selectedCode";
 
-function initBreakpoints(): void
-{
+function initBreakpoints(): void {
     const lines: NodeListOf<HTMLSpanElement> = document.querySelectorAll("#code > span");
-    for (let i: number = 0; i < lines.length; i++)
-    {
+    for (let i: number = 0; i < lines.length; i++) {
+        if (!lines[i].hasAttribute('index')) continue;
+
         // Listen for events on every lines of code.
-        lines[ i ].addEventListener("dblclick", statementOnDblClick);
-        lines[ i ].addEventListener("click", () => statementOnClick(lines[ i ]));
+        lines[i].addEventListener("dblclick", statementOnDblClick);
+        lines[i].addEventListener("click", () => statementOnClick(lines[i]));
     }
 }
 
-function statementOnDblClick(): void
-{
+function statementOnDblClick(): void {
     document.getSelection()?.removeAllRanges();
 }
 
-function statementOnClick(line: HTMLElement): void{
-    if (line.classList.contains(breakpointClass))
-    {
-        if (line.id === selectedCode) // Breakpoint, selected
-        {
-            // Remove breakpoint
-            line.classList.remove(breakpointClass, "highlighted");
-            line.id = "";
-        }
-        else // Breakpoint, not selected
-        {
-            // Select
-            select(line);
-        }
-    }
-    else // No breakpoint
-    {
-        // Add breakpoint
-        line.classList.add(breakpointClass);
-        // Select
-        select(line);
-    }
+function statementOnClick(line: HTMLSpanElement): void {
 
-    //stops the current algorithm execution
-	stopCode();
-
-}
-
-
-function select(line: HTMLElement): void
-{
-    const selected: HTMLElement | null = document.querySelector(selectedCode);
-    line.id = selectedCode;
+    // Stops the current algorithm execution.
+    stopCode();
     removeAllHighlighting();
+
+    // only removes highlighted
+    if (line.id === selectedCode) {
+        line.id = "";
+        if (line.classList.contains(breakpointClass))
+            line.classList.remove(breakpointClass);
+        return;
+    }
+
+    // Add breakpoint to algorithm line.
+    if (!line.classList.contains(breakpointClass)) {
+        line.classList.add(breakpointClass);
+    }
+
+    // Selectnig algorithm line.
+    const selected: HTMLElement | null = document.querySelector(`#${selectedCode}`);
+    line.id = selectedCode;
     highLight(parseInt(line.getAttribute("index")));
 
     if (selected != null) {
         selected.id = "";
     }
+
 }

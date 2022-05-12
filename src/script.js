@@ -3,6 +3,8 @@ const selectedCode = "selectedCode";
 function initBreakpoints() {
     const lines = document.querySelectorAll("#code > span");
     for (let i = 0; i < lines.length; i++) {
+        if (!lines[i].hasAttribute('index'))
+            continue;
         lines[i].addEventListener("dblclick", statementOnDblClick);
         lines[i].addEventListener("click", () => statementOnClick(lines[i]));
     }
@@ -11,25 +13,19 @@ function statementOnDblClick() {
     document.getSelection()?.removeAllRanges();
 }
 function statementOnClick(line) {
-    if (line.classList.contains(breakpointClass)) {
-        if (line.id === selectedCode) {
-            line.classList.remove(breakpointClass, "highlighted");
-            line.id = "";
-        }
-        else {
-            select(line);
-        }
-    }
-    else {
-        line.classList.add(breakpointClass);
-        select(line);
-    }
     stopCode();
-}
-function select(line) {
-    const selected = document.getElementById(selectedCode);
-    line.id = selectedCode;
     removeAllHighlighting();
+    if (line.id === selectedCode) {
+        line.id = "";
+        if (line.classList.contains(breakpointClass))
+            line.classList.remove(breakpointClass);
+        return;
+    }
+    if (!line.classList.contains(breakpointClass)) {
+        line.classList.add(breakpointClass);
+    }
+    const selected = document.querySelector(`#${selectedCode}`);
+    line.id = selectedCode;
     highLight(parseInt(line.getAttribute("index")));
     if (selected != null) {
         selected.id = "";
