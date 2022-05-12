@@ -1,10 +1,4 @@
 
-/*
-    TODO: Make enter work - sometimes it makes a double <br tag>
-    TODO: Make arrows work
-    TODO: Make tabs work
-    TODO: Make delete work
-*/
 
 /** Initialize pseudocode and subscribe to the correct events. */
 function pseudocode(right: HTMLElement): void {
@@ -16,6 +10,10 @@ function pseudocode(right: HTMLElement): void {
     right.addEventListener("keydown", fixDelete);
     right.addEventListener("keydown", fixArrows);
 }
+
+
+
+//FIXING PSEUDOCODE STUFF ----------------------------------------------------------------
 
 function fixDelete(eventParameters: KeyboardEvent) {
     const caret: number = getCaretPosition();
@@ -172,49 +170,62 @@ function pseudocodeOnTab(eventProperties: KeyboardEvent): void {
 
 }
 
-
 function insertString(defaultString: string, stringPosition: number, insertedString: string): string {
     return defaultString.slice(0, stringPosition) + insertedString + defaultString.slice(stringPosition);
 }
 
 function pseudocodeOnKeyPress(e: KeyboardEvent): void {
     if (e.key === "Enter") {
-        const br: Element = document.querySelector("#right > span > br");
-        br.remove();
-        
+        //Removes all break tags within spans.
+        const br: NodeListOf<Element> = document.querySelectorAll("#right > span > br");
+        for (let i = 0; i < br.length; i++) {
+            br[i].remove();
+        }
+
         const caretPosition: number = getCaretPosition();
         const activeElement: Element = document.activeElement;
 
-        const beforeCursor: string = activeElement.childNodes[0].nodeValue;
+        //creates a span of the text before the caret position
+        const beforeCursor: string = activeElement.childNodes[0].nodeValue.charCodeAt(0) > 32 ? activeElement.childNodes[0].nodeValue : "";
         const beforeElement: HTMLElement = createPseudocodeSpan(beforeCursor, activeElement.getAttribute("index"));
         beforeElement.classList.add("highlighted");
-        
-        const breakElement = document.createElement("br");
-        let afterCursor: string;
-        if (activeElement.childNodes[1] !== undefined){
-            afterCursor = activeElement.childNodes[1].nodeValue;
+
+        //creates a span of the text after the caret position
+        let afterCursor: string = "";
+        for (let i = 1; i < activeElement.childNodes.length; i++) {
+            if (activeElement.childNodes[0].nodeValue.charCodeAt(0) > 32) {
+                afterCursor = activeElement.childNodes[i].nodeValue;
+            }
         }
-        else{
-            afterCursor = "";
-        }
+
         const afterElement: HTMLElement = createPseudocodeSpan(afterCursor, activeElement.getAttribute("index"));
         afterElement.classList.add("highlighted");
-        
-        if (caretPosition == 0 && activeElement.childNodes[1] === undefined){
+
+        //creates a break element
+        const breakElement = document.createElement("br");
+
+        //inserts elements into the html
+        if (caretPosition == 0 && activeElement.childNodes[1] === undefined) {
             activeElement.replaceWith(afterElement, breakElement, beforeElement);
             setCaretPosition(beforeElement, 0);
         }
-        else{
+        else {
+
             activeElement.replaceWith(beforeElement, breakElement, afterElement);
             setCaretPosition(afterElement, 0);
         }
-   }
+    }
 }
+
+
+
+// PSEUDOCODE CODE ------------------------------------------------------------------------------------
 
 let oldActiveElement: HTMLElement | null = null;
 
 /** Event for when there has been clicked on a pseudocode span. */
 function pseudocodeOnClick(): void {
+
     // Get the currently active span element, or the last span element.
     let activeElement: HTMLElement | null = document.activeElement as HTMLElement;
     if (!(activeElement instanceof HTMLSpanElement)) {
@@ -347,12 +358,18 @@ function splitHtmlElement(element: HTMLElement, index: number) {
     }
 }
 
+
+
+// HELPER FUNCTIONS FOR PSEUDOCODE CODE --------------------------------------------------------------------
+
 /** Create a span for pseudocode with 'text' and index='codeIndex'. */
 function createPseudocodeSpan(text: string, codeIndex: string): HTMLElement {
     const element: HTMLElement = document.createElement("span");
+
     element.setAttribute("contenteditable", "true");
     element.setAttribute("index", codeIndex);
     element.innerText = text;
+
     return element;
 }
 
@@ -362,6 +379,10 @@ function insertPseudocodeSpan(newSpan: HTMLElement, splitableSpan: HTMLElement, 
     splitableSpan.replaceWith(newSpan);
     setCaretPosition(newSpan, 0);
 }
+
+
+
+// HELPER HELPER FUNCTIONS FOR PSEUDOCODE CODE ------------------------------------------------------------------
 
 /** Sets the caret position on 'element' to 'caretPos'. */
 function setCaretPosition(element: HTMLElement, caretPos: number): void {

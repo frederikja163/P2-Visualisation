@@ -364,23 +364,24 @@ function insertString(defaultString, stringPosition, insertedString) {
 }
 function pseudocodeOnKeyPress(e) {
     if (e.key === "Enter") {
-        const br = document.querySelector("#right > span > br");
-        br.remove();
+        const br = document.querySelectorAll("#right > span > br");
+        for (let i = 0; i < br.length; i++) {
+            br[i].remove();
+        }
         const caretPosition = getCaretPosition();
         const activeElement = document.activeElement;
-        const beforeCursor = activeElement.childNodes[0].nodeValue;
+        const beforeCursor = activeElement.childNodes[0].nodeValue.charCodeAt(0) > 32 ? activeElement.childNodes[0].nodeValue : "";
         const beforeElement = createPseudocodeSpan(beforeCursor, activeElement.getAttribute("index"));
         beforeElement.classList.add("highlighted");
-        const breakElement = document.createElement("br");
-        let afterCursor;
-        if (activeElement.childNodes[1] !== undefined) {
-            afterCursor = activeElement.childNodes[1].nodeValue;
-        }
-        else {
-            afterCursor = "";
+        let afterCursor = "";
+        for (let i = 1; i < activeElement.childNodes.length; i++) {
+            if (activeElement.childNodes[0].nodeValue.charCodeAt(0) > 32) {
+                afterCursor = activeElement.childNodes[i].nodeValue;
+            }
         }
         const afterElement = createPseudocodeSpan(afterCursor, activeElement.getAttribute("index"));
         afterElement.classList.add("highlighted");
+        const breakElement = document.createElement("br");
         if (caretPosition == 0 && activeElement.childNodes[1] === undefined) {
             activeElement.replaceWith(afterElement, breakElement, beforeElement);
             setCaretPosition(beforeElement, 0);
