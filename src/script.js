@@ -291,52 +291,80 @@ function fixDelete(eventParameters) {
         mergedElement.classList.add("highlighted");
 }
 function fixArrows(eventParameters) {
+    let direction = eventParameters.key === "ArrowLeft" ? -1 : (eventParameters.key === "ArrowRight" ? +1 : 0);
+    let caretPosition = getCaretPosition();
     const activeElement = document.activeElement;
-    let adjElement = null;
-    let adjAdjElement = null;
-    let adjIsRight;
-    let caret = getCaretPosition();
-    if (eventParameters.key === "ArrowLeft" && caret === 0) {
-        adjElement = activeElement.previousElementSibling;
-        if (adjElement != null) {
-            adjAdjElement = adjElement.previousElementSibling;
-        }
-        adjIsRight = false;
-    }
-    else if (eventParameters.key === "ArrowRight" && caret === activeElement.innerText.length) {
-        adjElement = activeElement.nextElementSibling;
-        if (adjElement != null) {
-            adjAdjElement = adjElement.nextElementSibling;
-        }
-        adjIsRight = true;
-    }
+    if (direction === 0 || (direction < 0 ? caretPosition != 0 : caretPosition != activeElement.innerHTML.length))
+        return;
+    eventParameters.preventDefault();
+    const index = activeElement.getAttribute("index");
+    let adjElement = (direction < 0 ?
+        activeElement.previousElementSibling :
+        activeElement.nextElementSibling);
     if (adjElement === null)
         return;
-    const index = activeElement.getAttribute("index");
-    let newElement = null;
-    if (adjAdjElement != null && adjElement.innerText.length === 1 && adjAdjElement.getAttribute("index") === index) {
-        setCaretPosition(adjAdjElement, adjIsRight ? 0 : adjAdjElement.innerText.length);
-        newElement = adjAdjElement;
-        eventParameters.preventDefault();
-    }
-    else {
-        newElement = createPseudocodeSpan("", index == null ? "" : index);
-        if (activeElement.classList.contains("highlighted"))
-            newElement.classList.add("highlighted");
-        insertPseudocodeSpan(newElement, adjElement, adjIsRight ? 1 : adjElement.innerText.length - 1);
-        setCaretPosition(newElement, 0);
-    }
-    if (activeElement.innerText.length == 0)
-        activeElement.remove();
-    if (adjIsRight) {
-        if (newElement.previousElementSibling.previousElementSibling !== null && newElement.previousElementSibling !== null) {
-            mergeElements(newElement.previousElementSibling.previousElementSibling, newElement.previousElementSibling);
+    if (activeElement.innerHTML != "") {
+        const newElement = createPseudocodeSpan("", index == null ? "" : index);
+        newElement.classList.add("highlighted");
+        if (adjElement.tagName !== "SPAN") {
+            adjElement = (direction < 0 ? (adjElement.previousElementSibling) : adjElement.nextElementSibling);
+            if (direction < 0)
+                adjElement.after(newElement);
+            else
+                adjElement.before(newElement);
         }
+        else {
+            insertPseudocodeSpan(newElement, adjElement, direction < 0 ? adjElement.innerText.length - 1 : 1);
+        }
+        setCaretPosition(newElement, 0);
+        oldActiveElement = newElement;
+        return;
     }
-    else if (newElement.nextElementSibling !== null && newElement.nextElementSibling.nextElementSibling !== null) {
-        mergeElements(newElement.nextElementSibling, newElement.nextElementSibling.nextElementSibling);
+    const adjadjElement = (direction < 0 ?
+        adjElement.previousElementSibling :
+        adjElement.nextElementSibling);
+    const behindElement = (direction < 0 ?
+        activeElement.nextElementSibling :
+        activeElement.previousElementSibling);
+    if ((adjElement.tagName !== "SPAN" || adjElement.innerHTML.length == 1) && adjadjElement != null &&
+        adjadjElement.tagName === "SPAN" && adjadjElement.getAttribute("index") === index) {
+        if (behindElement != null && behindElement.tagName === "SPAN" && adjElement.tagName === "SPAN") {
+            if (direction < 0)
+                mergeElements(adjElement, behindElement);
+            else
+                mergeElements(behindElement, adjElement);
+            activeElement.remove();
+        }
+        setCaretPosition(adjadjElement, direction < 0 ? adjadjElement.innerHTML.length : 0);
+        oldActiveElement = adjadjElement;
+        return;
     }
-    oldActiveElement = newElement;
+    if (adjElement.tagName !== "SPAN") {
+        adjElement.remove();
+        if (direction < 0)
+            activeElement.after(document.createElement("br"));
+        else
+            activeElement.before(document.createElement("br"));
+        return;
+    }
+    const adjChar = adjElement.innerHTML.charAt(direction < 0 ? adjElement.innerHTML.length - 1 : 0);
+    adjElement.innerHTML = direction < 0 ?
+        adjElement.innerHTML.slice(0, adjElement.innerHTML.length - 1) :
+        adjElement.innerHTML.slice(1);
+    const adjIndex = adjElement.getAttribute("index");
+    if (adjElement.innerHTML === "") {
+        adjElement.remove();
+    }
+    if (behindElement != null && behindElement.tagName === "SPAN") {
+        behindElement.innerHTML = direction < 0 ? adjChar + behindElement.innerHTML : behindElement.innerHTML + adjChar;
+        return;
+    }
+    const newElement = createPseudocodeSpan(adjChar, adjIndex);
+    if (direction < 0) {
+        activeElement.after(newElement);
+        return;
+    }
+    activeElement.before(newElement);
 }
 function pseudocodeOnTab(eventProperties) {
     let oldCaretPosition = getCaretPosition();
@@ -385,10 +413,12 @@ function pseudocodeOnKeyPress(e) {
         if (caretPosition == 0 && activeElement.childNodes[1] === undefined) {
             activeElement.replaceWith(afterElement, breakElement, beforeElement);
             setCaretPosition(beforeElement, 0);
+            oldActiveElement = beforeElement;
         }
         else {
             activeElement.replaceWith(beforeElement, breakElement, afterElement);
             setCaretPosition(afterElement, 0);
+            oldActiveElement = afterElement;
         }
     }
 }

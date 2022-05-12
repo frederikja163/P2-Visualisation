@@ -15,16 +15,20 @@ function main(): void {
 /*
 
 Fix Arrows (Problems)
-- Newline + Tab (adds tab to prev line)
-- Tabs adds an extra space (doesnt take break tags into account)
 V Pseudocode is not highlighted
 V Clicking on breakpoint algorithm lines they unbreakpointed
 V All breakpoints use span 0
-- Click sometimes removes breaks
-- Newline sometimes removes breaks
+V Click sometimes removes breaks
+V Newline sometimes removes breaks
+V Does not add <br> between spans with same index
+V Added <br> within spans
+V Newline + Tab (adds tab to prev line)
+V Tabs adds an extra space (doesnt take break tags into account)
+V Right-left arrows doesn't work with breaktags
+- Glitchy newlines
 - Ctrl-z fux shit up
-- Right-left arrows doesn't work with breakpoints
-- Does not add <br> between spans with same index
+- Newline at start of the line removes the line
+- A line that starts with space is removed when a newline is added after it
 
 COMMITS
 Fix prbolems (including arrows)

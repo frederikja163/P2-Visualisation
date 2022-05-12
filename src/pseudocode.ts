@@ -71,62 +71,95 @@ function fixDelete(eventParameters: KeyboardEvent) {
 
 function fixArrows(eventParameters: KeyboardEvent) {
 
+    /*
+    CASES
+    1. moving out of a currently selected span
+    2. moving into a currently selected span
+    3. moving from an empty span to a non selected span
+    4. moving across a break
+    */
+
+    let direction: number = eventParameters.key === "ArrowLeft" ? -1 : (eventParameters.key === "ArrowRight" ? +1 : 0);
+    let caretPosition: number = getCaretPosition();
     const activeElement: HTMLElement = <HTMLElement>document.activeElement;
-    let adjElement: HTMLElement = null;
-    let adjAdjElement: HTMLElement = null;
-    let adjIsRight: boolean;
+    if (direction === 0 || (direction < 0 ? caretPosition != 0 : caretPosition != activeElement.innerHTML.length)) return;
 
-    let caret: number = getCaretPosition();
+    eventParameters.preventDefault();
 
-    if (eventParameters.key === "ArrowLeft" && caret === 0) {
-        //if "leftarrow" and at the first position of the span
-        adjElement = <HTMLElement>activeElement.previousElementSibling;
-        if (adjElement != null) {
-            adjAdjElement = <HTMLElement>adjElement.previousElementSibling;
-        }
-        adjIsRight = false;
-    } else if (eventParameters.key === "ArrowRight" && caret === activeElement.innerText.length) {
-        // "rightarrow" and at the last position of the current span
-        adjElement = <HTMLElement>activeElement.nextElementSibling;
-        if (adjElement != null) {
-            adjAdjElement = <HTMLElement>adjElement.nextElementSibling;
-        }
-        adjIsRight = true;
-    }
+    const index: string | null = activeElement.getAttribute("index");
+    let adjElement = <HTMLElement>(direction < 0 ?
+        activeElement.previousElementSibling :
+        activeElement.nextElementSibling);
 
     if (adjElement === null) return;
 
-    //setting caret position
-    const index: string | null = activeElement.getAttribute("index");
-    let newElement: HTMLElement = null;
+    //If moving out of a span of the same index : insert empty span.
+    if (activeElement.innerHTML != "") {
+        const newElement = createPseudocodeSpan("", index == null ? "" : index);
+        newElement.classList.add("highlighted");
 
-    if (adjAdjElement != null && adjElement.innerText.length === 1 && adjAdjElement.getAttribute("index") === index) {
-        //inserting in existing span
-        setCaretPosition(adjAdjElement, adjIsRight ? 0 : adjAdjElement.innerText.length);
-        newElement = adjAdjElement;
-        eventParameters.preventDefault();
-    } else {
-        //inserting new empty span
-        newElement = createPseudocodeSpan("", index == null ? "" : index);
-        if (activeElement.classList.contains("highlighted")) newElement.classList.add("highlighted");
-
-        insertPseudocodeSpan(newElement, adjElement, adjIsRight ? 1 : adjElement.innerText.length - 1);
-        setCaretPosition(newElement, 0);
-    }
-
-    //removing prev span if empty
-    if (activeElement.innerText.length == 0) activeElement.remove();
-
-    //merging previously split spans
-    if (adjIsRight) {
-        if (newElement.previousElementSibling.previousElementSibling !== null && newElement.previousElementSibling !== null) {
-            mergeElements(<HTMLElement>newElement.previousElementSibling.previousElementSibling, <HTMLElement>newElement.previousElementSibling);
+        if (adjElement.tagName !== "SPAN") {
+            adjElement = <HTMLElement>(direction < 0 ? (adjElement.previousElementSibling) : adjElement.nextElementSibling);
+            if (direction < 0) adjElement.after(newElement);
+            else adjElement.before(newElement);
+        } else {
+            insertPseudocodeSpan(newElement, adjElement, direction < 0 ? adjElement.innerText.length - 1 : 1);
         }
-    } else if (newElement.nextElementSibling !== null && newElement.nextElementSibling.nextElementSibling !== null) {
-        mergeElements(<HTMLElement>newElement.nextElementSibling, <HTMLElement>newElement.nextElementSibling.nextElementSibling);
+        setCaretPosition(newElement, 0);
+        oldActiveElement = newElement;
+        return;
     }
 
-    oldActiveElement = newElement;
+    //If moving into a span of the same index: place curser in span.
+    const adjadjElement = <HTMLElement>(direction < 0 ?
+        adjElement.previousElementSibling :
+        adjElement.nextElementSibling);
+    const behindElement = <HTMLElement>(direction < 0 ?
+        activeElement.nextElementSibling :
+        activeElement.previousElementSibling);
+
+    if ((adjElement.tagName !== "SPAN" || adjElement.innerHTML.length == 1) && adjadjElement != null &&
+        adjadjElement.tagName === "SPAN" && adjadjElement.getAttribute("index") === index) {
+        if (behindElement != null && behindElement.tagName === "SPAN" && adjElement.tagName === "SPAN") {
+            if (direction < 0) mergeElements(adjElement, behindElement);
+            else mergeElements(behindElement, adjElement);
+            activeElement.remove();
+        }
+        setCaretPosition(adjadjElement, direction < 0 ? adjadjElement.innerHTML.length : 0);
+        oldActiveElement = adjadjElement;
+        return;
+    }
+
+    //if moving across a break
+    if (adjElement.tagName !== "SPAN") {
+        adjElement.remove();
+        if (direction < 0) activeElement.after(document.createElement("br"));
+        else activeElement.before(document.createElement("br"));
+        return;
+    }
+
+    // Otherwise move the empty
+    const adjChar: string = adjElement.innerHTML.charAt(direction < 0 ? adjElement.innerHTML.length - 1 : 0);
+    adjElement.innerHTML = direction < 0 ?
+        adjElement.innerHTML.slice(0, adjElement.innerHTML.length - 1) :
+        adjElement.innerHTML.slice(1);
+    const adjIndex: string = adjElement.getAttribute("index");
+    if (adjElement.innerHTML === "") {
+        adjElement.remove();
+    }
+
+    if (behindElement != null && behindElement.tagName === "SPAN") {
+        behindElement.innerHTML = direction < 0 ? adjChar + behindElement.innerHTML : behindElement.innerHTML + adjChar;
+        return;
+    }
+
+    const newElement = createPseudocodeSpan(adjChar, adjIndex);
+    if (direction < 0) {
+        activeElement.after(newElement);
+        return;
+    }
+
+    activeElement.before(newElement);
 
 }
 
@@ -208,11 +241,13 @@ function pseudocodeOnKeyPress(e: KeyboardEvent): void {
         if (caretPosition == 0 && activeElement.childNodes[1] === undefined) {
             activeElement.replaceWith(afterElement, breakElement, beforeElement);
             setCaretPosition(beforeElement, 0);
+            oldActiveElement = beforeElement;
         }
         else {
 
             activeElement.replaceWith(beforeElement, breakElement, afterElement);
             setCaretPosition(afterElement, 0);
+            oldActiveElement = afterElement;
         }
     }
 }
