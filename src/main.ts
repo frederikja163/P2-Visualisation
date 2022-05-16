@@ -27,20 +27,22 @@ V Tabs adds an extra space (doesnt take break tags into account)
 V Right-left arrows doesn't work with breaktags
 V Glitchy newlines
 V Ctrl-z fux shit up
-- A line that starts with space is removed when a newline is added
+V A line that starts with space is removed when a newline is added
+- Right/left arrows moves right and left of an empty string on a line
+- Starting to write on an empty line should remove 
 
 COMMITS
-Fix prbolems (including arrows)
-top fil komentar (2 -  3 komentar til filer)
-funktions komentar (omhandlende input og output)
-Ingen var, const når det er muligt
-Variabel typer
-Fjern temp kode inkl. udkomenteret kode
-Quarry selector
-CSS (kommentar, inkl. opsætning)
-Typescript filopdeling (Logisk mening med hvad filerne de heder og gør)
-logik ændringer
-read me (overordnet)
-- hvordan man compiler
-read me (src) 
+- Fix problems (including arrows)
+- top fil komentar (2 -  3 komentar til filer)
+- funktions komentar (omhandlende input og output)
+- Ingen var, const når det er muligt
+- Variabel typer
+- Fjern temp kode inkl. udkomenteret kode
+- Quarry selector
+- CSS (kommentar, inkl. opsætning)
+- Typescript filopdeling (Logisk mening med hvad filerne de heder og gør)
+- logik ændringer
+- read me (overordnet)
+    - hvordan man compiler
+- read me (src) 
 */

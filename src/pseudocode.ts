@@ -135,8 +135,28 @@ function fixArrows(eventParameters: KeyboardEvent) {
     //if moving across a break
     if (adjElement.tagName !== "SPAN") {
         adjElement.remove();
-        if (direction < 0) activeElement.after(document.createElement("br"));
-        else activeElement.before(document.createElement("br"));
+        const br: HTMLBRElement = <HTMLBRElement>document.createElement("br");
+        if (direction < 0) {
+            if (behindElement !== null && behindElement.tagName !== "SPAN") {
+                activeElement.after(br, createPseudocodeSpan("", index));
+            } else {
+                activeElement.after(br);
+            }
+        } else {
+            if (behindElement !== null && behindElement.tagName !== "SPAN") {
+                activeElement.before(createPseudocodeSpan("", index), br);
+            } else {
+                activeElement.before(br);
+            }
+        }
+
+        //remove adjacent empty elements
+        const adjElementNext: HTMLElement | null = <HTMLElement | null>document.activeElement.nextElementSibling;
+        const adjElementPrev: HTMLElement | null = <HTMLElement | null>document.activeElement.previousElementSibling;
+        const activeElementIndex: String = document.activeElement.getAttribute("index");
+        if (adjElementNext != null && adjElementNext.getAttribute("index") != null && adjElementNext.getAttribute("index") !== activeElementIndex && adjElementNext.innerHTML === "") adjElementNext.remove();
+        if (adjElementPrev != null && adjElementPrev.getAttribute("index") != null && adjElementPrev.getAttribute("index") !== activeElementIndex && adjElementPrev.innerHTML === "") adjElementPrev.remove();
+
         return;
     }
 
@@ -212,25 +232,22 @@ function insertString(defaultString: string, stringPosition: number, insertedStr
 function pseudocodeOnKeyPress(e: KeyboardEvent): void {
     if (e.key === "Enter") {
         //Removes all break tags within spans.
-        const br: NodeListOf<Element> = document.querySelectorAll("#right > span > br");
-        for (let i = 0; i < br.length; i++) {
-            br[i].remove();
-        }
+        // const br: NodeListOf<Element> = document.querySelectorAll("#right > span > br");
+        // for (let i = 0; i < br.length; i++) {
+        //     br[i].remove();
+        // }
 
-        const caretPosition: number = getCaretPosition();
         const activeElement: Element = document.activeElement;
 
         //creates a span of the text before the caret position
-        const beforeCursor: string = activeElement.childNodes[0].nodeValue.charCodeAt(0) > 32 ? activeElement.childNodes[0].nodeValue : "";
+        const beforeCursor: string = activeElement.childNodes[0].nodeValue.replaceAll("\n", "");
         const beforeElement: HTMLElement = createPseudocodeSpan(beforeCursor, activeElement.getAttribute("index"));
         beforeElement.classList.add("highlighted");
 
         //creates a span of the text after the caret position
         let afterCursor: string = "";
-        for (let i = 1; i < activeElement.childNodes.length; i++) {
-            if (activeElement.childNodes[0].nodeValue.charCodeAt(0) > 32) {
-                afterCursor = activeElement.childNodes[i].nodeValue;
-            }
+        for (let i = 1; i < activeElement.childNodes.length && afterCursor === ""; i++) {
+            afterCursor = activeElement.childNodes[i].nodeValue.replaceAll("\n", "");
         }
 
         const afterElement: HTMLElement = createPseudocodeSpan(afterCursor, activeElement.getAttribute("index"));
@@ -240,17 +257,9 @@ function pseudocodeOnKeyPress(e: KeyboardEvent): void {
         const breakElement = document.createElement("br");
 
         //inserts elements into the html
-        if (caretPosition == 0 && activeElement.childNodes[1] === undefined) {
-            activeElement.replaceWith(afterElement, breakElement, beforeElement);
-            setCaretPosition(beforeElement, 0);
-            oldActiveElement = beforeElement;
-        }
-        else {
-
-            activeElement.replaceWith(beforeElement, breakElement, afterElement);
-            setCaretPosition(afterElement, 0);
-            oldActiveElement = afterElement;
-        }
+        activeElement.replaceWith(beforeElement, breakElement, afterElement);
+        setCaretPosition(afterElement, 0);
+        oldActiveElement = afterElement;
     }
 }
 
@@ -326,21 +335,20 @@ function pseudocodeOnClick(): void {
         oldActiveElement = activeElement;
     }
     else if (activeElement != null && breakpointIndex != null) {
-
-
-        //      splitHtmlElement(activeElement, caretPosition);
-        //       
-        // Create the new element with the cursor.
         const newElement: HTMLElement = createPseudocodeSpan("", breakpointIndex);
-        insertPseudocodeSpan(newElement, activeElement, caretPosition);
         newElement.classList.add("highlighted");
-        //      activeElement.replaceWith(newElement);
-        //      setCaretPosition(newElement, 0);
+        insertPseudocodeSpan(newElement, activeElement, caretPosition);
 
         oldActiveElement = newElement;
-
-
     }
+
+    //remove adjacent empty elements
+    const adjElementNext: HTMLElement | null = <HTMLElement | null>document.activeElement.nextElementSibling;
+    const adjElementPrev: HTMLElement | null = <HTMLElement | null>document.activeElement.previousElementSibling;
+    const activeElementIndex: String = document.activeElement.getAttribute("index");
+    if (adjElementNext != null && adjElementNext.getAttribute("index") != null && adjElementNext.getAttribute("index") !== activeElementIndex && adjElementNext.innerHTML === "") adjElementNext.remove();
+    if (adjElementPrev != null && adjElementPrev.getAttribute("index") != null && adjElementPrev.getAttribute("index") !== activeElementIndex && adjElementPrev.innerHTML === "") adjElementPrev.remove();
+
 }
 
 /** Merges two elements if they have the same index value*/
@@ -370,26 +378,26 @@ function mergeElements(e1: HTMLElement | null, e2: HTMLElement | null): HTMLElem
 function splitHtmlElement(element: HTMLElement, index: number) {
     const text: string = element.innerText;
 
-    // Get the text before and aftsplitHtmlElementer the index.
+    // Get the text before and after HtmlElementer the index.
     const beforeText: string = text.slice(0, index);
     const afterText: string = text.slice(index, text.length);
-    const activeElementCodeIndex: string | null = element.getAttribute("index");
+    const elementIndex: string | null = element.getAttribute("index");
 
     // Create before and after elements with the correct text.
-    if (activeElementCodeIndex != null) {
+    if (elementIndex != null) {
         if (beforeText === "") {
-            const afterElement: HTMLElement = createPseudocodeSpan(afterText, activeElementCodeIndex);
+            const afterElement: HTMLElement = createPseudocodeSpan(afterText, elementIndex);
             if (element.classList.contains("highlighted")) afterElement.classList.add("highlighted");
             element.after(afterElement);
         }
         else if (afterText === "") {
-            const beforeElement: HTMLElement = createPseudocodeSpan(beforeText, activeElementCodeIndex);
+            const beforeElement: HTMLElement = createPseudocodeSpan(beforeText, elementIndex);
             if (element.classList.contains("highlighted")) beforeElement.classList.add("highlighted");
             element.before(beforeElement);
         }
         else {
-            const beforeElement: HTMLElement = createPseudocodeSpan(beforeText, activeElementCodeIndex);
-            const afterElement: HTMLElement = createPseudocodeSpan(afterText, activeElementCodeIndex);
+            const beforeElement: HTMLElement = createPseudocodeSpan(beforeText, elementIndex);
+            const afterElement: HTMLElement = createPseudocodeSpan(afterText, elementIndex);
             if (element.classList.contains("highlighted")) {
                 afterElement.classList.add("highlighted");
                 beforeElement.classList.add("highlighted");

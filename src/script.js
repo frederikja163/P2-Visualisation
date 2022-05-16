@@ -342,10 +342,30 @@ function fixArrows(eventParameters) {
     }
     if (adjElement.tagName !== "SPAN") {
         adjElement.remove();
-        if (direction < 0)
-            activeElement.after(document.createElement("br"));
-        else
-            activeElement.before(document.createElement("br"));
+        const br = document.createElement("br");
+        if (direction < 0) {
+            if (behindElement !== null && behindElement.tagName !== "SPAN") {
+                activeElement.after(br, createPseudocodeSpan("", index));
+            }
+            else {
+                activeElement.after(br);
+            }
+        }
+        else {
+            if (behindElement !== null && behindElement.tagName !== "SPAN") {
+                activeElement.before(createPseudocodeSpan("", index), br);
+            }
+            else {
+                activeElement.before(br);
+            }
+        }
+        const adjElementNext = document.activeElement.nextElementSibling;
+        const adjElementPrev = document.activeElement.previousElementSibling;
+        const activeElementIndex = document.activeElement.getAttribute("index");
+        if (adjElementNext != null && adjElementNext.getAttribute("index") != null && adjElementNext.getAttribute("index") !== activeElementIndex && adjElementNext.innerHTML === "")
+            adjElementNext.remove();
+        if (adjElementPrev != null && adjElementPrev.getAttribute("index") != null && adjElementPrev.getAttribute("index") !== activeElementIndex && adjElementPrev.innerHTML === "")
+            adjElementPrev.remove();
         return;
     }
     const adjChar = adjElement.innerHTML.charAt(direction < 0 ? adjElement.innerHTML.length - 1 : 0);
@@ -393,34 +413,20 @@ function insertString(defaultString, stringPosition, insertedString) {
 }
 function pseudocodeOnKeyPress(e) {
     if (e.key === "Enter") {
-        const br = document.querySelectorAll("#right > span > br");
-        for (let i = 0; i < br.length; i++) {
-            br[i].remove();
-        }
-        const caretPosition = getCaretPosition();
         const activeElement = document.activeElement;
-        const beforeCursor = activeElement.childNodes[0].nodeValue.charCodeAt(0) > 32 ? activeElement.childNodes[0].nodeValue : "";
+        const beforeCursor = activeElement.childNodes[0].nodeValue.replaceAll("\n", "");
         const beforeElement = createPseudocodeSpan(beforeCursor, activeElement.getAttribute("index"));
         beforeElement.classList.add("highlighted");
         let afterCursor = "";
-        for (let i = 1; i < activeElement.childNodes.length; i++) {
-            if (activeElement.childNodes[0].nodeValue.charCodeAt(0) > 32) {
-                afterCursor = activeElement.childNodes[i].nodeValue;
-            }
+        for (let i = 1; i < activeElement.childNodes.length && afterCursor === ""; i++) {
+            afterCursor = activeElement.childNodes[i].nodeValue.replaceAll("\n", "");
         }
         const afterElement = createPseudocodeSpan(afterCursor, activeElement.getAttribute("index"));
         afterElement.classList.add("highlighted");
         const breakElement = document.createElement("br");
-        if (caretPosition == 0 && activeElement.childNodes[1] === undefined) {
-            activeElement.replaceWith(afterElement, breakElement, beforeElement);
-            setCaretPosition(beforeElement, 0);
-            oldActiveElement = beforeElement;
-        }
-        else {
-            activeElement.replaceWith(beforeElement, breakElement, afterElement);
-            setCaretPosition(afterElement, 0);
-            oldActiveElement = afterElement;
-        }
+        activeElement.replaceWith(beforeElement, breakElement, afterElement);
+        setCaretPosition(afterElement, 0);
+        oldActiveElement = afterElement;
     }
 }
 function fixCtrlZ(eventParameters) {
@@ -474,10 +480,17 @@ function pseudocodeOnClick() {
     }
     else if (activeElement != null && breakpointIndex != null) {
         const newElement = createPseudocodeSpan("", breakpointIndex);
-        insertPseudocodeSpan(newElement, activeElement, caretPosition);
         newElement.classList.add("highlighted");
+        insertPseudocodeSpan(newElement, activeElement, caretPosition);
         oldActiveElement = newElement;
     }
+    const adjElementNext = document.activeElement.nextElementSibling;
+    const adjElementPrev = document.activeElement.previousElementSibling;
+    const activeElementIndex = document.activeElement.getAttribute("index");
+    if (adjElementNext != null && adjElementNext.getAttribute("index") != null && adjElementNext.getAttribute("index") !== activeElementIndex && adjElementNext.innerHTML === "")
+        adjElementNext.remove();
+    if (adjElementPrev != null && adjElementPrev.getAttribute("index") != null && adjElementPrev.getAttribute("index") !== activeElementIndex && adjElementPrev.innerHTML === "")
+        adjElementPrev.remove();
 }
 function mergeElements(e1, e2) {
     const i1 = e1?.getAttribute("index");
@@ -498,23 +511,23 @@ function splitHtmlElement(element, index) {
     const text = element.innerText;
     const beforeText = text.slice(0, index);
     const afterText = text.slice(index, text.length);
-    const activeElementCodeIndex = element.getAttribute("index");
-    if (activeElementCodeIndex != null) {
+    const elementIndex = element.getAttribute("index");
+    if (elementIndex != null) {
         if (beforeText === "") {
-            const afterElement = createPseudocodeSpan(afterText, activeElementCodeIndex);
+            const afterElement = createPseudocodeSpan(afterText, elementIndex);
             if (element.classList.contains("highlighted"))
                 afterElement.classList.add("highlighted");
             element.after(afterElement);
         }
         else if (afterText === "") {
-            const beforeElement = createPseudocodeSpan(beforeText, activeElementCodeIndex);
+            const beforeElement = createPseudocodeSpan(beforeText, elementIndex);
             if (element.classList.contains("highlighted"))
                 beforeElement.classList.add("highlighted");
             element.before(beforeElement);
         }
         else {
-            const beforeElement = createPseudocodeSpan(beforeText, activeElementCodeIndex);
-            const afterElement = createPseudocodeSpan(afterText, activeElementCodeIndex);
+            const beforeElement = createPseudocodeSpan(beforeText, elementIndex);
+            const afterElement = createPseudocodeSpan(afterText, elementIndex);
             if (element.classList.contains("highlighted")) {
                 afterElement.classList.add("highlighted");
                 beforeElement.classList.add("highlighted");
