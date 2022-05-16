@@ -9,6 +9,8 @@ function pseudocode(right: HTMLElement): void {
 
     right.addEventListener("keydown", fixDelete);
     right.addEventListener("keydown", fixArrows);
+
+    right.addEventListener("keydown", fixCtrlZ);
 }
 
 
@@ -252,6 +254,11 @@ function pseudocodeOnKeyPress(e: KeyboardEvent): void {
     }
 }
 
+function fixCtrlZ(eventParameters: KeyboardEvent) {
+    if (eventParameters.key === "z" && eventParameters.getModifierState("Control")) {
+        eventParameters.preventDefault();
+    }
+}
 
 
 // PSEUDOCODE CODE ------------------------------------------------------------------------------------

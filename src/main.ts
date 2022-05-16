@@ -25,10 +25,9 @@ V Added <br> within spans
 V Newline + Tab (adds tab to prev line)
 V Tabs adds an extra space (doesnt take break tags into account)
 V Right-left arrows doesn't work with breaktags
-- Glitchy newlines
-- Ctrl-z fux shit up
-- Newline at start of the line removes the line
-- A line that starts with space is removed when a newline is added after it
+V Glitchy newlines
+V Ctrl-z fux shit up
+- A line that starts with space is removed when a newline is added
 
 COMMITS
 Fix prbolems (including arrows)

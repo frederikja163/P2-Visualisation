@@ -245,6 +245,7 @@ function pseudocode(right) {
     right.addEventListener('keydown', pseudocodeOnTab);
     right.addEventListener("keydown", fixDelete);
     right.addEventListener("keydown", fixArrows);
+    right.addEventListener("keydown", fixCtrlZ);
 }
 function fixDelete(eventParameters) {
     const caret = getCaretPosition();
@@ -420,6 +421,11 @@ function pseudocodeOnKeyPress(e) {
             setCaretPosition(afterElement, 0);
             oldActiveElement = afterElement;
         }
+    }
+}
+function fixCtrlZ(eventParameters) {
+    if (eventParameters.key === "z" && eventParameters.getModifierState("Control")) {
+        eventParameters.preventDefault();
     }
 }
 let oldActiveElement = null;
