@@ -54,14 +54,14 @@ function runCode() {
     runParsedCode().then(() => setButtonToRun());
 }
 function setButtonToStop() {
-    const runButton = document.getElementById("runStopButton");
+    const runButton = document.querySelector("#runStopButton");
     if (runButton != null) {
         runButton.value = "Stop";
         runButton.onclick = stopCode;
     }
 }
 function setButtonToRun() {
-    const runButton = document.getElementById("runStopButton");
+    const runButton = document.querySelector("#runStopButton");
     if (runButton != null) {
         runButton.value = "Run";
         runButton.onclick = runCode;

@@ -13,36 +13,18 @@ function main(): void {
 }
 
 /*
-
-Fix Arrows (Problems)
-V Pseudocode is not highlighted
-V Clicking on breakpoint algorithm lines they unbreakpointed
-V All breakpoints use span 0
-V Click sometimes removes breaks
-V Newline sometimes removes breaks
-V Does not add <br> between spans with same index
-V Added <br> within spans
-V Newline + Tab (adds tab to prev line)
-V Tabs adds an extra space (doesnt take break tags into account)
-V Right-left arrows doesn't work with breaktags
-V Glitchy newlines
-V Ctrl-z fux shit up
-V A line that starts with space is removed when a newline is added
-- Right/left arrows moves right and left of an empty string on a line
-- Starting to write on an empty line should remove 
-
 COMMITS
-- Fix problems (including arrows)
-- top fil komentar (2 -  3 komentar til filer)
-- funktions komentar (omhandlende input og output)
+V Fix problems (including arrows)
+V logik ændringer
+V Quarry selector
 - Ingen var, const når det er muligt
 - Variabel typer
-- Fjern temp kode inkl. udkomenteret kode
-- Quarry selector
-- CSS (kommentar, inkl. opsætning)
+- funktions komentar (omhandlende input og output)
 - Typescript filopdeling (Logisk mening med hvad filerne de heder og gør)
-- logik ændringer
+- Fjern temp kode inkl. udkomenteret kode
+- top fil komentar (2 -  3 komentar til filer)
+- CSS (kommentar, inkl. opsætning)
+- read me (src) 
 - read me (overordnet)
     - hvordan man compiler
-- read me (src) 
 */

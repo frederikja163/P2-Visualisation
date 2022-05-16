@@ -37,7 +37,7 @@ function runCode(): void {
 
 /** Setting the run button to be a stop button.*/
 function setButtonToStop(): void {
-	const runButton: HTMLInputElement | null = <HTMLInputElement | null>document.getElementById("runStopButton");
+	const runButton: HTMLInputElement | null = <HTMLInputElement | null>document.querySelector("#runStopButton");
 
 	if (runButton != null) {
 		runButton.value = "Stop";
@@ -47,7 +47,7 @@ function setButtonToStop(): void {
 
 /** Setting the stop button to be a run button.*/
 function setButtonToRun(): void {
-	const runButton: HTMLInputElement | null = <HTMLInputElement | null>document.getElementById("runStopButton");
+	const runButton: HTMLInputElement | null = <HTMLInputElement | null>document.querySelector("#runStopButton");
 
 	if (runButton != null) {
 		runButton.value = "Run";

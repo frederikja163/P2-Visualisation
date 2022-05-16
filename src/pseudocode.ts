@@ -231,12 +231,6 @@ function insertString(defaultString: string, stringPosition: number, insertedStr
 
 function pseudocodeOnKeyPress(e: KeyboardEvent): void {
     if (e.key === "Enter") {
-        //Removes all break tags within spans.
-        // const br: NodeListOf<Element> = document.querySelectorAll("#right > span > br");
-        // for (let i = 0; i < br.length; i++) {
-        //     br[i].remove();
-        // }
-
         const activeElement: Element = document.activeElement;
 
         //creates a span of the text before the caret position
