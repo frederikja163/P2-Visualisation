@@ -4,7 +4,7 @@ function displayCodeAsString(textBox: Element, printFunction: Function): void {
     // Split string into array contatining each line as separate string.
     const lines: string[] = functionString.split(/(?<=\{\})|[\r\n]+/);
     // Wrap lines of function in html elements.
-    const paragraphString = wrapStrings("span", lines);
+    const paragraphString: string = wrapStrings("span", lines);
     // Display string on website.
     textBox.innerHTML = "<pre id= \"code\">" + paragraphString + "</pre>";
 
@@ -22,7 +22,7 @@ function wrapStrings(elementTag: string, lines: string[]): string {
         }
 
         // Delete indentation from each line of code.
-        const trimmedStr = currString.substring(indents);
+        const trimmedStr: string = currString.substring(indents);
         // Insert indentation outside of <p> tag.
         lines[i] = `${"&nbsp;".repeat(indents)}<${elementTag} index="${i}">${trimmedStr}</${elementTag}></br>`;
     }

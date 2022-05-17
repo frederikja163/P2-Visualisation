@@ -17,12 +17,13 @@ COMMITS
 V Fix problems (including arrows)
 V logik ændringer
 V Quarry selector
-X Ingen var, const når det er muligt
-- Variabel typer
-- indre funktions komentar (ift. logik)
-- ydre funktions komentar (omhandlende input og output)
-- Typescript filopdeling (Logisk mening med hvad filerne de heder og gør)
+V Ingen var, const når det er muligt
+V Variabel typer
 - Fjern temp kode inkl. udkomenteret kode
+- Funktions komentar
+    - indre funktions komentar (ift. logik)
+    - ydre funktions komentar (omhandlende input og output)
+- Typescript filopdeling (Logisk mening med hvad filerne de heder og gør)
 - top fil komentar (2 -  3 komentar til filer)
 - CSS (kommentar, inkl. opsætning)
 - read me (src) 

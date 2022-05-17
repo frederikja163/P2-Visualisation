@@ -1,7 +1,7 @@
 
 // Setting up all variables.
 let currentPromise: Promise<void>;
-let resolveCurrentPromise: Function;
+let resolveCurrentPromise: () => void;
 
 let isStopping: boolean = false;
 
@@ -24,7 +24,7 @@ function runCode(): void {
 	}
 
 	// Setting up promises.
-	currentPromise = new Promise((resolve: Function) => {
+	currentPromise = new Promise((resolve: () => void) => {
 		resolveCurrentPromise = resolve;
 	});
 
@@ -156,7 +156,7 @@ function addBreakpoint(currentLine: string, lines: NodeListOf<HTMLSpanElement>, 
 	if (hasWhile || hasFor || hasIf) {
 
 		// Insert breakpoint in line.
-		const indexOfExpr = hasFor ? currentLine.indexOf(";") : currentLine.indexOf("(");
+		const indexOfExpr: number = hasFor ? currentLine.indexOf(";") : currentLine.indexOf("(");
 		currentLine = currentLine.substring(0, indexOfExpr + 1) + `await breakpoint(${lineNum}) && ` + currentLine.substring(indexOfExpr + 1, currentLine.length);
 
 	} else if (hasElse || hasFunction) {
@@ -185,7 +185,7 @@ async function breakpoint(line: number): Promise<boolean> {
 	removeHighLight(line);
 
 	// Creating a new promise.
-	currentPromise = new Promise((resolve: Function) => {
+	currentPromise = new Promise((resolve: () => void) => {
 		resolveCurrentPromise = resolve;
 	});
 
