@@ -1,10 +1,14 @@
+
 function displayCodeAsString(textBox: Element, printFunction: Function): void {
     // Convert function to string.
     const functionString: string = printFunction.toString();
+
     // Split string into array contatining each line as separate string.
     const lines: string[] = functionString.split(/(?<=\{\})|[\r\n]+/);
+
     // Wrap lines of function in html elements.
     const paragraphString: string = wrapStrings("span", lines);
+
     // Display string on website.
     textBox.innerHTML = "<pre id= \"code\">" + paragraphString + "</pre>";
 
