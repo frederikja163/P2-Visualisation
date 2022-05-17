@@ -18,13 +18,13 @@ V Quarry selector
 V Ingen var, const når det er muligt
 V Variabel typer
 V Fjern temp kode inkl. udkomenteret kode
-- Funktions komentar
+V Funktions komentar
     - indre funktions komentar (ift. logik)
     - ydre funktions komentar (omhandlende input og output)
 V logik ændringer + naming
 V Typescript filopdeling (Logisk mening med hvad filerne de heder og gør)
-- top fil komentar (2 -  3 komentar til filer)
-- CSS (kommentar, inkl. opsætning)
+V top fil komentar (2 -  3 komentar til filer)
+V CSS (kommentar, inkl. opsætning)
 - read me (src) 
 - read me (overordnet)
     - hvordan man compiler

@@ -1,3 +1,8 @@
+/*
+This file handles the execution of the algorithm code. 
+This includes adding calls to the breakpoint function to the code. 
+Additionally this file handles the convertion of the algorithm code into runable code.
+*/
 
 // Setting up all variables.
 let currentPromise: Promise<void>;

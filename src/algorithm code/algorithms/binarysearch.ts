@@ -1,5 +1,12 @@
-function algBinarySearch(){
-    function binarySearch(sortedArray : number[], key : number){
+/*
+This file contains an example binary search algoirthm and an example input.
+*/
+
+/**The function which runs an example binary search algorithm.*/
+function algBinarySearch() {
+
+    /**An example of binary search algorithm.*/
+    function binarySearch(sortedArray: number[], key: number) {
         let start = 0;
         let end = sortedArray.length - 1;
 
@@ -19,8 +26,8 @@ function algBinarySearch(){
         }
         // key wasn't found
         return -1;
-    } 
-  
+    }
+
     binarySearch([420, 336, 201, 176, 101, 98, 90, 69, 63, 43, 12, 1], 69);
 
 }

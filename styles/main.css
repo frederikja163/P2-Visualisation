@@ -1,21 +1,31 @@
+/*
+This file includes all rules for formatting the site.
+*/
+
 :root {
   --trans: 0.15s
 }
 
+/*Underline for breakpoints*/
 .breakpoint {
   text-decoration: underline;
 }
 
+/*Formatting for algorithm code and pseudocode.*/
+/*
 textarea {
   border: none;
   outline: none;
   resize: none;
 }
+*/
 
+/*Red decoration to selected code.*/
 #selectedCode {
   text-decoration-color: red;
 }
 
+/*No outline for focused spans.*/
 span:focus-visible {
   outline: none;
 }
@@ -25,11 +35,13 @@ p:hover {
   width: fit-content;
 }
 
+/*Formating for highlighted spans.*/
 .highlighted {
   font-weight: bold;
   font-size: 110%;
 }
 
+/*Formatting for algorithm code and pseudocode.*/
 .textbox {
   display: inline-block;
   font-family: courier;
@@ -44,6 +56,7 @@ p:hover {
   padding-left: 1em;
 }
 
+/*Formatting for the body of the site.*/
 body {
   display: flex;
   margin: 0;
@@ -52,28 +65,28 @@ body {
   transition-duration: var(--trans);
 }
 
-#right {
-  transition-property: background-color, color;
-  transition-duration: var(--trans);
-}
-
-#right > span{
+/*Pseudocode spans.*/
+#right>span {
   white-space: pre;
 }
 
+/*The color of dark mode.*/
 .dark-mode {
   background-color: rgb(36, 36, 36);
   color: white;
 }
 
+/*Width of dark mode button.*/
 #darkModeBtn {
   width: 6em;
 }
 
+/*Margin to buttons*/
 .buttons {
   margin: 1%;
 }
 
+/*Formatting run, next and dark mode buttons.*/
 .controlBtn {
   color: white;
   background-color: #57b3b6;
@@ -84,6 +97,7 @@ body {
   font-variant-numeric: lining-nums;
 }
 
+/*Formatting choose algorithm buttons.*/
 .dropbtn {
   font-family: courier;
   font-weight: bold;
@@ -127,6 +141,7 @@ body {
   display: block;
 }
 
+/*Hovering over dropdown content.*/
 .dropdown-content:hover {
   cursor: pointer;
 }

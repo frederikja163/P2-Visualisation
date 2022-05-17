@@ -1,3 +1,6 @@
+/*
+The functions in this files handles adding breakpoints to the lines of the algorithm code. 
+*/
 
 //A strings representing the breakpoint class and one representing the id of the selected code.
 const breakpointClass: string = "breakpoint";

@@ -1,3 +1,8 @@
+/*
+This file inculdes the fixes to all the problem which where encounterd from having spans within an input element.
+This includes fixes for enter, tab, delete, right/left arrow keys.
+Additionaly it removes ctrl-z, since it works porly and would only confuse the user.
+*/
 
 /**Initialize fix function by adding event listeners.*/
 function initFix(right: HTMLElement) {

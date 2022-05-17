@@ -1,8 +1,12 @@
+/*
+The functions within this file handles the spans within the speudocode.
+*/
 
 /**Initialize pseudocode and subscribe to the correct events.*/
 function pseudocode(right: HTMLElement): void {
     right.addEventListener("click", pseudocodeOnClick);
 
+    //Initializes fix functions.
     initFix(right);
 }
 

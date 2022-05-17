@@ -1,4 +1,8 @@
+/*
+This file includes functions to convert functions of algoithms to strings spans and adds highlihgting.
+*/
 
+/**Converts the given function to a string and dispplays is within span elements in the algorithm code.*/
 function displayCodeAsString(textBox: Element, printFunction: Function): void {
     // Convert function to string.
     const functionString: string = printFunction.toString();
@@ -15,6 +19,7 @@ function displayCodeAsString(textBox: Element, printFunction: Function): void {
     initBreakpoints();
 }
 
+/**Adds span elements around the entire line and additional highlighting spans around specific keywords.*/
 function wrapStrings(elementTag: string, lines: string[]): string {
     // Iterate through each line of code, count size of indent
     for (let i: number = 0; i < lines.length; i++) {
