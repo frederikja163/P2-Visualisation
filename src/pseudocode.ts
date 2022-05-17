@@ -68,7 +68,6 @@ function fixDelete(eventParameters: KeyboardEvent) {
 
     if (mergedElement !== null && newActiveElement.classList.contains("highlighted")) mergedElement.classList.add("highlighted");
 
-
 }
 
 function fixArrows(eventParameters: KeyboardEvent) {
@@ -81,19 +80,27 @@ function fixArrows(eventParameters: KeyboardEvent) {
     4. moving across a break
     */
 
-    let direction: number = eventParameters.key === "ArrowLeft" ? -1 : (eventParameters.key === "ArrowRight" ? +1 : 0);
-    let caretPosition: number = getCaretPosition();
+    //Getting and initializing elements and variables
+    const direction: number = eventParameters.key === "ArrowLeft" ? -1 : (eventParameters.key === "ArrowRight" ? +1 : 0);
+    const caretPosition: number = getCaretPosition();
     const activeElement: HTMLElement = <HTMLElement>document.activeElement;
     if (direction === 0 || (direction < 0 ? caretPosition != 0 : caretPosition != activeElement.innerHTML.length)) return;
 
     eventParameters.preventDefault();
 
     const index: string | null = activeElement.getAttribute("index");
-    let adjElement = <HTMLElement>(direction < 0 ?
+    const adjElement = <HTMLElement>(direction < 0 ?
         activeElement.previousElementSibling :
         activeElement.nextElementSibling);
 
     if (adjElement === null) return;
+
+    const adjadjElement = <HTMLElement>(direction < 0 ?
+        adjElement.previousElementSibling :
+        adjElement.nextElementSibling);
+    const behindElement = <HTMLElement>(direction < 0 ?
+        activeElement.nextElementSibling :
+        activeElement.previousElementSibling);
 
     //If moving out of a span of the same index : insert empty span.
     if (activeElement.innerHTML != "") {
@@ -101,9 +108,8 @@ function fixArrows(eventParameters: KeyboardEvent) {
         newElement.classList.add("highlighted");
 
         if (adjElement.tagName !== "SPAN") {
-            adjElement = <HTMLElement>(direction < 0 ? (adjElement.previousElementSibling) : adjElement.nextElementSibling);
-            if (direction < 0) adjElement.after(newElement);
-            else adjElement.before(newElement);
+            if (direction < 0) adjadjElement.after(newElement);
+            else adjadjElement.before(newElement);
         } else {
             insertPseudocodeSpan(newElement, adjElement, direction < 0 ? adjElement.innerText.length - 1 : 1);
         }
@@ -113,13 +119,6 @@ function fixArrows(eventParameters: KeyboardEvent) {
     }
 
     //If moving into a span of the same index: place curser in span.
-    const adjadjElement = <HTMLElement>(direction < 0 ?
-        adjElement.previousElementSibling :
-        adjElement.nextElementSibling);
-    const behindElement = <HTMLElement>(direction < 0 ?
-        activeElement.nextElementSibling :
-        activeElement.previousElementSibling);
-
     if ((adjElement.tagName !== "SPAN" || adjElement.innerHTML.length == 1) && adjadjElement != null &&
         adjadjElement.tagName === "SPAN" && adjadjElement.getAttribute("index") === index) {
         if (behindElement != null && behindElement.tagName === "SPAN" && adjElement.tagName === "SPAN") {
@@ -187,8 +186,8 @@ function fixArrows(eventParameters: KeyboardEvent) {
 
 function pseudocodeOnTab(eventProperties: KeyboardEvent): void {
 
-    let oldCaretPosition: number = getCaretPosition();
-    let activeElement: Element = document.activeElement;
+    const oldCaretPosition: number = getCaretPosition();
+    const activeElement: Element = document.activeElement;
 
     if (eventProperties.key == "Tab") {
 
