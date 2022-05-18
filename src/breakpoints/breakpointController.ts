@@ -1,5 +1,7 @@
 /*
-The functions in this files handles adding breakpoints to the lines of the algorithm code. 
+The functions in this file handles adding and removing breakpoints to the lines of the algorithm code. 
+Additionaly it keeps track of the currently selected line of algorithm code.
+This selected line indicates what line the currently written pseudocode corresponds to.
 */
 
 //A strings representing the breakpoint class and one representing the id of the selected code.

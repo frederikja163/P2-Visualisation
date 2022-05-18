@@ -1,5 +1,7 @@
 /*
-This file includes function which hightlight and unhighlights span elements.
+This file includes functions which hightlight and unhighlights specific span elements.
+This is based on the given index.
+Additionaly a function is included to remove highlighting from all indecies, including index negative one.
 */
 
 /**Adds highlighting to all span elements with the given index.*/

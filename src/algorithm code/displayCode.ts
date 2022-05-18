@@ -1,5 +1,6 @@
 /*
-This file includes functions to convert functions of algoithms to strings spans and adds highlihgting.
+This file includes functions that convert algoithms to spans,
+additionaly colors are added to the spans, in the form of code highlighting.
 */
 
 /**Converts the given function to a string and dispplays is within span elements in the algorithm code.*/
