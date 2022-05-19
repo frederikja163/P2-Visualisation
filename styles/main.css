@@ -20,7 +20,7 @@ textarea {
 }
 */
 
-/*Red decoration to selected code.*/
+/*Changes the underline to red of selected code.*/
 #selectedCode {
   text-decoration-color: red;
 }
@@ -35,7 +35,7 @@ p:hover {
   width: fit-content;
 }
 
-/*Formating for highlighted spans.*/
+/*Formatting for highlighted spans.*/
 .highlighted {
   font-weight: bold;
   font-size: 110%;

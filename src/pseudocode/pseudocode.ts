@@ -1,7 +1,7 @@
 /*
 The functions within this file handles the spans within the speudocode.
 Meaning that they take care of adding and removing spans. 
-That includes the indecies which specify what lines of the algorithm code the span relates to.
+That includes the indices which specify what lines of the algorithm code the span relates to.
 */
 
 /**Initialize pseudocode and subscribe to the correct events.*/
@@ -92,13 +92,13 @@ function pseudocodeOnClick(): void {
 
 }
 
-/** Splits 'element' into two different html elements, the text is split at 'index'. */
+/** Splits 'element' into two different HTML elements, the text is split at 'index'. */
 function insertPseudocodeSpan(element: HTMLElement, newSpan: HTMLElement, index: number): void {
 
     //Gets the inner text of the given element
     const text: string = element.innerText;
 
-    // Get the text before and after HtmlElementer the index.
+    // Gets the text before and after the given index in element.
     const beforeText: string = text.slice(0, index);
     const afterText: string = text.slice(index, text.length);
     const elementIndex: string | null = element.getAttribute("index");
