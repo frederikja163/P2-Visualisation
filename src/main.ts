@@ -8,6 +8,4 @@ function main(): void {
     const right: HTMLElement | null = document.querySelector("#right");
     if (left != null) displayCodeAsString(left, algMergeSort);
     if (right != null) pseudocode(right);
-
-    //displayCodeAsString(document.querySelector("#left"), null);
 }
