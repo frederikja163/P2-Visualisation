@@ -20,7 +20,7 @@ textarea {
 }
 */
 
-/*Red decoration to selected code.*/
+/*Changes the underline to red of selected code.*/
 #selectedCode {
   text-decoration-color: red;
 }

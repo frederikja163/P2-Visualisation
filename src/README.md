@@ -8,7 +8,7 @@ main.ts only inlcudes the initialization of all files. This means adding event l
 
 ## Algorithm Code
 
-This folder includes the files which are responsible for displaying the algorithm code. This includes the drop down menu; which is responsible for runnig the *displayCodeAsString*-function. 
+This folder includes the files which are responsible for displaying the algorithm code. This includes the drop down menu; which is responsible for running the *displayCodeAsString*-function. 
 
 ### Algorithms
 
