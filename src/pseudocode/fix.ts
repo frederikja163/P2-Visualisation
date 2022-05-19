@@ -255,64 +255,29 @@ function insertString(defaultString: string, stringPosition: number, insertedStr
 /**Fixes the problems with the enter key within the text of the pseudocode.*/
 function fixEnter(eventParameters: KeyboardEvent): void {
 	if (eventParameters.key === "Enter") {
-
-		const br: Element = document.querySelector("#right > span > br");
-		br.remove();
-
-		const caretPosition: number = getCaretPosition();
 		const activeElement: Element = document.activeElement;
 
-		const beforeCursor: string = activeElement.childNodes[0].nodeValue;
+		//creates a span of the text before the caret position
+		const beforeCursor: string = activeElement.childNodes[0].nodeValue.replaceAll("\n", "");
 		const beforeElement: HTMLElement = createPseudocodeSpan(beforeCursor, activeElement.getAttribute("index"));
 		beforeElement.classList.add("highlighted");
 
-		const breakElement = document.createElement("br");
-		let afterCursor: string;
-		if (activeElement.childNodes[2] !== undefined) {
-			afterCursor = activeElement.childNodes[2].nodeValue;
-		} else {
-			afterCursor = "";
+		//creates a span of the text after the caret position
+		let afterCursor: string = "";
+		for (let i = 1; i < activeElement.childNodes.length && afterCursor === ""; i++) {
+			afterCursor = activeElement.childNodes[i].nodeValue.replaceAll("\n", "");
 		}
+
 		const afterElement: HTMLElement = createPseudocodeSpan(afterCursor, activeElement.getAttribute("index"));
 		afterElement.classList.add("highlighted");
 
-		if (caretPosition == 0 && activeElement.childNodes[1] === undefined) {
-			activeElement.replaceWith(afterElement, breakElement, beforeElement);
-			setCaretPosition(beforeElement, 0);
-		}
-		else {
-			activeElement.replaceWith(beforeElement, breakElement, afterElement);
-			setCaretPosition(afterElement, 0);
-		}
+		//creates a break element
+		const breakElement = document.createElement("br");
 
-		// const activeElement: Element = document.activeElement;
-
-		// //creates a span of the text before the caret position
-		// const beforeCursor: string = activeElement.childNodes[0].nodeValue.replaceAll("\n", "");
-		// const beforeElement: HTMLElement = createPseudocodeSpan(beforeCursor, activeElement.getAttribute("index"));
-		// beforeElement.classList.add("highlighted");
-
-		// //print node children
-		// for (let i = 0; i < activeElement.childNodes.length; i++) {
-		// 	console.log("\"" + activeElement.childNodes[i].nodeValue + "\"")
-		// }
-
-		// //creates a span of the text after the caret position
-		// let afterCursor: string = "";
-		// for (let i = 1; i < activeElement.childNodes.length && afterCursor === ""; i++) {
-		// 	afterCursor = activeElement.childNodes[i].nodeValue.replaceAll("\n", "");
-		// }
-
-		// const afterElement: HTMLElement = createPseudocodeSpan(afterCursor, activeElement.getAttribute("index"));
-		// afterElement.classList.add("highlighted");
-
-		// //creates a break element
-		// const breakElement = document.createElement("br");
-
-		// //inserts elements into the html
-		// activeElement.replaceWith(beforeElement, breakElement, afterElement);
-		// setCaretPosition(afterElement, 0);
-		// oldActiveElement = afterElement;
+		//inserts elements into the html
+		activeElement.replaceWith(beforeElement, breakElement, afterElement);
+		setCaretPosition(afterElement, 0);
+		oldActiveElement = afterElement;
 	}
 }
 

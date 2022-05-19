@@ -1,7 +1,7 @@
 /*
 The functions within this file handles the spans within the speudocode.
 Meaning that they take care of adding and removing spans. 
-That includes the indeces which specify what lines of the algorithm code the span relates to.
+That includes the indices which specify what lines of the algorithm code the span relates to.
 */
 
 /**Initialize pseudocode and subscribe to the correct events.*/

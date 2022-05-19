@@ -23,7 +23,7 @@ These files includes functions of algorithm examples.
 The functions of the files in the breakpoint folder takes care of the breakpoints. 
 This includes adding and removing breakpoints from the algorithm code.
 Additionally running and continuing the algorithm execution.
-It also includes functions for highlighting and unhighlighting specific indeces.
+It also includes functions for highlighting and unhighlighting specific indices.
 
 ## Pseudocode
 
