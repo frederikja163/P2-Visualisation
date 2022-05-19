@@ -542,20 +542,31 @@ function insertString(defaultString, stringPosition, insertedString) {
 }
 function fixEnter(eventParameters) {
     if (eventParameters.key === "Enter") {
+        const br = document.querySelector("#right > span > br");
+        br.remove();
+        const caretPosition = getCaretPosition();
         const activeElement = document.activeElement;
-        const beforeCursor = activeElement.childNodes[0].nodeValue.replaceAll("\n", "");
+        const beforeCursor = activeElement.childNodes[0].nodeValue;
         const beforeElement = createPseudocodeSpan(beforeCursor, activeElement.getAttribute("index"));
         beforeElement.classList.add("highlighted");
-        let afterCursor = "";
-        for (let i = 1; i < activeElement.childNodes.length && afterCursor === ""; i++) {
-            afterCursor = activeElement.childNodes[i].nodeValue.replaceAll("\n", "");
+        const breakElement = document.createElement("br");
+        let afterCursor;
+        if (activeElement.childNodes[2] !== undefined) {
+            afterCursor = activeElement.childNodes[2].nodeValue;
+        }
+        else {
+            afterCursor = "";
         }
         const afterElement = createPseudocodeSpan(afterCursor, activeElement.getAttribute("index"));
         afterElement.classList.add("highlighted");
-        const breakElement = document.createElement("br");
-        activeElement.replaceWith(beforeElement, breakElement, afterElement);
-        setCaretPosition(afterElement, 0);
-        oldActiveElement = afterElement;
+        if (caretPosition == 0 && activeElement.childNodes[1] === undefined) {
+            activeElement.replaceWith(afterElement, breakElement, beforeElement);
+            setCaretPosition(beforeElement, 0);
+        }
+        else {
+            activeElement.replaceWith(beforeElement, breakElement, afterElement);
+            setCaretPosition(afterElement, 0);
+        }
     }
 }
 function fixCtrlZ(eventParameters) {
